@@ -1,0 +1,67 @@
+#!/usr/bin/env batchflow
+<?xml version="1.0"?>
+<Document>
+  <Network type="subnet" name="MAIN">
+    <Node name="node_RosNodeGenerator_1" type="RosNodeGenerator" x="-117.000000" y="49.000000">
+      <Parameter name="NODE_NAME" type="string" value="HARK_MASTER_NODE5" description="Node name for ROS"/>
+    </Node>
+    <Node name="node_LOOP0_1" type="LOOP0" x="-117.000000" y="125.000000">
+      <Parameter name="DOWHILE" type="bool" value="" description=""/>
+    </Node>
+    <NetOutput name="VALUE" node="node_RosNodeGenerator_1" terminal="VALUE" object_type="int" description="int parameter"/>
+    <NetOutput name="OUTPUT" node="node_LOOP0_1" terminal="OUTPUT" object_type="Vector&lt;float&gt;" description="Returning the input audio frames"/>
+    <Note x="0" y="0" visible="0" text="Created with FlowDesigner 0.9.1"/>
+  </Network>
+  <Network type="iterator" name="LOOP0">
+    <Node name="node_HarkMsgsStreamFromRos_1" type="HarkMsgsStreamFromRos" x="-508.000000" y="184.000000">
+      <Parameter name="STREAM_SELECTION" type="string" value="HarkWave" description="Selector of stream you want to realize. All other subscription will be disabled."/>
+      <Parameter name="TOPIC_NAME_HARKWAVE" type="string" value="RemoteUser" description="Subscribed topic name for ROS (HarkWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFFT" type="string" value="HarkFFT" description="Subscribed topic name for ROS (HarkFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFEATURE" type="string" value="HarkFeature" description="Subscribed topic name for ROS (HarkFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSOURCE" type="string" value="HarkSource" description="Subscribed topic name for ROS (HarkSource type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCWAVE" type="string" value="HarkSrcWave" description="Subscribed topic name for ROS (HarkSrcWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFFT" type="string" value="HarkSrcFFT" description="Subscribed topic name for ROS (HarkSrcFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATURE" type="string" value="HarkSrcFeature" description="Subscribed topic name for ROS (HarkSrcFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATUREMFM" type="string" value="HarkSrcFeatureMFM" description="Subscribed topic name for ROS (HarkSrcFeatureMFM type message)"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="1000000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="MSG_BUFFER_NUM" type="int" value="100" description="Buffer size for a ROS subscribed message."/>
+      <Parameter name="DATA_BUFFER_NUM" type="int" value="100" description="Buffer save size for a HARK output. Too small value makes packet loss. Too large value takes large memory."/>
+      <Parameter name="KILL_TIME_LEN" type="int" value="990000" description="Kill time length for this network [usec] (must be less than 10[sec]). Set KILL_NETWORK enable."/>
+      <Parameter name="KILL_NETWORK" type="bool" value="false" description="Kill whole hark network when this node does not take any message from ROS."/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="false" description="print debug message of this module in case of true."/>
+    </Node>
+    <Node name="node_MultiGain_1" type="MultiGain" x="-257.000000" y="154.000000">
+      <Parameter name="GAIN" type="float" value="2.0" description="Gain factor."/>
+    </Node>
+    <Node name="node_ChannelSelector_1" type="ChannelSelector" x="-123.000000" y="154.000000">
+      <Parameter name="SELECTOR" type="object" value="&lt;Vector&lt;int&gt; 0&gt;" description="Channel selection setting which is a vector consisting of channel IDs (ID starts with 0). When the first three channels are selected from four channels, this should be set to &lt;Vector&lt;int&gt; 0 1 2&gt;."/>
+    </Node>
+    <Node name="node_MatrixToVector_1" type="MatrixToVector" x="22.000000" y="154.000000">
+      <Parameter name="ORDER" type="string" value="ROW" description="Order of elements of an array. &quot;ROW&quot; or &quot;COLUMN&quot; major."/>
+    </Node>
+    <Node name="node_Reframe_1" type="Reframe" x="146.000000" y="154.000000">
+      <Parameter name="LENGTH" type="int" value="160" description="Length of the frames"/>
+      <Parameter name="ADVANCE" type="int" value="512" description="Frame advance (offset)"/>
+    </Node>
+    <Node name="node_WriteAudio_1" type="WriteAudio" x="326.000000" y="162.000000">
+      <Parameter name="LEAD_IN" type="int" value="" description="Number of zero frames to send before starting (for synchronization)"/>
+    </Node>
+    <Node name="node_Sound_1" type="Sound" x="146.000000" y="201.000000">
+      <Parameter name="DEVICE" type="string" value="/dev/dsp" description="Path to the sound device"/>
+      <Parameter name="RATE" type="int" value="16000" description="Sampling rate"/>
+      <Parameter name="STEREO" type="int" value="0" description="1 for stereo, 0 for mono"/>
+      <Parameter name="MODE" type="string" value="W" description="R for sound input, W for sound output, RW for full-duplex mode"/>
+      <Parameter name="BUFFER" type="int" value="" description="Length of the audio buffer to allocate (not reliable)"/>
+      <Parameter name="DUMMY" type="int" value="" description="Put something here to output to a file"/>
+    </Node>
+    <Link from="node_HarkMsgsStreamFromRos_1" output="MATOUT" to="node_MultiGain_1" input="INPUT"/>
+    <Link from="node_MultiGain_1" output="OUTPUT" to="node_ChannelSelector_1" input="INPUT"/>
+    <Link from="node_ChannelSelector_1" output="OUTPUT" to="node_MatrixToVector_1" input="INPUT"/>
+    <Link from="node_MatrixToVector_1" output="OUTPUT" to="node_Reframe_1" input="INPUT"/>
+    <Link from="node_Reframe_1" output="OUTPUT" to="node_WriteAudio_1" input="OBJECT"/>
+    <Link from="node_Sound_1" output="OUTPUT" to="node_WriteAudio_1" input="DEVICE"/>
+    <NetOutput name="OUTPUT" node="node_WriteAudio_1" terminal="OUTPUT" object_type="Vector&lt;float&gt;" description="Returning the input audio frames"/>
+    <NetCondition name="CONDITION" node="node_HarkMsgsStreamFromRos_1" terminal="NOT_EOF"/>
+    <Note x="0" y="0" visible="0" text="Created with FlowDesigner 0.9.1"/>
+  </Network>
+</Document>

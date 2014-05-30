@@ -1,0 +1,6 @@
+<launch>
+<node pkg="ui_alt" name="tfmanager" type="tfmanager_offline.py" />
+<node pkg="ui_alt" name="mic" type="mic.n" />
+<node pkg="ui_alt" name="localization" type="loc_kinect.n" args="$(find ui_alt)/hark/network_main/current/kinect_final.dat" />
+<node pkg="ui_alt" name="play" type="play.n" />
+</launch>

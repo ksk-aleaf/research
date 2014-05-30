@@ -1,0 +1,1 @@
+/usr/bin/c++  -fPIC -O2 -g   -shared -Wl,-soname,libgtest.so -o /home/koike/Dropbox/HRI/workspace/recogResultPublisher/lib/libgtest.so CMakeFiles/gtest.dir/src/gtest-all.cc.o -L/opt/ros/hydro/lib -L/home/koike/Dropbox/HRI/workspace/recogResultPublisher/build/gtest/src -lpthread -Wl,-rpath,/opt/ros/hydro/lib:/home/koike/Dropbox/HRI/workspace/recogResultPublisher/build/gtest/src 

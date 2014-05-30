@@ -1,0 +1,134 @@
+#!/usr/bin/env batchflow
+<?xml version="1.0"?>
+<Document>
+  <Network type="subnet" name="MAIN">
+    <Node name="node_RosNodeGenerator_1" type="RosNodeGenerator" x="-436.000000" y="-155.000000">
+      <Parameter name="NODE_NAME" type="string" value="HARK_MASTER_NODE3" description="Node name for ROS"/>
+    </Node>
+    <Node name="node_LOOP0_1" type="LOOP0" x="-441.000000" y="-72.000000">
+      <Parameter name="LENGTH" type="int" value="512" description="The length of FFT."/>
+      <Parameter name="ADVANCE" type="int" value="160" description="The shift length beween adjacent frames (in samples)[default: 160]."/>
+      <Parameter name="SAMPLING_RATE" type="int" value="16000" description="Sampling rate (Hz) [default: 16000]."/>
+      <Parameter name="TF_CONJ" type="subnet_param" value="string:ARG1" description="Filename of a pre-measured transfer function for separation."/>
+      <Parameter name="DOWHILE" type="bool" value="" description=""/>
+    </Node>
+    <NetOutput name="VALUE" node="node_RosNodeGenerator_1" terminal="VALUE" object_type="int" description="int parameter"/>
+    <NetOutput name="OUTPUT" node="node_LOOP0_1" terminal="OUTPUT" object_type="ObjectRef" description="This is a dummy output, and it has no mean. Only for an activation of this module."/>
+    <Note x="0" y="0" visible="0" text="Created with FlowDesigner 0.9.1"/>
+  </Network>
+  <Network type="iterator" name="LOOP0">
+    <Node name="node_MultiFFT_1" type="MultiFFT" x="2.000000" y="-346.000000">
+      <Parameter name="LENGTH" type="subnet_param" value="LENGTH" description="The length of FFT."/>
+      <Parameter name="WINDOW" type="string" value="HAMMING" description="A window function for FFT. WINDOW should be &quot;CONJ&quot;."/>
+      <Parameter name="WINDOW_LENGTH" type="int" value="512" description="The length of the window."/>
+    </Node>
+    <Node name="node_GHDSS_1" type="GHDSS" x="203.000000" y="-426.000000">
+      <Parameter name="LENGTH" type="subnet_param" value="LENGTH" description="The frame length of each channel (in samples) [default: 512]."/>
+      <Parameter name="ADVANCE" type="subnet_param" value="ADVANCE" description="The shift length beween adjacent frames (in samples)[default: 160]."/>
+      <Parameter name="SAMPLING_RATE" type="subnet_param" value="SAMPLING_RATE" description="Sampling rate (Hz) [default: 16000]."/>
+      <Parameter name="LOWER_BOUND_FREQUENCY" type="int" value="0" description="Lower bound of frequency (Hz). [default: 0]"/>
+      <Parameter name="UPPER_BOUND_FREQUENCY" type="int" value="8000" description="Upper bound of frequency (Hz). [default: 8000]"/>
+      <Parameter name="TF_CONJ" type="string" value="DATABASE" description="Transfer function (TF) type. CALC generates TF from the geometrical relationship between microphones and a sound source, and DATABASE uses pre-measured TF [default: CALC]."/>
+      <Parameter name="TF_CONJ_FILENAME" type="subnet_param" value="TF_CONJ" description="Filename of a pre-measured transfer function for separation."/>
+      <Parameter name="MIC_FILENAME" type="string" value="" description="Filename for microphone positions."/>
+      <Parameter name="MIC_POS_SHIFT" type="string" value="FIX" description="Method to decide the orgin of the coordinates. FIX uses the origin in the coordinates in MIC_FILENAME, SHIFT regards the center of microphone array as the origin. [default: FIX]"/>
+      <Parameter name="FIXED_NOISE" type="bool" value="false" description="Flag to specify fixed noise sources. [default: false]"/>
+      <Parameter name="FIXED_NOISE_FILENAME" type="string" value="" description="Filename describing sound locations of the fixed noise sources. The specified noise sources are always separated in addition to sound sources in INPUT_SOURCES. Available only when FIXED_NOISE = true."/>
+      <Parameter name="INITW_FILENAME" type="string" value="" description="Filename of an initial separation matrix. If specified, a matrix in INITW_FILENAME is used as an initial separation matrix. Otherwise, initial separation matrix is estimated from the geometrical relationship or pre-measured TF according to TF_CONJ."/>
+      <Parameter name="SPEED_OF_SOUND" type="float" value="343.0" description="Speed of sound(m/s) [default: 343.0]."/>
+      <Parameter name="SS_METHOD" type="string" value="ADAPTIVE" description="The calculation method for SS step size parameter corresponding to the blind separation part. &quot;FIX&quot; uses a fixed step size,&quot;LC_MYU&quot; uses the same value as LC_MYU, and &quot;ADAPTIVE&quot; adaptively estimates an optimal step size. [default: FIX]"/>
+      <Parameter name="SS_SCAL" type="float" value="1.0" description="Scaling factor for SS step size. [default: 1.0]"/>
+      <Parameter name="SS_MYU" type="float" value="0.001" description="SS step size value. [default 0.001]"/>
+      <Parameter name="NOISE_FLOOR" type="float" value="0.0" description="Noise floor value. [default 0.0]"/>
+      <Parameter name="LC_CONST" type="string" value="FULL" description="The calculation method for geometric constraints. &quot;FULL&quot; uses all elements of a matrix, and &quot;DIAG&quot; only uses diagonal parts. [default: FULL]"/>
+      <Parameter name="LC_METHOD" type="string" value="ADAPTIVE" description="The calculation method for LC step size corresponding to geometric constraints. &quot;FIX&quot; uses a fixed value, and &quot;Adaptive&quot; adaptively estimates an optimal step size. [default: FIX]"/>
+      <Parameter name="LC_MYU" type="float" value="0.001" description="LC step size value. [default 0.001]"/>
+      <Parameter name="UPDATE_METHOD_TF_CONJ" type="string" value="POS" description="Switching method of TF_CONJ data. [default: POS]"/>
+      <Parameter name="UPDATE_METHOD_W" type="string" value="ID_POS" description="Switching method of separation matrix, W. [default: ID]"/>
+      <Parameter name="UPDATE_ACCEPT_ANGLE" type="float" value="5.0" description="Angle allowance to switch separation matrix in degree. available when when UPDATE_METHOD_W is POS or ID_POS. [default: 5.0]"/>
+      <Parameter name="EXPORT_W" type="bool" value="false" description="Separation matrix W is exported if true. [default: false]"/>
+      <Parameter name="EXPORT_W_FILENAME" type="string" value="" description="The filename to export W."/>
+      <Parameter name="UPDATE" type="string" value="STEP" description="The update method of separation matrix. &quot;STEP&quot; updates W sequentially, i.e., based on SS and then on LC cost. &quot;TOTAL&quot; updates W based on an integrated value of SS and LC cost [default: STEP]"/>
+    </Node>
+    <Node name="node_Synthesize_1" type="Synthesize" x="306.000000" y="-426.000000">
+      <Parameter name="LENGTH" type="int" value="512" description="Size of window length in sample. [default: 512]"/>
+      <Parameter name="ADVANCE" type="int" value="160" description="The length in sample between a frame and a previous frame. [default: 160]"/>
+      <Parameter name="SAMPLING_RATE" type="int" value="16000" description="Sampling rate (Hz) [default: 16000]."/>
+      <Parameter name="MIN_FREQUENCY" type="int" value="0" description="Minimum frequency (Hz) [default: 125]"/>
+      <Parameter name="MAX_FREQUENCY" type="int" value="8000" description="Maximum frequency (Hz) [default: 7900]"/>
+      <Parameter name="WINDOW" type="string" value="HAMMING" description="A window function for overlap-add. WINDOW should be CONJ, HAMMING, or RECTANGLE. [default: HAMMING]"/>
+      <Parameter name="OUTPUT_GAIN" type="float" value="2.0" description="Output gain factor. [default: 1.0]"/>
+    </Node>
+    <Node name="node_ChannelSelector_1" type="ChannelSelector" x="-243.000000" y="-346.000000">
+      <Parameter name="SELECTOR" type="object" value="&lt;Vector&lt;int&gt; 0 1 2 3 4 5 6&gt;" description="Channel selection setting which is a vector consisting of channel IDs (ID starts with 0). When the first three channels are selected from four channels, this should be set to &lt;Vector&lt;int&gt; 0 1 2&gt;."/>
+    </Node>
+    <Node name="node_MultiGain_1" type="MultiGain" x="-105.000000" y="-346.000000">
+      <Parameter name="GAIN" type="float" value="1.0" description="Gain factor."/>
+    </Node>
+    <Node name="node_HarkMsgsStreamFromRos_1" type="HarkMsgsStreamFromRos" x="-514.000000" y="-316.000000">
+      <Parameter name="STREAM_SELECTION" type="string" value="HarkWave" description="Selector of stream you want to realize. All other subscription will be disabled."/>
+      <Parameter name="TOPIC_NAME_HARKWAVE" type="string" value="HarkWave" description="Subscribed topic name for ROS (HarkWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFFT" type="string" value="HarkFFT" description="Subscribed topic name for ROS (HarkFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFEATURE" type="string" value="HarkFeature" description="Subscribed topic name for ROS (HarkFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSOURCE" type="string" value="HarkSource" description="Subscribed topic name for ROS (HarkSource type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCWAVE" type="string" value="HarkSrcWave" description="Subscribed topic name for ROS (HarkSrcWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFFT" type="string" value="HarkSrcFFT" description="Subscribed topic name for ROS (HarkSrcFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATURE" type="string" value="HarkSrcFeature" description="Subscribed topic name for ROS (HarkSrcFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATUREMFM" type="string" value="HarkSrcFeatureMFM" description="Subscribed topic name for ROS (HarkSrcFeatureMFM type message)"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="1000000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="MSG_BUFFER_NUM" type="int" value="1000" description="Buffer size for a ROS subscribed message."/>
+      <Parameter name="DATA_BUFFER_NUM" type="int" value="1000" description="Buffer save size for a HARK output. Too small value makes packet loss. Too large value takes large memory."/>
+      <Parameter name="KILL_TIME_LEN" type="int" value="900000" description="Kill time length for this network [usec] (must be less than 10[sec]). Set KILL_NETWORK enable."/>
+      <Parameter name="KILL_NETWORK" type="bool" value="true" description="Kill whole hark network when this node does not take any message from ROS."/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="false" description="print debug message of this module in case of true."/>
+    </Node>
+    <Node name="node_RosHarkMsgsSubscriber_2" type="RosHarkMsgsSubscriber" x="-157.000000" y="-412.000000">
+      <Parameter name="STREAM_SELECTION" type="string" value="HarkSource" description="Selector of stream you want to realize. All other subscription will be disabled."/>
+      <Parameter name="NB_CHANNELS" type="int" value="8" description="The number of input channels. Only used for no data period (Not important). [default: 8]"/>
+      <Parameter name="FFT_LENGTH" type="int" value="512" description="FFT length in sample. Only used for no data period (Not important). [default: 512]"/>
+      <Parameter name="TOPIC_NAME_HARKWAVE" type="string" value="HarkWave" description="Subscribed topic name for ROS (HarkWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFFT" type="string" value="HarkFFT" description="Subscribed topic name for ROS (HarkFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFEATURE" type="string" value="HarkFeature" description="Subscribed topic name for ROS (HarkFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSOURCE" type="string" value="DetectedSource" description="Subscribed topic name for ROS (HarkSource type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCWAVE" type="string" value="HarkSrcWave" description="Subscribed topic name for ROS (HarkSrcWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFFT" type="string" value="HarkSrcFFT" description="Subscribed topic name for ROS (HarkSrcFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATURE" type="string" value="HarkSrcFeature" description="Subscribed topic name for ROS (HarkSrcFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATUREMFM" type="string" value="HarkSrcFeatureMFM" description="Subscribed topic name for ROS (HarkSrcFeatureMFM type message)"/>
+      <Parameter name="TOPIC_NAME_HARKJULIUS" type="string" value="HarkJulius" description="Subscribed topic name for ROS (HarkJulius type message)"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="1000000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="MSG_BUFFER_NUM" type="int" value="1000" description="Buffer size for a ROS subscribed message."/>
+      <Parameter name="DATA_BUFFER_NUM" type="int" value="1000" description="Buffer save size for a HARK output. Too small value makes packet loss. Too large value takes large memory. Minimum size is 5."/>
+      <Parameter name="REMAIN_LATEST" type="bool" value="true" description="Enable to keep the latest data as output even when this module doesn't receive any messages [default: false]"/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="false" description="print debug message of this module in case of true."/>
+    </Node>
+    <Node name="node_RosHarkMsgsPublisher_1" type="RosHarkMsgsPublisher" x="665.000000" y="-532.000000">
+      <Parameter name="ADVANCE" type="int" value="160" description="Shift sample number for sliding spectrum analysis."/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="false" description="print debug message of this module in case of true."/>
+      <Parameter name="TOPIC_NAME_HARKWAVE" type="string" value="HarkWavePlay" description="Published topic name for ROS (HarkWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFFT" type="string" value="HarkFFT" description="Published topic name for ROS (HarkFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFEATURE" type="string" value="HarkFeature" description="Published topic name for ROS (HarkFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSOURCE" type="string" value="HarkSourcePlay" description="Published topic name for ROS (HarkSource type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCWAVE" type="string" value="HarkSrcWavePlay" description="Published topic name for ROS (HarkSrcWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFFT" type="string" value="HarkSrcFFT" description="Published topic name for ROS (HarkSrcFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATURE" type="string" value="HarkSrcFeature" description="Published topic name for ROS (HarkSrcFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATUREMFM" type="string" value="HarkSrcFeatureMFM" description="Published topic name for ROS (HarkSrcFeatureMFM type message)"/>
+      <Parameter name="BUFFER_NUM" type="int" value="100" description="Buffer size for a ROS published message"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="100000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="TIMESTAMP_TYPE" type="string" value="ROS_TIME_NOW" description="Time stamp type. If TIMESTAMP is connected, this is ignored."/>
+      <Parameter name="SAMPLING_RATE" type="int" value="16000" description="The time increment is caluculated as ADVANCE / SAMPLING_RATE"/>
+      <Parameter name="ROS_FRAME_ID" type="string" value="HarkRosFrameID" description="ROS frame_id of the message header"/>
+    </Node>
+    <Link from="node_MultiGain_1" output="OUTPUT" to="node_MultiFFT_1" input="INPUT"/>
+    <Link from="node_MultiFFT_1" output="OUTPUT" to="node_GHDSS_1" input="INPUT_FRAMES">35.5 -346 36 -434 66 -433.5 </Link>
+    <Link from="node_ChannelSelector_1" output="OUTPUT" to="node_MultiGain_1" input="INPUT"/>
+    <Link from="node_HarkMsgsStreamFromRos_1" output="MATOUT" to="node_ChannelSelector_1" input="INPUT"/>
+    <Link from="node_GHDSS_1" output="OUTPUT" to="node_Synthesize_1" input="INPUT"/>
+    <Link from="node_RosHarkMsgsSubscriber_2" output="SRCOUT" to="node_GHDSS_1" input="INPUT_SOURCES"/>
+    <Link from="node_Synthesize_1" output="OUTPUT" to="node_RosHarkMsgsPublisher_1" input="SRC_WAVE"/>
+    <Link from="node_RosHarkMsgsSubscriber_2" output="SRCOUT" to="node_RosHarkMsgsPublisher_1" input="SRC_INFO">4 -419.5 4 -553 475 -554.5 </Link>
+    <NetCondition name="CONDITION" node="node_HarkMsgsStreamFromRos_1" terminal="NOT_EOF"/>
+    <NetOutput name="OUTPUT" node="node_RosHarkMsgsPublisher_1" terminal="OUTPUT" object_type="ObjectRef" description="This is a dummy output, and it has no mean. Only for an activation of this module."/>
+    <Note x="0" y="0" visible="0" text="Created with FlowDesigner 0.9.1"/>
+  </Network>
+  <Parameter name="string:ARG1" type="" value=""/>
+</Document>

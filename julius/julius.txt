@@ -1,0 +1,125 @@
+STAT: include config: julius.conf
+STAT: loading plugins at "/home/user/hark/julius-4.1.5-hark-plugin":
+STAT: file: calcmix_none.jpi        #0 [Gaussian calculation plugin for Julius.(ADD_MASK_TO_NONE)]
+STAT: file: calcmix_safe.jpi        #1 [Gaussian calculation plugin for Julius.(ADD_MASK_TO_SAFE)]
+STAT: file: mfcnet.jpi              #2 [Feature vector input plugin for Julius.(MFCNET)]
+STAT: file: calcmix_heu.jpi         #3 [Gaussian calculation plugin for Julius.(ADD_MASK_TO_HEU)]
+STAT: file: calcmix_beam.jpi        #4 [Gaussian calculation plugin for Julius.(ADD_MASK_TO_BEAM)]
+STAT: 5 files loaded
+STAT: jconf successfully finalized
+STAT: *** loading AM00 _default
+Stat: init_phmm: Reading in HMM definition
+Stat: rdhmmdef: ascii format HMM definition
+Stat: rdhmmdef: limit check passed
+Stat: rdhmmdef: this HMM does not need multipath handling
+Stat: init_phmm: defined HMMs:  7925
+Stat: init_phmm: loading ascii hmmlist
+Stat: init_phmm: logical names: 20468 in HMMList
+Stat: init_phmm: base phones:    42 used in logical
+Stat: init_phmm: finished reading HMM definitions
+STAT: making pseudo bi/mono-phone for IW-triphone
+Stat: hmm_lookup: 18 pseudo phones are added to logical HMM list
+STAT: *** AM00 _default loaded
+STAT: *** loading LM00 _default
+Error: voca_load_htkdict: line 9891: triphone "a-q+r" not found
+Error: voca_load_htkdict: line 9891: triphone "q-r+a:" not found
+Error: voca_load_htkdict: the line content was: アッラー:アッラー:アッラー:507	[アッラー]	a q r a: 
+Error: voca_load_htkdict: line 10771: triphone "e-q+g" not found
+Error: voca_load_htkdict: the line content was: エッグ:エッグ:エッグ:507	[エッグ]	e q g u 
+Error: voca_load_htkdict: line 11056: triphone "o-q+z" not found
+Error: voca_load_htkdict: the line content was: オッズ:オッズ:オッズ:507	[オッズ]	o q z u 
+Error: voca_load_htkdict: line 11644: triphone "i-q+z" not found
+Error: voca_load_htkdict: the line content was: キッズ:未知語:キッズ:505	[キッズ]	k i q z u 
+Error: voca_load_htkdict: line 11645: triphone "i-q+z" not found
+Error: voca_load_htkdict: the line content was: キッズテニス:未知語:キッズテニス:505	[キッズテニス]	k i q z u t e n i s u 
+Error: voca_load_htkdict: line 12199: triphone "e-q+g" not found
+Error: voca_load_htkdict: the line content was: グレッグ:未知語:グレッグ:505	[グレッグ]	g u r e q g u 
+Error: voca_load_htkdict: line 15019: triphone "q-g+a" not found
+Error: voca_load_htkdict: the line content was: デバッガ:デバッガ:デバッガ:507	[デバッガ]	d e b a q g a 
+Error: voca_load_htkdict: line 15044: triphone "*-dy+u" or biphone "dy+u" not found
+Error: voca_load_htkdict: line 15044: triphone "dy-u+*" or biphone "dy-u" not found
+Error: voca_load_htkdict: the line content was: デュ:未知語:デュ:505	[デュ]	dy u 
+Error: voca_load_htkdict: line 15045: triphone "*-dy+u:" or biphone "dy+u:" not found
+Error: voca_load_htkdict: line 15045: triphone "dy-u:+*" or biphone "dy-u:" not found
+Error: voca_load_htkdict: the line content was: デュー:未知語:デュー:505	[デュー]	dy u: 
+Error: voca_load_htkdict: line 15046: triphone "*-dy+u:" or biphone "dy+u:" not found
+Error: voca_load_htkdict: line 15046: triphone "dy-u:+k" not found
+Error: voca_load_htkdict: the line content was: デューク:デューク:デューク:507	[デューク]	dy u: k u 
+Error: voca_load_htkdict: line 15047: triphone "*-dy+u" or biphone "dy+u" not found
+Error: voca_load_htkdict: line 15047: triphone "dy-u+a" not found
+Error: voca_load_htkdict: the line content was: デュアル:デュアル:デュアル:507	[デュアル]	dy u a r u 
+Error: voca_load_htkdict: line 15048: triphone "*-dy+u" or biphone "dy+u" not found
+Error: voca_load_htkdict: line 15048: triphone "dy-u+e" not found
+Error: voca_load_htkdict: the line content was: デュエット:デュエット:デュエット:507	[デュエット]	dy u e q t o 
+Error: voca_load_htkdict: line 15049: triphone "*-dy+u" or biphone "dy+u" not found
+Error: voca_load_htkdict: line 15049: triphone "dy-u+o" not found
+Error: voca_load_htkdict: the line content was: デュオ:デュオ:デュオ:507	[デュオ]	dy u o 
+Error: voca_load_htkdict: line 15050: triphone "*-dy+u" or biphone "dy+u" not found
+Error: voca_load_htkdict: line 15050: triphone "dy-u+b" not found
+Error: voca_load_htkdict: the line content was: デュバル:未知語:デュバル:505	[デュバル]	dy u b a r u 
+Error: voca_load_htkdict: line 15051: triphone "*-dy+u" or biphone "dy+u" not found
+Error: voca_load_htkdict: line 15051: triphone "dy-u+p" not found
+Error: voca_load_htkdict: the line content was: デュポン:デュポン:デュポン:514	[デュポン]	dy u p o N 
+Error: voca_load_htkdict: line 15052: triphone "*-dy+u" or biphone "dy+u" not found
+Error: voca_load_htkdict: line 15052: triphone "dy-u+r" not found
+Error: voca_load_htkdict: the line content was: デュラン:デュラン:デュラン:512	[デュラン]	dy u r a N 
+Error: voca_load_htkdict: line 15304: triphone "o-q+g" not found
+Error: voca_load_htkdict: the line content was: ドッグ:未知語:ドッグ:505	[ドッグ]	d o q g u 
+Error: voca_load_htkdict: line 15305: triphone "o-q+g" not found
+Error: voca_load_htkdict: the line content was: ドッグフード:未知語:ドッグフード:505	[ドッグフード]	d o q g u f u: d o 
+Error: voca_load_htkdict: line 16895: triphone "o-N+dy" not found
+Error: voca_load_htkdict: line 16895: triphone "N-dy+u" not found
+Error: voca_load_htkdict: line 16895: triphone "dy-u+*" or biphone "dy-u" not found
+Error: voca_load_htkdict: the line content was: フォンデュ:フォンデュ:フォンデュ:507	[フォンデュ]	f o N dy u 
+Error: voca_load_htkdict: line 17202: triphone "o-q+g" not found
+Error: voca_load_htkdict: the line content was: ブルドッグ:ブルドッグ:ブルドッグ:507	[ブルドッグ]	b u r u d o q g u 
+Error: voca_load_htkdict: line 17349: triphone "o-q+g" not found
+Error: voca_load_htkdict: the line content was: プレーリードッグ:プレーリードッグ:プレーリードッグ:507	[プレーリードッグ]	p u r e: r i: d o q g u 
+Error: voca_load_htkdict: line 17409: triphone "r-o+dy" not found
+Error: voca_load_htkdict: line 17409: triphone "o-dy+u:" not found
+Error: voca_load_htkdict: line 17409: triphone "dy-u:+s" not found
+Error: voca_load_htkdict: the line content was: プロデューサー:プロデューサー:プロデューサー:507	[プロデューサー]	p u r o dy u: s a: 
+Error: voca_load_htkdict: line 17410: triphone "r-o+dy" not found
+Error: voca_load_htkdict: line 17410: triphone "o-dy+u:" not found
+Error: voca_load_htkdict: line 17410: triphone "dy-u:+s" not found
+Error: voca_load_htkdict: the line content was: プロデュース:プロデュース:プロデュース:505	[プロデュース]	p u r o dy u: s u 
+Error: voca_load_htkdict: line 17739: triphone "o-q+g" not found
+Error: voca_load_htkdict: the line content was: ホットドッグ:ホットドッグ:ホットドッグ:507	[ホットドッグ]	h o q t o d o q g u 
+Error: voca_load_htkdict: line 19456: triphone "e-q+g" not found
+Error: voca_load_htkdict: the line content was: レッグ:レッグ:レッグ:511	[レッグ]	r e q g u 
+Error: voca_load_htkdict: line 19459: triphone "e-q+z" not found
+Error: voca_load_htkdict: the line content was: レッズ:レッズ:レッズ:514	[レッズ]	r e q z u 
+Error: voca_load_htkdict: line 19637: triphone "o-q+j" not found
+Error: voca_load_htkdict: the line content was: ロッジ:ロッジ:ロッジ:507	[ロッジ]	r o q j i 
+Error: voca_load_htkdict: line 21464: triphone "e-q+z" not found
+Error: voca_load_htkdict: the line content was: 浦和レッズ:ウラワレッズ:浦和レッズ:514	[浦和レッズ]	u r a w a r e q z u 
+Error: voca_load_htkdict: begin missing phones
+Error: voca_load_htkdict: *-dy+u or biphone dy+u
+Error: voca_load_htkdict: *-dy+u: or biphone dy+u:
+Error: voca_load_htkdict: N-dy+u
+Error: voca_load_htkdict: a-q+r
+Error: voca_load_htkdict: dy-u+* or biphone dy-u
+Error: voca_load_htkdict: dy-u+a
+Error: voca_load_htkdict: dy-u+b
+Error: voca_load_htkdict: dy-u+e
+Error: voca_load_htkdict: dy-u+o
+Error: voca_load_htkdict: dy-u+p
+Error: voca_load_htkdict: dy-u+r
+Error: voca_load_htkdict: dy-u:+* or biphone dy-u:
+Error: voca_load_htkdict: dy-u:+k
+Error: voca_load_htkdict: dy-u:+s
+Error: voca_load_htkdict: e-q+g
+Error: voca_load_htkdict: e-q+z
+Error: voca_load_htkdict: i-q+z
+Error: voca_load_htkdict: o-N+dy
+Error: voca_load_htkdict: o-dy+u:
+Error: voca_load_htkdict: o-q+g
+Error: voca_load_htkdict: o-q+j
+Error: voca_load_htkdict: o-q+z
+Error: voca_load_htkdict: q-g+a
+Error: voca_load_htkdict: q-r+a:
+Error: voca_load_htkdict: r-o+dy
+Error: voca_load_htkdict: end missing phones
+Error: init_voca: error in reading model/lang_m/web.60k.htkdic: 28 words failed out of 60222 words
+ERROR: m_fusion: failed to read dictionary, terminated
+ERROR: m_fusion: failed to initialize dictionary

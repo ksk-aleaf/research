@@ -1,0 +1,155 @@
+#!/usr/bin/env batchflow
+<?xml version="1.0"?>
+<Document>
+  <Network type="subnet" name="MAIN">
+    <Node name="node_RosNodeGenerator_1" type="RosNodeGenerator" x="-167.000000" y="-128.000000">
+      <Parameter name="NODE_NAME" type="string" value="PLAY_SOUND_NODE" description="Node name for ROS"/>
+    </Node>
+    <Node name="node_LOOP0_1" type="LOOP0" x="-209.000000" y="-58.000000">
+      <Parameter name="DOWHILE" type="bool" value="" description=""/>
+    </Node>
+    <NetOutput name="VALUE" node="node_RosNodeGenerator_1" terminal="VALUE" object_type="int" description="int parameter"/>
+    <NetOutput name="OUTPUT" node="node_LOOP0_1" terminal="OUTPUT" object_type="Vector&lt;float&gt;" description="Returning the input audio frames"/>
+    <NetOutput name="TIMESTAMP" node="node_LOOP0_1" terminal="TIMESTAMP" object_type="any" description="No description available"/>
+    <NetOutput name="SRCOUT" node="node_LOOP0_1" terminal="SRCOUT" object_type="any" description="No description available"/>
+    <Note x="0" y="0" visible="0" text="Created with FlowDesigner 0.9.1"/>
+  </Network>
+  <Network type="iterator" name="LOOP0">
+    <Node name="node_WriteAudio_1" type="WriteAudio" x="-291.000000" y="-509.000000">
+      <Parameter name="LEAD_IN" type="int" value="" description="Number of zero frames to send before starting (for synchronization)"/>
+    </Node>
+    <Node name="node_Sound_1" type="Sound" x="-463.000000" y="-455.000000">
+      <Parameter name="DEVICE" type="string" value="/dev/dsp" description="Path to the sound device"/>
+      <Parameter name="RATE" type="int" value="16000" description="Sampling rate"/>
+      <Parameter name="STEREO" type="int" value="0" description="1 for stereo, 0 for mono"/>
+      <Parameter name="MODE" type="string" value="W" description="R for sound input, W for sound output, RW for full-duplex mode"/>
+      <Parameter name="BUFFER" type="int" value="" description="Length of the audio buffer to allocate (not reliable)"/>
+      <Parameter name="DUMMY" type="int" value="" description="Put something here to output to a file"/>
+    </Node>
+    <Node name="node_Reframe_1" type="Reframe" x="-464.000000" y="-517.000000">
+      <Parameter name="LENGTH" type="int" value="160" description="Length of the frames"/>
+      <Parameter name="ADVANCE" type="int" value="512" description="Frame advance (offset)"/>
+    </Node>
+    <Node name="node_IF_1" type="IF" x="-545.000000" y="-517.000000">
+      <Parameter name="PULL_ANYWAY" type="bool" value="true" description="If true, the IF statement pulls also on the branch not taken"/>
+    </Node>
+    <Node name="node_MatrixToVector_1" type="MatrixToVector" x="-779.000000" y="-422.000000">
+      <Parameter name="ORDER" type="string" value="ROW" description="Order of elements of an array. &quot;ROW&quot; or &quot;COLUMN&quot; major."/>
+    </Node>
+    <Node name="node_MapToVector_1" type="MapToVector" x="-794.000000" y="-517.000000">
+      <Parameter name="ALGORITHM" type="string" value="SUMMATION" description="Algorithm to concatenate multiple maps into one vector"/>
+      <Parameter name="SAFE_MODE" type="bool" value="true" description="If true it sends zeropadded frames (i.e. filled with 0s) whenever the input is an empy Map (e.g., when there is no activated signal source when using GHDSS); If false it sends an empty vector whenever the input is an empty map. [default: false]"/>
+      <Parameter name="LENGTH" type="int" value="512" description="Time length of the output Vector (in samples). Only needed if SAFE_MODE is true, otherwise the Map input size will be assigned to the output Vector. [default: 512]"/>
+    </Node>
+    <Node name="node_RosStdMsgsSubscriber_1" type="RosStdMsgsSubscriber" x="-747.000000" y="-590.000000">
+      <Parameter name="ROS_MESSAGE_TYPE" type="string" value="Bool" description="Subscribed ROS message type. Match this setting and subscribed ROS message type."/>
+      <Parameter name="OUT_ARRAY_FORMAT" type="string" value="Vector&lt;&gt;" description="Hark output format. This parameter is valid when the ROS_MESSAGE_TYPE is related to MultiArray. The subscribed MultiArray message is converted to this format."/>
+      <Parameter name="BOOL_DEFAULT" type="bool" value="false" description="Default output bool during no data period [default: false]"/>
+      <Parameter name="INT_DEFAULT" type="int" value="0" description="Default output integer during no data period [default: 0]"/>
+      <Parameter name="FLOAT_DEFAULT" type="float" value="0.0" description="Default output float during no data period [default: 0.0]"/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="true" description="print debug message of this module in case of true."/>
+      <Parameter name="TOPIC_NAME" type="string" value="SeparateListenTrigger" description="Subscribed topic name for ROS (HarkWave type message)"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="1000000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="MSG_BUFFER_NUM" type="int" value="100" description="Buffer size for a ROS subscribed message."/>
+      <Parameter name="DATA_BUFFER_NUM" type="int" value="100" description="Buffer save size for a HARK output. Too small value makes packet loss. Too large value takes large memory. Minimum size is 5."/>
+      <Parameter name="REMAIN_LATEST" type="bool" value="true" description="Enable to keep the latest data as output even when this module doesn't receive any messages [default: false]"/>
+    </Node>
+    <Node name="node_Delay_1" type="Delay" x="-662.000000" y="-517.000000">
+      <Parameter name="DELAY" type="int" value="0" description="The delay"/>
+    </Node>
+    <Node name="node_Delay_2" type="Delay" x="-659.000000" y="-422.000000">
+      <Parameter name="DELAY" type="int" value="0" description="The delay"/>
+    </Node>
+    <Node name="node_RosHarkMsgsSubscriber_1" type="RosHarkMsgsSubscriber" x="-1343.000000" y="-599.000000">
+      <Parameter name="STREAM_SELECTION" type="string" value="HarkSrcWave" description="Selector of stream you want to realize. All other subscription will be disabled."/>
+      <Parameter name="NB_CHANNELS" type="int" value="8" description="The number of input channels. Only used for no data period (Not important). [default: 8]"/>
+      <Parameter name="FFT_LENGTH" type="int" value="512" description="FFT length in sample. Only used for no data period (Not important). [default: 512]"/>
+      <Parameter name="TOPIC_NAME_HARKWAVE" type="string" value="HarkWave" description="Subscribed topic name for ROS (HarkWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFFT" type="string" value="HarkFFT" description="Subscribed topic name for ROS (HarkFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFEATURE" type="string" value="HarkFeature" description="Subscribed topic name for ROS (HarkFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSOURCE" type="string" value="HarkSource" description="Subscribed topic name for ROS (HarkSource type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCWAVE" type="string" value="HarkSrcWavePlay" description="Subscribed topic name for ROS (HarkSrcWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFFT" type="string" value="HarkSrcFFT" description="Subscribed topic name for ROS (HarkSrcFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATURE" type="string" value="HarkSrcFeature" description="Subscribed topic name for ROS (HarkSrcFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATUREMFM" type="string" value="HarkSrcFeatureMFM" description="Subscribed topic name for ROS (HarkSrcFeatureMFM type message)"/>
+      <Parameter name="TOPIC_NAME_HARKJULIUS" type="string" value="HarkJulius" description="Subscribed topic name for ROS (HarkJulius type message)"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="1000000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="MSG_BUFFER_NUM" type="int" value="100" description="Buffer size for a ROS subscribed message."/>
+      <Parameter name="DATA_BUFFER_NUM" type="int" value="100" description="Buffer save size for a HARK output. Too small value makes packet loss. Too large value takes large memory. Minimum size is 5."/>
+      <Parameter name="REMAIN_LATEST" type="bool" value="true" description="Enable to keep the latest data as output even when this module doesn't receive any messages [default: false]"/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="true" description="print debug message of this module in case of true."/>
+    </Node>
+    <Node name="node_HarkMsgsStreamFromRos_1" type="HarkMsgsStreamFromRos" x="-1342.000000" y="-392.000000">
+      <Parameter name="STREAM_SELECTION" type="string" value="HarkWave" description="Selector of stream you want to realize. All other subscription will be disabled."/>
+      <Parameter name="TOPIC_NAME_HARKWAVE" type="string" value="HarkWave" description="Subscribed topic name for ROS (HarkWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFFT" type="string" value="HarkFFT" description="Subscribed topic name for ROS (HarkFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFEATURE" type="string" value="HarkFeature" description="Subscribed topic name for ROS (HarkFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSOURCE" type="string" value="HarkSource" description="Subscribed topic name for ROS (HarkSource type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCWAVE" type="string" value="HarkSrcWave" description="Subscribed topic name for ROS (HarkSrcWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFFT" type="string" value="HarkSrcFFT" description="Subscribed topic name for ROS (HarkSrcFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATURE" type="string" value="HarkSrcFeature" description="Subscribed topic name for ROS (HarkSrcFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATUREMFM" type="string" value="HarkSrcFeatureMFM" description="Subscribed topic name for ROS (HarkSrcFeatureMFM type message)"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="1000000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="MSG_BUFFER_NUM" type="int" value="100" description="Buffer size for a ROS subscribed message."/>
+      <Parameter name="DATA_BUFFER_NUM" type="int" value="100" description="Buffer save size for a HARK output. Too small value makes packet loss. Too large value takes large memory."/>
+      <Parameter name="KILL_TIME_LEN" type="int" value="900000" description="Kill time length for this network [usec] (must be less than 10[sec]). Set KILL_NETWORK enable."/>
+      <Parameter name="KILL_NETWORK" type="bool" value="true" description="Kill whole hark network when this node does not take any message from ROS."/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="false" description="print debug message of this module in case of true."/>
+    </Node>
+    <Node name="node_ChannelSelector_1" type="ChannelSelector" x="-929.000000" y="-422.000000">
+      <Parameter name="SELECTOR" type="object" value="&lt;Vector&lt;int&gt; 0&gt;" description="Channel selection setting which is a vector consisting of channel IDs (ID starts with 0). When the first three channels are selected from four channels, this should be set to &lt;Vector&lt;int&gt; 0 1 2&gt;."/>
+    </Node>
+    <Node name="node_MultiGain_1" type="MultiGain" x="-1075.000000" y="-422.000000">
+      <Parameter name="GAIN" type="float" value="1.0" description="Gain factor."/>
+    </Node>
+    <Node name="node_RosHarkMsgsSubscriber_2" type="RosHarkMsgsSubscriber" x="-1345.000000" y="-502.000000">
+      <Parameter name="STREAM_SELECTION" type="string" value="HarkSource" description="Selector of stream you want to realize. All other subscription will be disabled."/>
+      <Parameter name="NB_CHANNELS" type="int" value="8" description="The number of input channels. Only used for no data period (Not important). [default: 8]"/>
+      <Parameter name="FFT_LENGTH" type="int" value="512" description="FFT length in sample. Only used for no data period (Not important). [default: 512]"/>
+      <Parameter name="TOPIC_NAME_HARKWAVE" type="string" value="HarkWave" description="Subscribed topic name for ROS (HarkWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFFT" type="string" value="HarkFFT" description="Subscribed topic name for ROS (HarkFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKFEATURE" type="string" value="HarkFeature" description="Subscribed topic name for ROS (HarkFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSOURCE" type="string" value="SelectedSource" description="Subscribed topic name for ROS (HarkSource type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCWAVE" type="string" value="HarkSrcWave" description="Subscribed topic name for ROS (HarkSrcWave type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFFT" type="string" value="HarkSrcFFT" description="Subscribed topic name for ROS (HarkSrcFFT type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATURE" type="string" value="HarkSrcFeature" description="Subscribed topic name for ROS (HarkSrcFeature type message)"/>
+      <Parameter name="TOPIC_NAME_HARKSRCFEATUREMFM" type="string" value="HarkSrcFeatureMFM" description="Subscribed topic name for ROS (HarkSrcFeatureMFM type message)"/>
+      <Parameter name="TOPIC_NAME_HARKJULIUS" type="string" value="HarkJulius" description="Subscribed topic name for ROS (HarkJulius type message)"/>
+      <Parameter name="ROS_LOOP_RATE" type="float" value="1000000" description="This allows you to specify a frequency that you would like to loop at [Hz]. Keep this value large. (If ROS interval is shorter than HARK interval, ROS interval is overwritten.)"/>
+      <Parameter name="MSG_BUFFER_NUM" type="int" value="1000" description="Buffer size for a ROS subscribed message."/>
+      <Parameter name="DATA_BUFFER_NUM" type="int" value="1000" description="Buffer save size for a HARK output. Too small value makes packet loss. Too large value takes large memory. Minimum size is 5."/>
+      <Parameter name="REMAIN_LATEST" type="bool" value="true" description="Enable to keep the latest data as output even when this module doesn't receive any messages [default: false]"/>
+      <Parameter name="ENABLE_DEBUG" type="bool" value="true" description="print debug message of this module in case of true."/>
+    </Node>
+    <Node name="node_MapSelectorBySource_1" type="MapSelectorBySource" x="-979.000000" y="-517.000000">
+      <Parameter name="SELECTION_TYPE" type="string" value="DIRECTION" description="Criterion for selecting Map. If SOURCES is not connected, ID should be selected."/>
+      <Parameter name="ID_SELECTION_TYPE" type="string" value="LATEST" description="Criterion for selecting Map using ID."/>
+      <Parameter name="ID_RANGE" type="object" value="&lt;Vector&lt;int&gt; 0 0&gt;" description="ID range to select Map. The format is &quot;&lt;Vector&lt;int&gt; minimum maximum&gt;&quot; like &quot;&lt;Vector&lt;float&gt; 0 3&gt;&quot;."/>
+      <Parameter name="POWER_SELECTION_TYPE" type="string" value="HIGHEST" description="Criterion for selecting Map using POWER."/>
+      <Parameter name="POWER_RANGE" type="object" value="&lt;Vector&lt;float&gt; 0.0 40.0&gt;" description="Power range to select Map. The format is &quot;&lt;Vector&lt;float&gt; minimum maximum&gt;&quot; like &quot;&lt;Vector&lt;float&gt; 0.0 40.0&gt;&quot;."/>
+      <Parameter name="DIRECTION_SELECTION_TYPE" type="string" value="BETWEEN" description="Criterion for selecting Map using DIRECTION."/>
+      <Parameter name="DIRECTION" type="float" value="0.0" description="Direction to select Map when NEAREST is selected."/>
+      <Parameter name="DIRECTION_RANGE" type="object" value="&lt;Vector&lt;float&gt; 0.0 360.0&gt;" description="Direction range to select Map. The format is &quot;&lt;Vector&lt;float&gt; minimum maximum&gt;&quot; like &quot;&lt;Vector&lt;float&gt; 0.0 360.0&gt;&quot;."/>
+      <Parameter name="DEBUG_PRINT" type="bool" value="true" description="print debug message of this module in case of true."/>
+    </Node>
+    <Link from="node_Reframe_1" output="OUTPUT" to="node_WriteAudio_1" input="OBJECT"/>
+    <Link from="node_Sound_1" output="OUTPUT" to="node_WriteAudio_1" input="DEVICE"/>
+    <Link from="node_RosStdMsgsSubscriber_1" output="OUTPUT" to="node_IF_1" input="COND"/>
+    <Link from="node_Delay_1" output="OUTPUT" to="node_IF_1" input="THEN"/>
+    <Link from="node_Delay_2" output="OUTPUT" to="node_IF_1" input="ELSE"/>
+    <Link from="node_MapToVector_1" output="OUTPUT" to="node_Delay_1" input="INPUT"/>
+    <Link from="node_MatrixToVector_1" output="OUTPUT" to="node_Delay_2" input="INPUT"/>
+    <Link from="node_IF_1" output="OUTPUT" to="node_Reframe_1" input="INPUT"/>
+    <Link from="node_MultiGain_1" output="OUTPUT" to="node_ChannelSelector_1" input="INPUT"/>
+    <Link from="node_HarkMsgsStreamFromRos_1" output="MATOUT" to="node_MultiGain_1" input="INPUT"/>
+    <Link from="node_ChannelSelector_1" output="OUTPUT" to="node_MatrixToVector_1" input="INPUT"/>
+    <Link from="node_RosHarkMsgsSubscriber_2" output="SRCOUT" to="node_MapSelectorBySource_1" input="SOURCES"/>
+    <Link from="node_RosHarkMsgsSubscriber_1" output="MAPOUT" to="node_MapSelectorBySource_1" input="INPUT"/>
+    <Link from="node_MapSelectorBySource_1" output="OUTPUT" to="node_MapToVector_1" input="INPUT"/>
+    <NetOutput name="OUTPUT" node="node_WriteAudio_1" terminal="OUTPUT" object_type="Vector&lt;float&gt;" description="Returning the input audio frames"/>
+    <NetCondition name="CONDITION" node="node_HarkMsgsStreamFromRos_1" terminal="NOT_EOF"/>
+    <NetOutput name="TIMESTAMP" node="node_RosHarkMsgsSubscriber_1" terminal="TIMESTAMP" object_type="TimeStamp" description="Time stamp of the subscribed messages"/>
+    <NetOutput name="SRCOUT" node="node_RosHarkMsgsSubscriber_1" terminal="SRCOUT" object_type="Vector&lt;ObjectRef&gt;" description="Source output port when STREAM_SELECTION=HarkSource or HarkSrcWave or HarkSrcFFT or HarkSrcFeature or HarkSrcFeatureMFM"/>
+    <Note x="0" y="0" visible="0" text="Created with FlowDesigner 0.9.1"/>
+  </Network>
+</Document>
