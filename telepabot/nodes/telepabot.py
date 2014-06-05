@@ -198,7 +198,7 @@ class CentralWidget(QtGui.QWidget):
 		#have to init in paintEvent
 		camImgPainter = QPainter(self)
 
-		cameraimage.drawCameraImage(event,global_var.cvImage,const.CAM_IMG_DRAW_POINT,camImgPainter)
+		cameraimage.drawCameraImage(event,global_var.cvCenterImage,const.CAM_IMG_DRAW_POINT,camImgPainter)
 
 		self.paintListenRange(event)
 

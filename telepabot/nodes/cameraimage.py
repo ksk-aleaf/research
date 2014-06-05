@@ -66,6 +66,7 @@ class CameraDevice(QtCore.QObject):
 		frame = global_var.cvCenterImage
 
 		if frame == None:
+			print "frame = None"
 			return
 
 		if self.mirrored:
@@ -73,6 +74,10 @@ class CameraDevice(QtCore.QObject):
 			cv.Copy(frame, mirroredFrame, None)
 			#cv.Flip(frame, mirroredFrame, 1)
 			frame =  mirroredFrame
+		
+		if frame == None:
+			print "frame = None 2"
+			return
 		
 		global_var.cvCenterImage = frame
 		#self.iplimageSygnal.emit(frame)
@@ -103,9 +108,11 @@ def drawCameraImage(event,cvImage,point,painter):
 #receive image callback
 def imageCallback(rosImage):
 	global_var.cvCenterImage = const.CV_BRIDGE.imgmsg_to_cv(rosImage, "rgb8")
+	if global_var.cvCenterImage is None:
+		print "none"
 
 
 
 def subscriber():
-	rospy.Subscriber(const.CAM_IMG_TOPIC_NAME, Image, imageCallback)
-	rospy.Subscriber(const.CAM_IMG_TOPIC_NAME, Image, imageCallback)
+	rospy.Subscriber(const.CENTER_CAM_IMG_TOPIC_NAME, Image, imageCallback)
+	#rospy.Subscriber(const.CAM_IMG_TOPIC_NAME, Image, imageCallback)

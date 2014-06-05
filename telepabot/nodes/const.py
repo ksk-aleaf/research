@@ -18,8 +18,8 @@ from PyQt4.QtGui import *
 SYSTEM_NAME = "telepabot"
 
 #TOPIC NAME
-CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/center_image_raw"
-SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam/side_image_raw"
+CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw"
+#SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam/side_image_raw"
 
 #CAM PARAMETER
 CAM_DEFAULT_FPS = 30
