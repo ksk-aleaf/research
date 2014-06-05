@@ -46,7 +46,9 @@ locSrcList = [] #harkから得た定位音源情報を整形して入れる配�
 prevLocSrcList = [] #直前の定位音源情報
 vanLocSrcList = [] #消えた音源の情報をしばらく入れる配列
 msg_select = [] #視聴選択範囲内の音源情報
-cvImage = None
+cvCenterImage = None
+
+#cvImage
 harkMsg = HarkSource() #HarkSource型のままのメッセージ
 prev_msg = HarkSource()
 recogWordList = [] #have list from 0 to VERT_MAX_RESULT_NUM

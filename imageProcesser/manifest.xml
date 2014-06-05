@@ -1,0 +1,17 @@
+<package>
+  <description brief="imageProcesser">
+
+     imageProcesser
+
+  </description>
+  <author>koike</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/imageProcesser</url>
+  <depend package="roslib"/>
+  <depend package="roscpp"/>
+  <depend package="std_msgs"/>
+
+</package>
+
+

@@ -167,9 +167,6 @@ class CentralWidget(QtGui.QWidget):
 			else:
 				self.cameraDevice.newFrame.disconnect(self._onNewFrame)
 
-	#人の口の近くに音の波を描画
-	#def paintVoiceWave(self,e):
-	#def paintWave(self,point):
 
 	def paintListenRange(self,e):
 		if global_var.listenSeparateSoundFlag:
@@ -205,24 +202,10 @@ class CentralWidget(QtGui.QWidget):
 
 		self.paintListenRange(event)
 
-		#口付近に表示する音の波を描画
-		#self.paintVoiceWave(e)
-
-
-	#クリックが正面映像上でなければX座標を補正する
-	def getOnImageX(self,x):
-		if x < const.CAM_IMG_OFS_X:
-			return const.CAM_IMG_OFS_X
-		elif x > (const.CAM_IMG_OFS_X + const.CAM_IMG_WID):
-			return const.CAM_IMG_OFS_X + const.CAM_IMG_WID
-		else:
-			return x
-
-
-	#def ifOnSideImage(x,y):
 
 	def mousePressEvent(self,event):
-		self.listenRangeStartX = self.getOnImageX(event.x())
+		self.listenRangeStartX = event.x()
+		#self.getOnImageX(event.x())
 		self.listenRangeEndX =  self.listenRangeStartX
 		global_var.listenSeparateSoundFlag = True
 		#p = QtGui.QPixmap.grabWindow(self.winId())
@@ -233,14 +216,15 @@ class CentralWidget(QtGui.QWidget):
 		global_var.listenSeparateSoundFlag = False
 
 	def mouseMoveEvent(self,event):
-		self.listenRangeEndX = self.getOnImageX(event.x())
+		self.listenRangeEndX = event.x()
+		#self.getOnImageX(event.x())
 
 	def mouseReleaseEvent(self, e):
 		#座標を角度に変換してグローバル変数にセット
 		print "startx:"+str(self.listenRangeStartX - const.CAM_IMG_OFS_X)
 		print "endx:" + str(self.listenRangeEndX - const.CAM_IMG_OFS_X)
 		if math.fabs(self.listenRangeEndX - self.listenRangeStartX) > const.IGNOR_PIX_THR:
-			format_loc_src_microcone.setListenAngles(self.listenRangeStartX - const.CAM_IMG_OFS_X,self.listenRangeEndX - const.CAM_IMG_OFS_X)
+			format_loc_src_microcone.setListenAngles(self.listenRangeStartX,self.listenRangeEndX)
 			format_loc_src_microcone.listenSeparateSound()
 			global_var.listenSeparateSoundFlag = True
 		else:
@@ -263,14 +247,15 @@ class CentralWidget(QtGui.QWidget):
 		elif key == Qt.Key_2:
 			command = const.BACK_CMD
 		sendCommand(command,const.KEY_MAN_ROT_TO)
-	
+
+
 	def getPaintRect(self,startX,endX):
 		absRange = math.fabs(endX - startX)
 		
 		if startX < endX:
-			return QRect(startX,0,absRange,const.CAM_IMG_HT)
+			return QRect(startX,const.CAM_IMG_OFS_Y,absRange,const.CAM_IMG_HT)
 		else:
-			return QRect(endX,0,absRange,const.CAM_IMG_HT)
+			return QRect(endX,const.CAM_IMG_OFS_Y,absRange,const.CAM_IMG_HT)
 
 
 #ウィンドウ全体

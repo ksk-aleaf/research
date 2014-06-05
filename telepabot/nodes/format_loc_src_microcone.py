@@ -12,6 +12,7 @@ from hark_msgs.msg import HarkSrcWave
 from hark_msgs.msg import HarkSrcWaveVal
 from hark_msgs.msg import HarkSource
 import math
+import thetaimg
 #import button
 from std_msgs.msg import Bool
 
@@ -100,24 +101,13 @@ def localization_callback(data):
 		msg_val.theta = data.src[k].theta
 		msg.src.append(msg_val)
 		msg.exist_src_num += 1
-	
-	"""for l in range(len(global_var.prev_msg.src)):
-		flag = False
-		for n in range(len(msg.src)):
-			if(global_var.prev_msg.src[l].id == msg.src[n].id):
-				flag = True
-		if(flag is False):
-			msg.src.append(global_var.prev_msg.src[l])
-			msg.exist_src_num += 1"""
 
+	#処理後の音源情報を発行
 	const.CLASSIFIED_SOURCE_PUB.publish(msg)
 	global_var.prev_msg = msg
 	
 	#分離音声を視聴している場合は範囲内の音源情報を発行する
-	#if global_var.listenSeparateSoundFlag:
-	#if (time.time() - global_var.sendSeparateAngleInfoTime) > global_var.sendSeparateAngleInfoDuration:
 	const.SELECTED_SOURCE_PUB.publish(getSoundSrcInRange(data.src))
-	#global_var.sendSeparateAngleInfoTime = time.time()
 
 
 def listenSeparateSound():
@@ -140,8 +130,12 @@ def getListenAngle(xaxis):
 	return (xaxis * 2 * const.IMG_HOR_HALF_VIEW_AGL)/const.CAM_IMG_WID - const.IMG_HOR_HALF_VIEW_AGL
 
 def setListenAngles(startX,endX):
-	global_var.listenRangeStartAngle = getListenAngle(startX)
-	global_var.listenRangeEndAngle = getListenAngle(endX)
+	global_var.listenRangeStartAngle = thetaimg.getThetaFromXAxis(startX)
+	#thetaimg.getXAxisFromAzimuth(startX)
+	# = getListenAngle(startX)
+	global_var.listenRangeEndAngle = thetaimg.getThetaFromXAxis(endX)
+	#thetaimg.getXAxisFromAzimuth(endX)
+	# = getListenAngle(endX)
 
 def makeSoundSrcInRange():
 	msg_select = HarkSource()
