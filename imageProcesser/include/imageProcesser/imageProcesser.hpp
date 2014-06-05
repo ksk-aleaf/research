@@ -10,6 +10,9 @@
 
 
 
+void centerImageCallback(const sensor_msgs::ImageConstPtr& msg){}
+void sideImageCallback(const sensor_msgs::ImageConstPtr& msg){}
+
 
 
 #endif /* IMAGEPROCESSER_HPP_ */
