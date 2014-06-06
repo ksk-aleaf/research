@@ -47,6 +47,8 @@ prevLocSrcList = [] #直前の定位音源情報
 vanLocSrcList = [] #消えた音源の情報をしばらく入れる配列
 msg_select = [] #視聴選択範囲内の音源情報
 cvCenterImage = None
+cvLeftImage = None
+cvRightImage = None
 
 #cvImage
 harkMsg = HarkSource() #HarkSource型のままのメッセージ

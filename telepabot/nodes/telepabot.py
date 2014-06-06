@@ -29,6 +29,7 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import cv
+import cv2
 import threading
 import time
 import math
@@ -117,14 +118,9 @@ def sendCommand(command,timeout):
 
 #central widget
 class CentralWidget(QtGui.QWidget):
-	#newFrame = QtCore.pyqtSignal(cv.iplimage)
-
-	def __init__(self, cameraDevice, parent=None):
+	def __init__(self, parent=None):
 
 		super(CentralWidget, self).__init__(parent)
-		self.cameraImage = None#camera image
-		
-		#signal timer for slot(paintEvent)
 		self.signalTimer = QtCore.QTimer(self)
 		self.signalTimer.timeout.connect(self.redraw)
 		self.signalTimer.setInterval(const.MSEC_ONE_SEC/const.CENTRAL_WIDGET_FPS)
@@ -137,11 +133,6 @@ class CentralWidget(QtGui.QWidget):
 		self.frame.setLineWidth(2)
 		self.frame.setGeometry(0, 0, const.WIN_WID, const.WIN_HT)
 
-		#self.cameraDevice = cameraDevice
-		#self.cameraDevice.iplimageSygnal.connect(self._onNewFrame)
-		#self.drawCamImgPoint = const.CAM_IMG_DRAW_POINT
-		#w, h = self.cameraDevice.frameSize
-		#self.setStyleSheet("background-color: white")#背景色を白に
 		
 		#set widget size
 		self.setMinimumSize(const.WIN_WID, const.WIN_HT)
@@ -196,16 +187,22 @@ class CentralWidget(QtGui.QWidget):
 		tmpVanLocSrcList= global_var.vanLocSrcList[:]
 		
 		#have to init in paintEvent
-		camImgPainter = QPainter(self)
+		centerCamImgPainter = QPainter(self)
+		leftCamImgPainter = QPainter(self)
+		rightCamImgPainter = QPainter(self)
 
-		cameraimage.drawCameraImage(event,global_var.cvCenterImage,const.CAM_IMG_DRAW_POINT,camImgPainter)
+		if global_var.cvCenterImage is not None:
+			cameraimage.drawCameraImage(event,global_var.cvCenterImage,QtGui.QImage.Format_RGB888,const.CENTER_CAM_IMG_DRAW_POINT,centerCamImgPainter)
+ 		if global_var.cvLeftImage is not None:
+			cameraimage.drawCameraImage(event,global_var.cvLeftImage,QtGui.QImage.Format_RGB888,const.LEFT_CAM_IMG_DRAW_POINT,leftCamImgPainter)
+ 		if global_var.cvRightImage is not None:
+			cameraimage.drawCameraImage(event,global_var.cvRightImage,QtGui.QImage.Format_RGB888,const.RIGHT_CAM_IMG_DRAW_POINT,rightCamImgPainter)
 
 		self.paintListenRange(event)
 
 
 	def mousePressEvent(self,event):
 		self.listenRangeStartX = event.x()
-		#self.getOnImageX(event.x())
 		self.listenRangeEndX =  self.listenRangeStartX
 		global_var.listenSeparateSoundFlag = True
 		#p = QtGui.QPixmap.grabWindow(self.winId())
@@ -217,7 +214,6 @@ class CentralWidget(QtGui.QWidget):
 
 	def mouseMoveEvent(self,event):
 		self.listenRangeEndX = event.x()
-		#self.getOnImageX(event.x())
 
 	def mouseReleaseEvent(self, e):
 		#座標を角度に変換してグローバル変数にセット
@@ -274,8 +270,7 @@ class MainWindow(QtGui.QMainWindow):
 		self.exit.setStatusTip(u"アプリケーションを終了します")
 
 		#CentralWidget
-		cameraDevice = cameraimage.CameraDevice(mirrored = True)
-		self.centralWidget = CentralWidget(cameraDevice)
+		self.centralWidget = CentralWidget()
 		self.setCentralWidget(self.centralWidget)
 		self.setGeometry(0, 0, const.WIN_WID, const.WIN_HT)
 		#self.setAutoFillBackground(False)
@@ -290,7 +285,6 @@ def initialize():
 	window.setWindowTitle(const.SYSTEM_NAME)
 	window.show()
 	recogword.initRecogData()
-	#app.exec_()
 	return app,window
 
 #トピック購読処理
@@ -304,7 +298,10 @@ def subscriber():
 
 #メイン関数
 if __name__ == '__main__':
-	app,window = initialize()
 	subscriber()
+	#need to get window
+	app,window = initialize()	
+
+	#do this method last in main(system loop start)
 	app.exec_()
 	#sys.exit(app.exec_())

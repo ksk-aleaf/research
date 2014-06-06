@@ -31,64 +31,12 @@ import global_var
 #定数モジュール
 import const
 
-#camera image class
-class CameraDevice(QtCore.QObject):
-
-	iplimageSygnal = QtCore.pyqtSignal(cv.iplimage)
-
-	def __init__(self, mirrored=False, parent=None):
-
-		super(CameraDevice, self).__init__(parent)
-
-		self.mirrored = mirrored
-		
-		#signal timer for slot(_queryFrame)
-		self.signalTimer = QtCore.QTimer(self)
-		self.signalTimer.timeout.connect(self.emitImage)
-		self.signalTimer.setInterval(const.CAM_DRAW_HZ)
-		
-		self.paused = False
-
-	@property
-	def paused(self):
-		return not self.signalTimer.isActive()
-
-	@paused.setter
-	def paused(self, p):
-		if p:
-			self.signalTimer.stop()
-		else:
-			self.signalTimer.start()
-
-	
-	@QtCore.pyqtSlot()
-	def emitImage(self):
-		frame = global_var.cvCenterImage
-
-		if frame == None:
-			print "frame = None"
-			return
-
-		if self.mirrored:
-			mirroredFrame = cv.CreateImage(cv.GetSize(frame), 8, 3)
-			cv.Copy(frame, mirroredFrame, None)
-			#cv.Flip(frame, mirroredFrame, 1)
-			frame =  mirroredFrame
-		
-		if frame == None:
-			print "frame = None 2"
-			return
-		
-		global_var.cvCenterImage = frame
-		#self.iplimageSygnal.emit(frame)
-
-
 
 #OpenCVIplImageからPyQtのQImageへの変換クラス http://rafaelbarreto.wordpress.com/tag/pyqt/
 class OpenCVQImage(QtGui.QImage):
-	def __init__(self, opencvRgbImg):
+	def __init__(self, opencvRgbImg, format):
 		w,h = cv.GetSize(opencvRgbImg)
-		super(OpenCVQImage, self).__init__(opencvRgbImg.tostring(),w , h, QtGui.QImage.Format_RGB888)
+		super(OpenCVQImage, self).__init__(opencvRgbImg.tostring(),w , h, format)
 
 def getGrayScale(cvmatImage):
 	for row in range(cvmatImage.rows):
@@ -99,20 +47,25 @@ def getGrayScale(cvmatImage):
 
 
 
-def drawCameraImage(event,cvImage,point,painter):
-	#cvImage = getGrayScale(cvImage)
+def drawCameraImage(event,cvImage,format,point,painter):
 	if cvImage is not None:
-		painter.drawImage(point, OpenCVQImage(cvImage))
+		painter.drawImage(point, OpenCVQImage(cvImage,format))
 
 
-#receive image callback
-def imageCallback(rosImage):
+#receive center image callback
+def centerImageCallback(rosImage):
 	global_var.cvCenterImage = const.CV_BRIDGE.imgmsg_to_cv(rosImage, "rgb8")
-	if global_var.cvCenterImage is None:
-		print "none"
+	
+#receive left image callback
+def leftImageCallback(rosImage):
+	global_var.cvLeftImage = const.CV_BRIDGE.imgmsg_to_cv(rosImage, "rgb8")
 
+#receive right image callback
+def rightImageCallback(rosImage):
+	global_var.cvRightImage = const.CV_BRIDGE.imgmsg_to_cv(rosImage, "rgb8")
 
 
 def subscriber():
-	rospy.Subscriber(const.CENTER_CAM_IMG_TOPIC_NAME, Image, imageCallback)
-	#rospy.Subscriber(const.CAM_IMG_TOPIC_NAME, Image, imageCallback)
+	rospy.Subscriber(const.CENTER_CAM_IMG_TOPIC_NAME, Image, centerImageCallback)
+	rospy.Subscriber(const.LEFT_CAM_IMG_TOPIC_NAME, Image, leftImageCallback)
+	rospy.Subscriber(const.RIGHT_CAM_IMG_TOPIC_NAME, Image, rightImageCallback)

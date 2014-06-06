@@ -8,6 +8,7 @@ from std_msgs.msg import Bool
 
 #openCV import
 from cv_bridge import CvBridge, CvBridgeError
+import cv
 
 #PyQt import
 from PyQt4.QtCore import *
@@ -18,8 +19,9 @@ from PyQt4.QtGui import *
 SYSTEM_NAME = "telepabot"
 
 #TOPIC NAME
-CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw"
-#SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam/side_image_raw"
+CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
+LEFT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/left"
+RIGHT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/right"
 
 #CAM PARAMETER
 CAM_DEFAULT_FPS = 30
@@ -37,7 +39,13 @@ CAM_IMG_OFS_X = 0
 CAM_IMG_OFS_Y = 200
 
 #cam draw position
-CAM_IMG_DRAW_POINT = QPoint(CAM_IMG_OFS_X, CAM_IMG_OFS_Y)
+CENTER_CAM_IMG_DRAW_POINT = QPoint(CAM_IMG_OFS_X + CAM_LEFT_IMG_WID, CAM_IMG_OFS_Y)
+LEFT_CAM_IMG_DRAW_POINT = QPoint(CAM_IMG_OFS_X, CAM_IMG_OFS_Y)
+RIGHT_CAM_IMG_DRAW_POINT = QPoint(CAM_IMG_OFS_X + CAM_LEFT_IMG_WID + CAM_CENTER_IMG_WID, CAM_IMG_OFS_Y)
+
+#cam cut subrect
+LEFT_CAM_SUBRECT = (0, CAM_IMG_OFS_Y, CAM_LEFT_IMG_WID, CAM_IMG_HT)
+RIGHT_CAM_SUBRECT = (CAM_LEFT_IMG_WID + CAM_CENTER_IMG_WID, CAM_IMG_OFS_Y, CAM_RIGHT_IMG_WID, CAM_IMG_HT)
 
 #sec to milsec
 MSEC_ONE_SEC = 1000
@@ -65,6 +73,9 @@ PIXEL_PER_AZIMUTH = int(CAM_WHOLE_IMG_WID / IMG_HOR_VIEW_AGL)
 WIN_WID = CAM_WHOLE_IMG_WID + CAM_IMG_OFS_X*2
 WIN_HT = CAM_IMG_HT + CAM_IMG_OFS_Y
 
+#画像切り出し用の矩形領域
+# LEFT_IMG_ROI = cv.Rect()
+# RIGHT_IMG_ROI = 
 
 
 ##################画像データ################################
