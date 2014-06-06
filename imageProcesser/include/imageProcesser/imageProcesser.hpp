@@ -10,8 +10,8 @@
 
 
 
-void centerImageCallback(const sensor_msgs::ImageConstPtr& msg){}
-void sideImageCallback(const sensor_msgs::ImageConstPtr& msg){}
+//void centerImageCallback(const sensor_msgs::ImageConstPtr& msg){}
+//void sideImageCallback(const sensor_msgs::ImageConstPtr& msg){}
 
 
 
