@@ -38,9 +38,37 @@ void sideImageCallback(const sensor_msgs::ImageConstPtr& msg){
 	sideCvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
 }
 
-void processSideImage(){
-	cv::Mat leftMat;
-	centerCvPtr.get()->image(LEFT_ROI);
+//void getNBitPixVal(int _8BitPixVal,int n){
+//
+//}
+
+void processCenterImage(){
+
+	if (centerCvPtr == NULL || centerCvPtr.get() == NULL){
+		return;
+	}
+
+	cv::Mat mat = centerCvPtr.get()->image;
+	int mat_channnel = mat.channels();
+	int pixVal = 0;
+	int pixValRem = 0;
+
+	cvtColor(mat,mat,CV_RGB2HSV);
+
+	Mat_<Vec3b>& img = (Mat_<Vec3b>&)mat; // 画像の 3 チャンネルポインタ
+
+	for(int y = 0; y < mat.rows; y++){
+		for(int x = 0; x < 300; x++){
+			for(int channel = 0; channel < mat_channnel; channel++){
+				pixVal = img(y,x)[channel];
+				pixValRem = pixVal % 16;
+				img(y,x)[channel] = pixVal-pixValRem;
+				//img(y,x)[channel] = 255;
+			}
+		}
+	}
+
+	centerCvPtr.get()->image = mat;
 }
 
 void publishSideImg(image_transport::Publisher &leftImgPublisher,image_transport::Publisher &rightImgPublisher){
