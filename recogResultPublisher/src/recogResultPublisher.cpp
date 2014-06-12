@@ -191,6 +191,14 @@ string getRecogStr(int sd)
 	return recogResult;
 }
 
+// print recognized word for stdout
+void printRecogMsg(hark_msgs::HarkJuliusSrc &recogMsg){
+	cout << endl;
+	cout << "id:" << recogMsg.azimuth << endl;
+	cout << "azimuth:" << recogMsg.azimuth << endl;
+	cout << "word:" << recogMsg.src.at(0).word << endl;
+}
+
 
 /**
  * This tutorial demonstrates simple sending of messages over the ROS system.
@@ -231,7 +239,7 @@ int main(int argc, char **argv)
 	while (ros::ok())
 	{
 		recogMsg = getRecogMsg(getRecogStr(sock));
-
+		printRecogMsg(recogMsg);
 		if( recogMsg.id >= 0){
 			chatter_pub.publish(recogMsg);
 		}
