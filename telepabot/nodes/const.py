@@ -136,8 +136,8 @@ HEIGHT_PER_CHAR = 20
 
 #topic publisher
 CLASSIFIED_SOURCE_PUB = rospy.Publisher("ClassifiedSource", HarkSource)
-SELECTED_SOURCE_PUB = rospy.Publisher("SelectedSource", HarkSource)
-SEP_LIS_TRIG_PUB = rospy.Publisher("SeparateListenTrigger", Bool)
+SELECTED_SOURCE_PUB = rospy.Publisher("DetectedSource", HarkSource)
+SEP_LIS_TRIG_PUB = rospy.Publisher("Trigger", Bool)
 
 #topic name
 HARK_JULIUS_SOURCE_TOPIC_NAME = "HarkJuliusSrc"

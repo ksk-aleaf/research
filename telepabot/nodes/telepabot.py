@@ -220,6 +220,7 @@ class CentralWidget(QtGui.QWidget):
 		print "startx:"+str(self.listenRangeStartX - const.CAM_IMG_OFS_X)
 		print "endx:" + str(self.listenRangeEndX - const.CAM_IMG_OFS_X)
 		if math.fabs(self.listenRangeEndX - self.listenRangeStartX) > const.IGNOR_PIX_THR:
+			print "inif"
 			format_loc_src_microcone.setListenAngles(self.listenRangeStartX,self.listenRangeEndX)
 			format_loc_src_microcone.listenSeparateSound()
 			global_var.listenSeparateSoundFlag = True
@@ -291,7 +292,7 @@ def initialize():
 def subscriber():
 	rospy.init_node(const.SYSTEM_NAME, anonymous = True)
 	#kinect_tf.subscriber()
-	#format_loc_src_microcone.subscriber()
+	format_loc_src_microcone.subscriber()
 	recogword.subscriber()
 	cameraimage.subscriber()
 	#rospy.spin()

@@ -13,7 +13,6 @@ from hark_msgs.msg import HarkSrcWaveVal
 from hark_msgs.msg import HarkSource
 import math
 import thetaimg
-#import button
 from std_msgs.msg import Bool
 
 #定位した音源情報を格納するクラス
@@ -21,6 +20,12 @@ class LocSrc():
 	def __init__(self,srcId,theta,power,x_onImage,y_arrow,onImageFlag,powerCode):
 		self.srcId, self.theta, self.power, self.x_onImage, self.y_arrow, self.onImageFlag,self.deletedTime,self.powerCode = srcId,theta,power,x_onImage,y_arrow,onImageFlag,0,powerCode
 
+#音源の角度を引数にとり、付与するIDを返す
+def getSourceDirectionId(theta):
+	if(theta >= global_var.listenRangeStartAngle and theta < global_var.listenRangeEndAngle):
+		return const.LISTENABLE
+	else:
+		return const.UNLISTENABLE
 
 #Show localization information
 def localization_callback(data):
@@ -35,15 +40,15 @@ def localization_callback(data):
 
 	#harkSourceに画像上のx座標情報を追加してglobal_var.locSrcListに格納
 	for i in range(len(data.src)):
-		if(data.src[i].theta >= -const.IMG_HOR_HALF_VIEW_AGL and data.src[i].theta <= const.IMG_HOR_HALF_VIEW_AGL):#映像視野内
-			x_onImage = (const.CAM_IMG_WID / 2)*(1-(math.tan(math.radians(data.src[i].theta))/math.tan(math.radians(const.IMG_HOR_HALF_VIEW_AGL))))
+		if(data.src[i].azimuth >= -const.IMG_HOR_HALF_VIEW_AGL and data.src[i].azimuth <= const.IMG_HOR_HALF_VIEW_AGL):#映像視野内
+			x_onImage = (const.CAM_WHOLE_IMG_WID / 2)*(1-(math.tan(math.radians(data.src[i].azimuth))/math.tan(math.radians(const.IMG_HOR_HALF_VIEW_AGL))))
 			onImageFlag = True
 			y_arrow = -100
 		else:#画面外
-			if(data.src[i].theta > 0):
-				y_arrow = const.PIXEL_BY_STRIDE*(int( (data.src[i].theta - const.IMG_HOR_HALF_VIEW_AGL) / const.THETA_STRIDE ))
+			if(data.src[i].azimuth > 0):
+				y_arrow = const.PIXEL_BY_STRIDE*(int( (data.src[i].azimuth - const.IMG_HOR_HALF_VIEW_AGL) / const.THETA_STRIDE ))
 			else:
-				y_arrow = -const.PIXEL_BY_STRIDE*(int( (data.src[i].theta + const.IMG_HOR_HALF_VIEW_AGL) / const.THETA_STRIDE ))
+				y_arrow = -const.PIXEL_BY_STRIDE*(int( (data.src[i].azimuth + const.IMG_HOR_HALF_VIEW_AGL) / const.THETA_STRIDE ))
 			x_onImage = -100
 			onImageFlag = False
 
@@ -54,7 +59,7 @@ def localization_callback(data):
 		else:
 			powerCode = const.WEAK_POW_CODE
 
-		src = LocSrc(data.src[i].id, data.src[i].theta, data.src[i].power,x_onImage,y_arrow,onImageFlag,powerCode)
+		src = LocSrc(data.src[i].id, data.src[i].azimuth, data.src[i].power,x_onImage,y_arrow,onImageFlag,powerCode)
 		global_var.locSrcList.append(src)
 
 
@@ -95,10 +100,10 @@ def localization_callback(data):
 	#音源情報のIDを振りなおす
 	for k in range(len(data.src)):
 		msg_val = HarkSourceVal()
-		msg_val.id = button.getSourceDirectionId(data.src[k].theta)
+		msg_val.id = getSourceDirectionId(data.src[k].azimuth)
 		msg_val.x  = data.src[k].x
 		msg_val.y  = data.src[k].y
-		msg_val.theta = data.src[k].theta
+		msg_val.azimuth = data.src[k].azimuth
 		msg.src.append(msg_val)
 		msg.exist_src_num += 1
 
@@ -122,6 +127,7 @@ def listenSeparateSound():
 	r = rospy.Rate(3)
 	r.sleep()
 	const.SEP_LIS_TRIG_PUB.publish(True)
+	print "pub_separateFlg"
 
 def listenWholeSound():
 	const.SEP_LIS_TRIG_PUB.publish(False)
@@ -145,10 +151,10 @@ def makeSoundSrcInRange():
 def getSoundSrcInRange(harkSource):
 	msg_select = HarkSource()
 	for index in range(len(harkSource)):
-		if ifThetaInRange(harkSource[index].theta):
+		if ifThetaInRange(harkSource[index].azimuth):
 			append = HarkSourceVal()
-			append.id = button.getSourceDirectionId(harkSource[index].theta)
-			append.theta = harkSource[index].theta
+			append.id = getSourceDirectionId(harkSource[index].azimuth)
+			append.azimuth = harkSource[index].azimuth
 			msg_select.src.append(append)
 			msg_select.exist_src_num += 1
 	return msg_select

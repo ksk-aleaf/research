@@ -19,20 +19,20 @@
 ##
 ## DFA ファイルと単語辞書ファイルを指定
 ## order.dfa と order.dic を指定している
--gram grammar/introduction
-#-gram order
+#-gram grammar/introduction
+-gram order
 
 ##
 ## 音響HMM定義ファイル
 ##
--h hmmdefs.gz
-
+#-h hmmdefs.gz
+-h model/phone_m/microcone_smartroom_X2m_Y2m_H150_20130110_hmmdefs
 
 ## triphoneモデルの場合，さらに
 ##     論理的に出現しうる triphone -> 定義されている triphone
 ## の対応を指定した「HMMListファイル」が必要です．
--hlist allTriphones
-
+#-hlist allTriphones
+-hlist model/phone_m/logicalTri
 ######################################################################
 #### 言語モデル詳細設定
 ######################################################################

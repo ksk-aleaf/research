@@ -11,7 +11,7 @@
 # Missing Feature Mask 処理を有効にするためのプラグインの場所
 #-plugindir /usr/local/lib/julius_plugin
 #-plugindir jpi
--plugindir /usr/lib/julius_plugin
+-plugindir /usr/local/lib/julius_plugin
 
 ######################################################################
 #### ファイル指定
@@ -19,19 +19,19 @@
 ##
 ## DFA ファイルと単語辞書ファイルを指定
 ## order.dfa と order.dic を指定している
--gram LM/order
+-gram grammar/order
 
 ##
 ## 音響HMM定義ファイル
 ##
--h AM/hmmdefs.gz
-
+#-h AM/hmmdefs.gz
+-h model/phone_m/microcone_smartroom_X2m_Y2m_H150_20130110_hmmdefs
 
 ## triphoneモデルの場合，さらに
 ##     論理的に出現しうる triphone -> 定義されている triphone
 ## の対応を指定した「HMMListファイル」が必要です．
--hlist AM/allTriphones
-
+#-hlist AM/allTriphones
+-hlist model/phone_m/microcone_triphones
 ######################################################################
 #### 言語モデル詳細設定
 ######################################################################
@@ -131,8 +131,8 @@
 #### 音声入力ソース
 ######################################################################
 ## どれかを選んでください（デフォルト：mfcfile）
--input mfcnet                                   # Julius を通常起動する場合
-#-input mfcnet -adport 5530                     # Julius をモジュールモードで起動する場合
+#-input mfcnet                                   # Julius を通常起動する場合
+-input mfcnet -adport 5530                     # Julius をモジュールモードで起動する場合
 #-input mfcfile		# HTK形式のパラメータファイル(MFCC) 
 #-input rawfile		# 音声波形データファイル(フォーマット自動判別)
 			# 形式：WAV(16bit) または
@@ -199,7 +199,7 @@
 #### サーバーモジュールモード
 ######################################################################
 #-module		# サーバーモジュールモードで起動
-#-module 5530		# (ポート番号を指定する場合)
+-module 5530		# (ポート番号を指定する場合)
 
 ######################################################################
 #### その他

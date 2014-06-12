@@ -66,12 +66,7 @@ import const
 		return 11
 '''
 
-#音源の角度を引数にとり、付与するIDを返す
-def getSourceDirectionId(theta):
-	if(theta >= global_var.listenRangeStartAngle and theta < global_var.listenRangeEndAngle):
-		return const.LISTENABLE
-	else:
-		return const.UNLISTENABLE
+
 
 #マニュアル操作ボタンのable/disable切り替え
 def switchManBtnAble(flag):
