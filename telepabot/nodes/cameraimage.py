@@ -38,14 +38,6 @@ class OpenCVQImage(QtGui.QImage):
 		w,h = cv.GetSize(opencvRgbImg)
 		super(OpenCVQImage, self).__init__(opencvRgbImg.tostring(),w , h, format)
 
-def getGrayScale(cvmatImage):
-	for row in range(cvmatImage.rows):
-		for col in range(cvmatImage.cols):
-			if cvmatImage[row,col][0] + 50 < 255:
-				cvmatImage[row,col]=(cvmatImage[row,col][0] + 50,cvmatImage[row,col][1],cvmatImage[row,col][2])
-	return cvmatImage
-
-
 
 def drawCameraImage(event,cvImage,format,point,painter):
 	if cvImage is not None:

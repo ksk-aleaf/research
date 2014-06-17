@@ -14,6 +14,7 @@ from hark_msgs.msg import HarkSource
 import math
 import thetaimg
 from std_msgs.msg import Bool
+import csvlog
 
 #定位した音源情報を格納するクラス
 class LocSrc():
@@ -127,19 +128,21 @@ def listenSeparateSound():
 	r = rospy.Rate(3)
 	r.sleep()
 	const.SEP_LIS_TRIG_PUB.publish(True)
-	print "pub_separateFlg"
+	#print "pub_separateFlg"
+	csvlog.writeLog(const.CSV_START_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
 def listenWholeSound():
 	const.SEP_LIS_TRIG_PUB.publish(False)
+	csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
 def getListenAngle(xaxis):
 	return (xaxis * 2 * const.IMG_HOR_HALF_VIEW_AGL)/const.CAM_IMG_WID - const.IMG_HOR_HALF_VIEW_AGL
 
 def setListenAngles(startX,endX):
-	global_var.listenRangeStartAngle = thetaimg.getThetaFromXAxis(startX)
+	global_var.listenRangeStartAngle = thetaimg.getAzimuthFromXAxis(startX)
 	#thetaimg.getXAxisFromAzimuth(startX)
 	# = getListenAngle(startX)
-	global_var.listenRangeEndAngle = thetaimg.getThetaFromXAxis(endX)
+	global_var.listenRangeEndAngle = thetaimg.getAzimuthFromXAxis(endX)
 	#thetaimg.getXAxisFromAzimuth(endX)
 	# = getListenAngle(endX)
 

@@ -35,6 +35,7 @@ import time
 import math
 import tf
 import os
+import signal
 
 #グローバル変数モジュール
 import global_var
@@ -46,60 +47,10 @@ import format_loc_src_microcone
 import recogword
 #camera image processer
 import cameraimage
+#csv log module
+import csvlog
 
-#画面内の音を選択する用
-def src_select():
-	global_var.msg_select = HarkSource()
-	global_var.msg_select.exist_src_num = 0
-	trigger = rospy.Publisher('Trigger', Bool)
-	pub_select = rospy.Publisher('SourceSelect', HarkSource)
-	select = False
-	flag = False
 
-	#何も選択されていない場合，生データ再生
-	if(global_var.sflag == False):
-
-		global_var.msg_select.src = []
-		trigger.publish(select)
-		global_var.msg_select.exist_src_num = 0
-
-	#選択された場合
-	if(global_var.sflag == True and global_var.flag == False):
-
-		if(global_var.cflag == True):
-
-			for i in range(len(global_var.max_theta)):
-				append = HarkSourceVal()
-				if((global_var.min_theta[i] + global_var.max_theta[i]) / 2 >= -10 and (global_var.min_theta[i] + global_var.max_theta[i]) / 2 < 10):
-					append.id = 0
-				if((global_var.min_theta[i] + global_var.max_theta[i]) / 2 >= -30 and (global_var.min_theta[i] + global_var.max_theta[i]) / 2 < -10):
-					append.id = 2
-				if((global_var.min_theta[i] + global_var.max_theta[i]) / 2 >= 10 and (global_var.min_theta[i] + global_var.max_theta[i]) / 2 < 30):
-					append.id = 1
-
-			global_var.msg_select.src.append(append)
-			flag = True
-			global_var.msg_select.exist_src_num = len(global_var.max_theta)
-			select = True
-
-	if(global_var.dflag == True):
-		for i in range(len(global_var.d_theta)):
-			append = HarkSourceVal()
-			if(global_var.d_theta[i] >= -10 and global_var.d_theta[i] < 10):
-				append.id = 0
-			if(global_var.d_theta[i] >= -30 and global_var.d_theta[i] < -10):
-				append.id = 1
-			if(global_var.d_theta[i] >= 10 and global_var.d_theta[i] < 30):
-				append.id = 2
-			global_var.msg_select.src.append(append)
-			global_var.flag = True
-			global_var.msg_select.exist_src_num = len(global_var.d_theta)
-			select = True
-	
-	pub_select.publish(global_var.msg_select)
-	r = rospy.Rate(3)
-	r.sleep()
-	trigger.publish(select)
 
 #turtlebotへコマンドを送信
 def sendCommand(command,timeout):
@@ -107,13 +58,6 @@ def sendCommand(command,timeout):
 	pub = rospy.Publisher('/cmd_vel', Twist)
 	pub.publish(command)
 	rospy.loginfo(command)
-
-
-
-
-
-
-
 
 
 #central widget
@@ -177,15 +121,7 @@ class CentralWidget(QtGui.QWidget):
 				painter.drawText(word.boundBox.bottomLeft(),QString(word.text.decode("utf-8")))
 
 
-
-	#描画処理全般（カメラ画像、情報提示）
-	def paintEvent(self, event):
-		#draw recog word
-		self.paintRecogWord(event)
-
-		tmpLocSrcList = global_var.locSrcList[:]
-		tmpVanLocSrcList= global_var.vanLocSrcList[:]
-		
+	def paintCamImg(self,event):
 		#have to init in paintEvent
 		centerCamImgPainter = QPainter(self)
 		leftCamImgPainter = QPainter(self)
@@ -198,6 +134,15 @@ class CentralWidget(QtGui.QWidget):
  		if global_var.cvRightImage is not None:
 			cameraimage.drawCameraImage(event,global_var.cvRightImage,QtGui.QImage.Format_RGB888,const.RIGHT_CAM_IMG_DRAW_POINT,rightCamImgPainter)
 
+	#描画処理全般（カメラ画像、情報提示）
+	def paintEvent(self, event):
+		#draw recog word
+		self.paintRecogWord(event)
+
+		tmpLocSrcList = global_var.locSrcList[:]
+		tmpVanLocSrcList= global_var.vanLocSrcList[:]
+
+		self.paintCamImg(event)
 		self.paintListenRange(event)
 
 
@@ -220,7 +165,6 @@ class CentralWidget(QtGui.QWidget):
 		print "startx:"+str(self.listenRangeStartX - const.CAM_IMG_OFS_X)
 		print "endx:" + str(self.listenRangeEndX - const.CAM_IMG_OFS_X)
 		if math.fabs(self.listenRangeEndX - self.listenRangeStartX) > const.IGNOR_PIX_THR:
-			print "inif"
 			format_loc_src_microcone.setListenAngles(self.listenRangeStartX,self.listenRangeEndX)
 			format_loc_src_microcone.listenSeparateSound()
 			global_var.listenSeparateSoundFlag = True
@@ -231,6 +175,7 @@ class CentralWidget(QtGui.QWidget):
 		print "separate"
 		print "from:" + str(global_var.listenRangeStartAngle)
 		print "to:" + str(global_var.listenRangeEndAngle)
+
 
 	def keyPressEvent(self,event):
 		key = event.key()
@@ -278,6 +223,10 @@ class MainWindow(QtGui.QMainWindow):
 		self.statusBar().showMessage("Welcome to telepabot!")
 		#self.click.triggered.connect(self.Click)
 
+def signal_handler(signal, frame):
+	print('You pressed Ctrl+C!')
+	csvlog.close()
+	sys.exit(0)
 
 
 def initialize():
@@ -286,6 +235,7 @@ def initialize():
 	window.setWindowTitle(const.SYSTEM_NAME)
 	window.show()
 	recogword.initRecogData()
+	signal.signal(signal.SIGINT, signal_handler)
 	return app,window
 
 #トピック購読処理
@@ -301,7 +251,7 @@ def subscriber():
 if __name__ == '__main__':
 	subscriber()
 	#need to get window
-	app,window = initialize()	
+	app,window = initialize()
 
 	#do this method last in main(system loop start)
 	app.exec_()

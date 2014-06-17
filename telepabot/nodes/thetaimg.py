@@ -13,5 +13,10 @@ def getXAxisFromAzimuth(azimuth):
 def getXAxisOnImage(xaxis):
 	return xaxis - const.CAM_IMG_OFS_X
 
-def getThetaFromXAxis(xaxis):
-	return - const.IMG_HOR_HALF_VIEW_AGL + ( const.IMG_HOR_VIEW_AGL *  getXAxisOnImage(xaxis) ) / const.CAM_WHOLE_IMG_WID 
+def getAzimuthFromXAxis(xaxis):
+	azimuth = - const.IMG_HOR_HALF_VIEW_AGL + ( const.IMG_HOR_VIEW_AGL *  getXAxisOnImage(xaxis) ) / const.CAM_WHOLE_IMG_WID
+	if azimuth < -const.IMG_HOR_HALF_VIEW_AGL:
+		azimuth = -const.IMG_HOR_HALF_VIEW_AGL
+	elif azimuth > const.IMG_HOR_HALF_VIEW_AGL:
+		azimuth = const.IMG_HOR_HALF_VIEW_AGL
+	return azimuth

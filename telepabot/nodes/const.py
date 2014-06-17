@@ -136,14 +136,21 @@ HEIGHT_PER_CHAR = 20
 
 #topic publisher
 CLASSIFIED_SOURCE_PUB = rospy.Publisher("ClassifiedSource", HarkSource)
-SELECTED_SOURCE_PUB = rospy.Publisher("DetectedSource", HarkSource)
-SEP_LIS_TRIG_PUB = rospy.Publisher("Trigger", Bool)
+SELECTED_SOURCE_PUB = rospy.Publisher("SelectedSource", HarkSource)
+SEP_LIS_TRIG_PUB = rospy.Publisher("SeparateListenTrigger", Bool)
 
 #topic name
 HARK_JULIUS_SOURCE_TOPIC_NAME = "HarkJuliusSrc"
 HARK_LOC_SOURCE_TOPIC_NAME = "HarkSource"
 #JULIUS_RECOG_RESULT_TOPIC_NAME = "RecogResult"
 
+#CSV log
+CSV_LOG_FILE_NAME_HEADER = "listenRange_"
+CSV_LOG_FILE_PATH = "../log/"
+CSV_LOG_FILE_BKUP_PATH = "../log/bkup/"
+CSV_LOG_FILE_EXT = ".csv"
+CSV_START_LISTEN_TAG = "startSeparateListen"
+CSV_END_LISTEN_TAG = "endSeparateListen"
 
 #英単語略称一覧
 """
