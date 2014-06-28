@@ -40,7 +40,7 @@
       <Parameter name="SAMPLING_RATE" type="int" value="16000" description="Sampling rate (Hz) [default: 16000]."/>
       <Parameter name="DEVICETYPE" type="string" value="ALSA" description="Device type [default: WS]."/>
       <Parameter name="GAIN" type="string" value="0dB" description="capture gain (dB)  [default: 0dB]."/>
-      <Parameter name="DEVICE" type="string" value="plughw:1,0" description="Device name or IP address [default: 127.0.0.1]"/>
+      <Parameter name="DEVICE" type="string" value="plughw:2,0" description="Device name or IP address [default: 127.0.0.1]"/>
     </Node>
     <Link from="node_MultiGain_1" output="OUTPUT" to="node_RosHarkMsgsPublisher_1" input="MIC_WAVE"/>
     <Link from="node_AudioStreamFromMic_1" output="AUDIO" to="node_MultiGain_1" input="INPUT"/>

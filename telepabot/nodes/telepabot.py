@@ -53,9 +53,10 @@ import csvlog
 
 
 #turtlebotへコマンドを送信
-def sendCommand(command,timeout):
-	os.system(const.SET_TO_STR + str(timeout))
-	pub = rospy.Publisher('/cmd_vel', Twist)
+def sendCommand(command):
+	#os.system(const.SET_TO_STR + str(timeout))
+	#pub = rospy.Publisher('/cmd_vel', Twist)
+	pub = rospy.Publisher(const.KOBUKI_VEL_NODE_STR, Twist)
 	pub.publish(command)
 	rospy.loginfo(command)
 
@@ -177,18 +178,7 @@ class CentralWidget(QtGui.QWidget):
 		print "to:" + str(global_var.listenRangeEndAngle)
 
 
-	def keyPressEvent(self,event):
-		key = event.key()
-		command = None
-		if key == Qt.Key_6:
-			command = const.R_ROT_CMD
-		elif key == Qt.Key_4:
-			command = const.L_ROT_CMD
-		elif key == Qt.Key_8:
-			command = const.FWD_CMD
-		elif key == Qt.Key_2:
-			command = const.BACK_CMD
-		sendCommand(command,const.KEY_MAN_ROT_TO)
+
 
 
 	def getPaintRect(self,startX,endX):
@@ -222,6 +212,26 @@ class MainWindow(QtGui.QMainWindow):
 		#self.setAutoFillBackground(False)
 		self.statusBar().showMessage("Welcome to telepabot!")
 		#self.click.triggered.connect(self.Click)
+	
+	def keyPressEvent(self,event):
+		print "keyPressed"
+		key = event.key()
+		command = None
+		if key == Qt.Key_Right:
+			print "key_6_Pressed"
+			command = const.R_ROT_CMD
+		elif key == Qt.Key_Left:
+			print "key_4_Pressed"
+			command = const.L_ROT_CMD
+		elif key == Qt.Key_Up:
+			print "key_8_Pressed"
+			command = const.FWD_CMD
+		elif key == Qt.Key_Down:
+			print "key_2_Pressed"
+			command = const.BACK_CMD
+		#sendCommand(command,const.KEY_MAN_ROT_TO)
+		if command is not None:
+			sendCommand(command)
 
 def signal_handler(signal, frame):
 	print('You pressed Ctrl+C!')
@@ -235,7 +245,7 @@ def initialize():
 	window.setWindowTitle(const.SYSTEM_NAME)
 	window.show()
 	recogword.initRecogData()
-	signal.signal(signal.SIGINT, signal_handler)
+	#signal.signal(signal.SIGINT, signal_handler)
 	return app,window
 
 #トピック購読処理

@@ -3,6 +3,7 @@
 
 import rospy
 from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Vector3
 from hark_msgs.msg import HarkSource
 from std_msgs.msg import Bool
 
@@ -19,7 +20,8 @@ from PyQt4.QtGui import *
 SYSTEM_NAME = "telepabot"
 
 #TOPIC NAME
-CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
+#CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
+CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed"
 LEFT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/left"
 RIGHT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/right"
 
@@ -85,20 +87,25 @@ VAN_SRC_KEEP_SEC= 3.0
 
 #staticに使いたいインスタンス(今のところコマンド送信用)
 L_ROT_CMD = Twist()
+#L_ROT_CMD.angular = Vector3()
 L_ROT_CMD.angular.z = 0.88
 R_ROT_CMD = Twist()
+#R_ROT_CMD.angular = Vector3()
 R_ROT_CMD.angular.z = -0.88
 FWD_CMD = Twist()
-FWD_CMD.linear.x = 0.1
+#FWD_CMD.linear = Vector3()
+FWD_CMD.linear.x = -0.1
 BACK_CMD = Twist()
-BACK_CMD.linear.x = -0.1
+#BACK_CMD.linear = Vector3()
+BACK_CMD.linear.x = 0.1
 #CMD_PUBLISHER = rospy.Publisher('/cmd_vel', Twist)
 
 #image convert static instance
 CV_BRIDGE = CvBridge()
 
 #turtlebotにタイムアウトを設定する用
-SET_TO_STR = "rosparam set /turtlebot_node/cmd_vel_timeout "
+#SET_TO_STR = "rosparam set /turtlebot_node/cmd_vel_timeout "
+KOBUKI_VEL_NODE_STR = "/mobile_base/commands/velocity"
 MAN_ROT_TO = 0.4
 KEY_MAN_ROT_TO = 0.5
 JOY_MAN_ROT_TO = 0.4
