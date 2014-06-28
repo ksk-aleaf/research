@@ -12,8 +12,8 @@
 using namespace std;
 using namespace cv;
 
-const string CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw";
-const string SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam_side/image_raw";
+const string CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed";
+const string SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam_side/image_raw/decompressed";
 const string PUBLISH_CENTER_IMG_TOPIC_NAME = "/usb_cam/processed_image/center";
 const string PUBLISH_RIGHT_IMG_TOPIC_NAME = "/usb_cam/processed_image/right";
 const string PUBLISH_LEFT_IMG_TOPIC_NAME = "/usb_cam/processed_image/left";
