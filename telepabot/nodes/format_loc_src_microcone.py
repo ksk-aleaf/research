@@ -125,6 +125,8 @@ def getHarkSourceVal(id,azimuth):
 	sourceVal = HarkSourceVal()
 	sourceVal.id = id
 	sourceVal.azimuth = azimuth
+	sourceVal.x = math.cos(math.radians(azimuth))
+	sourceVal.y = math.sin(math.radians(azimuth))
 	return sourceVal
 
 def getListenRangeSource(startAzimuth,endAzimuth):
@@ -141,7 +143,7 @@ def getListenRangeSource(startAzimuth,endAzimuth):
 
 	# make sound source for input listen range to separation node	
 	if azimuthRange < const.HARK_SEPARATION_RESOLUTION:
-		azimuth = (startAzimuth + endAzumuth) / 2
+		azimuth = (startAzimuth + endAzimuth) / 2
 		separateSource.src.append(getHarkSourceVal(id, azimuth))
 	else:
 		sourcePointCount = int((azimuthRange - const.HARK_SEPARATION_RESOLUTION) / const.HARK_SEPARATION_RESOLUTION + 3)
