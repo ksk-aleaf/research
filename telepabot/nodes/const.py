@@ -67,6 +67,10 @@ IMG_HOR_HALF_VIEW_AGL = float(IMG_HOR_VIEW_AGL) / 2
 IMG_ELEV_VIEW_AGL = 45
 IMG_ELEV_HALF_VIEW_AGL = float(IMG_ELEV_VIEW_AGL) / 2
 
+#hark spec
+HARK_SEPARATION_RESOLUTION = 30
+
+
 #THETA IMG
 PIXEL_PER_AZIMUTH = int(CAM_WHOLE_IMG_WID / IMG_HOR_VIEW_AGL)
 
@@ -142,8 +146,8 @@ WIDTH_PER_CHAR = 19
 HEIGHT_PER_CHAR = 20
 
 #topic publisher
-CLASSIFIED_SOURCE_PUB = rospy.Publisher("ClassifiedSource", HarkSource)
-SELECTED_SOURCE_PUB = rospy.Publisher("SelectedSource", HarkSource)
+SEPARATE_SOURCE_PUB = rospy.Publisher("SeparateSource", HarkSource)
+SELECTOR_SOURCE_PUB = rospy.Publisher("SelectorSource", HarkSource)
 SEP_LIS_TRIG_PUB = rospy.Publisher("SeparateListenTrigger", Bool)
 
 #topic name

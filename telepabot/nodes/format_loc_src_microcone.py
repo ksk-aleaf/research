@@ -115,15 +115,62 @@ def localization_callback(data):
 	#分離音声を視聴している場合は範囲内の音源情報を発行する
 	const.SELECTED_SOURCE_PUB.publish(getSoundSrcInRange(data.src))
 
+def getAgainstAzimuthInPm180(azimuth):
+	if azimuth > 0:
+		return azimuth - 180
+	else:
+		return azimuth + 180
+
+def getHarkSourceVal(id,azimuth):
+	sourceVal = HarkSourceVal()
+	sourceVal.id = id
+	sourceVal.azimuth = azimuth
+	return sourceVal
+
+def getListenRangeSource(startAzimuth,endAzimuth):
+	# ensure startAzimuth < endAzimuth
+	if startAzimuth > endAzimuth:
+		tmp = startAzimuth
+		startAzimuth = endAzimuth
+		endAzimuth = tmp
+	
+	separateSource = HarkSource()
+	selectorSource = HarkSource()
+	id = 0
+	azimuthRange = endAzimuth - startAzimuth
+
+	# make sound source for input listen range to separation node	
+	if azimuthRange < const.HARK_SEPARATION_RESOLUTION:
+		azimuth = (startAzimuth + endAzumuth) / 2
+		separateSource.src.append(getHarkSourceVal(id, azimuth))
+	else:
+		sourcePointCount = int((azimuthRange - const.HARK_SEPARATION_RESOLUTION) / const.HARK_SEPARATION_RESOLUTION + 3)
+		azimuth = startAzimuth + const.HARK_SEPARATION_RESOLUTION / 2
+		for id in range(0,sourcePointCount):
+			separateSource.src.append(getHarkSourceVal(id, azimuth))
+			azimuth = azimuth + (azimuthRange - 30) / (sourcePointCount -1)
+	
+	selectorSource = copy.deepcopy(separateSource)
+	selectorSource.src.append(getHarkSourceVal(id + 1, getAgainstAzimuthInPm180((startAzimuth + endAzimuth) / 2)))
+	separateSource.exist_src_num = len(separateSource.src)
+	selectorSource.exist_src_num = len(selectorSource.src)
+	
+	print "separateSource:"+str(separateSource)
+	
+	return [separateSource,selectorSource]
 
 def listenSeparateSound():
-	msg_select = HarkSource()
-	msg_select.exist_src_num = 1
-
-	append_msg = HarkSourceVal()
-	append_msg.id = const.LISTENABLE
-	append_msg.azimuth = (global_var.listenRangeStartAngle + global_var.listenRangeEndAngle)/2
-	msg_select.src.append(append_msg)
+	separateSource,selectorSource = getListenRangeSource(global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
+	const.SEPARATE_SOURCE_PUB.publish(separateSource)
+	const.SELECTOR_SOURCE_PUB.publish(selectorSource)
+	
+# 	msg_select = HarkSource()
+# 	msg_select.exist_src_num = 1
+# 
+# 	append_msg = HarkSourceVal()
+# 	append_msg.id = const.LISTENABLE
+# 	append_msg.azimuth = (global_var.listenRangeStartAngle + global_var.listenRangeEndAngle)/2
+# 	msg_select.src.append(append_msg)
 
 	r = rospy.Rate(3)
 	r.sleep()

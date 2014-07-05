@@ -3,11 +3,12 @@
 
 
 
-import roslib; roslib.load_manifest("telepabot")
+#import roslib; roslib.load_manifest("telepabot")
 import rospy
 import copy
 
 #必要なメッセージファイル
+import hark_msgs
 from hark_msgs.msg import HarkSource
 from hark_msgs.msg import HarkSourceVal
 from hark_msgs.msg import HarkSrcWave
