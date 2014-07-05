@@ -3,7 +3,7 @@
 
 
 
-#import roslib; roslib.load_manifest("telepabot")
+import roslib; roslib.load_manifest("telepabot")
 import rospy
 import copy
 
