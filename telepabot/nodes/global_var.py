@@ -16,7 +16,7 @@ from std_msgs.msg import String
 from std_msgs.msg import Bool
 from cv_bridge import CvBridge, CvBridgeError
 from std_msgs.msg import Header
-from ui_alt.msg import tf_uialt
+#from ui_alt.msg import tf_uialt
 from sensor_msgs.msg import Joy
 
 import sys
