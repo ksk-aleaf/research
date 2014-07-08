@@ -21,7 +21,8 @@ SYSTEM_NAME = "telepabot"
 
 #TOPIC NAME
 #CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
-CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed"
+#CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed"
+CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw"
 LEFT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/left"
 RIGHT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/right"
 

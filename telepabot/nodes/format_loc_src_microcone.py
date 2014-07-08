@@ -96,24 +96,6 @@ def localization_callback(data):
 			tmpList.append(global_var.vanLocSrcList[vanishIndex])
 	global_var.vanLocSrcList= tmpList[:]
 
-	msg = HarkSource()
-
-	#音源情報のIDを振りなおす
-	for k in range(len(data.src)):
-		msg_val = HarkSourceVal()
-		msg_val.id = getSourceDirectionId(data.src[k].azimuth)
-		msg_val.x  = data.src[k].x
-		msg_val.y  = data.src[k].y
-		msg_val.azimuth = data.src[k].azimuth
-		msg.src.append(msg_val)
-		msg.exist_src_num += 1
-
-	#処理後の音源情報を発行
-	const.CLASSIFIED_SOURCE_PUB.publish(msg)
-	global_var.prev_msg = msg
-	
-	#分離音声を視聴している場合は範囲内の音源情報を発行する
-	const.SELECTED_SOURCE_PUB.publish(getSoundSrcInRange(data.src))
 
 def getAgainstAzimuthInPm180(azimuth):
 	if azimuth > 0:
@@ -136,64 +118,52 @@ def getListenRangeSource(startAzimuth,endAzimuth):
 		startAzimuth = endAzimuth
 		endAzimuth = tmp
 	
-	separateSource = HarkSource()
 	selectorSource = HarkSource()
+	separateSource = HarkSource()
 	id = 0
 	azimuthRange = endAzimuth - startAzimuth
 
 	# make sound source for input listen range to separation node	
 	if azimuthRange < const.HARK_SEPARATION_RESOLUTION:
 		azimuth = (startAzimuth + endAzimuth) / 2
-		separateSource.src.append(getHarkSourceVal(id, azimuth))
+		selectorSource.src.append(getHarkSourceVal(id, azimuth))
 	else:
 		sourcePointCount = int((azimuthRange - const.HARK_SEPARATION_RESOLUTION) / const.HARK_SEPARATION_RESOLUTION + 3)
 		azimuth = startAzimuth + const.HARK_SEPARATION_RESOLUTION / 2
 		for id in range(0,sourcePointCount):
-			separateSource.src.append(getHarkSourceVal(id, azimuth))
+			selectorSource.src.append(getHarkSourceVal(id, azimuth))
 			azimuth = azimuth + (azimuthRange - 30) / (sourcePointCount -1)
 	
-	selectorSource = copy.deepcopy(separateSource)
-	selectorSource.src.append(getHarkSourceVal(id + 1, getAgainstAzimuthInPm180((startAzimuth + endAzimuth) / 2)))
-	separateSource.exist_src_num = len(separateSource.src)
+	separateSource = copy.deepcopy(selectorSource)
+	print "addSrcId:"+str(id)
+	separateSource.src.append(getHarkSourceVal(id + 1, getAgainstAzimuthInPm180((startAzimuth + endAzimuth) / 2)))
 	selectorSource.exist_src_num = len(selectorSource.src)
+	separateSource.exist_src_num = len(separateSource.src)
 	
-	print "separateSource:"+str(separateSource)
+	#print "selectorSource:"+str(selectorSource)
 	
-	return [separateSource,selectorSource]
+	return [selectorSource,separateSource]
 
 def listenSeparateSound():
-	separateSource,selectorSource = getListenRangeSource(global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
+	selectorSource,separateSource = getListenRangeSource(global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 	const.SEPARATE_SOURCE_PUB.publish(separateSource)
 	const.SELECTOR_SOURCE_PUB.publish(selectorSource)
-	
-# 	msg_select = HarkSource()
-# 	msg_select.exist_src_num = 1
-# 
-# 	append_msg = HarkSourceVal()
-# 	append_msg.id = const.LISTENABLE
-# 	append_msg.azimuth = (global_var.listenRangeStartAngle + global_var.listenRangeEndAngle)/2
-# 	msg_select.src.append(append_msg)
-
-	r = rospy.Rate(3)
-	r.sleep()
-	const.SEP_LIS_TRIG_PUB.publish(True)
-	#print "pub_separateFlg"
+	const.SEP_LIS_TRIG_PUB.publish(True)	
+	#r = rospy.Rate(3)
+	#r.sleep()
 	csvlog.writeLog(const.CSV_START_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
 def listenWholeSound():
 	const.SEP_LIS_TRIG_PUB.publish(False)
 	csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
+#reverse angle for microcone(microcone's right angle is minus
 def getListenAngle(xaxis):
-	return (xaxis * 2 * const.IMG_HOR_HALF_VIEW_AGL)/const.CAM_IMG_WID - const.IMG_HOR_HALF_VIEW_AGL
+	return -((xaxis * 2 * const.IMG_HOR_HALF_VIEW_AGL)/const.CAM_IMG_WHOLE_WID - const.IMG_HOR_HALF_VIEW_AGL)
 
 def setListenAngles(startX,endX):
 	global_var.listenRangeStartAngle = thetaimg.getAzimuthFromXAxis(startX)
-	#thetaimg.getXAxisFromAzimuth(startX)
-	# = getListenAngle(startX)
 	global_var.listenRangeEndAngle = thetaimg.getAzimuthFromXAxis(endX)
-	#thetaimg.getXAxisFromAzimuth(endX)
-	# = getListenAngle(endX)
 
 def makeSoundSrcInRange():
 	msg_select = HarkSource()

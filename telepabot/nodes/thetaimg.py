@@ -19,4 +19,4 @@ def getAzimuthFromXAxis(xaxis):
 		azimuth = -const.IMG_HOR_HALF_VIEW_AGL
 	elif azimuth > const.IMG_HOR_HALF_VIEW_AGL:
 		azimuth = const.IMG_HOR_HALF_VIEW_AGL
-	return azimuth
+	return -azimuth
