@@ -13,6 +13,7 @@ def getXAxisFromAzimuth(azimuth):
 def getXAxisOnImage(xaxis):
 	return xaxis - const.CAM_IMG_OFS_X
 
+#reverse angle for microcone(microcone's right angle is minus
 def getAzimuthFromXAxis(xaxis):
 	azimuth = - const.IMG_HOR_HALF_VIEW_AGL + ( const.IMG_HOR_VIEW_AGL *  getXAxisOnImage(xaxis) ) / const.CAM_WHOLE_IMG_WID
 	if azimuth < -const.IMG_HOR_HALF_VIEW_AGL:
