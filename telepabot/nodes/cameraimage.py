@@ -5,23 +5,23 @@
 
 import roslib; roslib.load_manifest("telepabot")
 import rospy
-import copy
-import const
-import types
+#import copy
+#import const
+#import types
 
 
 #pyqt import
-from PyQt4 import QtCore
+#from PyQt4 import QtCore
 from PyQt4 import QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
+#from PyQt4.QtCore import *
+#from PyQt4.QtGui import *
 
 #openCV import
-from cv_bridge import CvBridge, CvBridgeError
+#from cv_bridge import CvBridge, CvBridgeError
 import cv
 
 
-import numpy
+#import numpy
 
 #ros camera image msg
 from sensor_msgs.msg import Image
@@ -34,14 +34,14 @@ import const
 
 #OpenCVIplImageからPyQtのQImageへの変換クラス http://rafaelbarreto.wordpress.com/tag/pyqt/
 class OpenCVQImage(QtGui.QImage):
-	def __init__(self, opencvRgbImg, format):
-		w,h = cv.GetSize(opencvRgbImg)
-		super(OpenCVQImage, self).__init__(opencvRgbImg.tostring(),w , h, format)
+	def __init__(self, opencvRgbImg, imgFormat):
+		w,h = cv.GetSize(opencvRgbImg)  # @UndefinedVariable
+		super(OpenCVQImage, self).__init__(opencvRgbImg.tostring(),w , h, imgFormat)
 
 
-def drawCameraImage(event,cvImage,format,point,painter):
+def drawCameraImage(event,cvImage,imgFormat,point,painter):
 	if cvImage is not None:
-		painter.drawImage(point, OpenCVQImage(cvImage,format))
+		painter.drawImage(point, OpenCVQImage(cvImage,imgFormat))
 
 
 #receive center image callback

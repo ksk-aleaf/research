@@ -5,38 +5,38 @@
 
 import roslib; roslib.load_manifest("telepabot")
 import rospy
-import copy
+#import copy
 
 #必要なメッセージファイル
-import hark_msgs
-from hark_msgs.msg import HarkSource
-from hark_msgs.msg import HarkSourceVal
-from hark_msgs.msg import HarkSrcWave
-from hark_msgs.msg import HarkSrcWaveVal
-from hark_msgs.msg import HarkJuliusSrc
-from hark_msgs.msg import HarkJuliusSrcVal
+#import hark_msgs  # @UnresolvedImport
+#from hark_msgs.msg import HarkSource  # @UnresolvedImport
+#from hark_msgs.msg import HarkSourceVal  # @UnresolvedImport
+#from hark_msgs.msg import HarkSrcWave  # @UnresolvedImport
+#from hark_msgs.msg import HarkSrcWaveVal  # @UnresolvedImport
+#from hark_msgs.msg import HarkJuliusSrc  # @UnresolvedImport
+#from hark_msgs.msg import HarkJuliusSrcVal  # @UnresolvedImport
 from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Image# as SIm
-from std_msgs.msg import String
-from std_msgs.msg import Bool
-from cv_bridge import CvBridge, CvBridgeError
-from std_msgs.msg import Header
+#from sensor_msgs.msg import Image# as SIm
+#from std_msgs.msg import String
+#from std_msgs.msg import Bool
+#from cv_bridge import CvBridge, CvBridgeError
+#from std_msgs.msg import Header
 #from telepabot.msg import tf_telepabot
-from sensor_msgs.msg import Joy
+#from sensor_msgs.msg import Joy
 
 import sys
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-import cv
-import cv2
-import threading
-import time
+#import cv
+#import cv2
+#import threading
+#import time
 import math
-import tf
-import os
-import signal
+#import tf
+#import os
+#import signal
 
 #グローバル変数モジュール
 import global_var
@@ -90,6 +90,11 @@ class CentralWidget(QtGui.QWidget):
 		
 		#camera painter
 		self.cameraPainter = QPainter(self)
+		
+		#loc src painter
+		self.locSrcPainter = QPainter(self)
+		self.locSrcPainter.setFont(QFont('Decorative',14))
+		
 
 
 	#@QtCore.pyqtSlot()
@@ -122,6 +127,9 @@ class CentralWidget(QtGui.QWidget):
 				painter.begin(self)
 				painter.drawText(word.boundBox.bottomLeft(),QString(word.text.decode("utf-8")))
 
+# 	def paintLocVoice(self):
+# 		for index in range(len(global_var.locSrcList)):
+
 
 	def paintCamImg(self,event):
 		#have to init in paintEvent
@@ -131,9 +139,9 @@ class CentralWidget(QtGui.QWidget):
 
 		if global_var.cvCenterImage is not None:
 			cameraimage.drawCameraImage(event,global_var.cvCenterImage,QtGui.QImage.Format_RGB888,const.CENTER_CAM_IMG_DRAW_POINT,centerCamImgPainter)
- 		if global_var.cvLeftImage is not None:
+		if global_var.cvLeftImage is not None:
 			cameraimage.drawCameraImage(event,global_var.cvLeftImage,QtGui.QImage.Format_RGB888,const.LEFT_CAM_IMG_DRAW_POINT,leftCamImgPainter)
- 		if global_var.cvRightImage is not None:
+		if global_var.cvRightImage is not None:
 			cameraimage.drawCameraImage(event,global_var.cvRightImage,QtGui.QImage.Format_RGB888,const.RIGHT_CAM_IMG_DRAW_POINT,rightCamImgPainter)
 
 	#描画処理全般（カメラ画像、情報提示）
@@ -141,8 +149,8 @@ class CentralWidget(QtGui.QWidget):
 		#draw recog word
 		self.paintRecogWord(event)
 
-		tmpLocSrcList = global_var.locSrcList[:]
-		tmpVanLocSrcList= global_var.vanLocSrcList[:]
+		#tmpLocSrcList = global_var.locSrcList[:]
+		#tmpVanLocSrcList= global_var.vanLocSrcList[:]
 
 		self.paintCamImg(event)
 		self.paintListenRange(event)

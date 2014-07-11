@@ -2,34 +2,34 @@
 # -*-coding: utf-8 -*-
 
 import roslib; roslib.load_manifest("telepabot")
-import rospy
-import copy
+#import rospy
+#import copy
 
 #必要なメッセージファイル
-from hark_msgs.msg import HarkSource
-from hark_msgs.msg import HarkSourceVal
-from hark_msgs.msg import HarkSrcWave
-from hark_msgs.msg import HarkSrcWaveVal
-from geometry_msgs.msg import Twist
-from sensor_msgs.msg import Image as SIm
-from std_msgs.msg import String
-from std_msgs.msg import Bool
-from cv_bridge import CvBridge, CvBridgeError
-from std_msgs.msg import Header
+from hark_msgs.msg import HarkSource  # @UnresolvedImport
+from hark_msgs.msg import HarkSourceVal  # @UnusedImport @UnresolvedImport
+#from hark_msgs.msg import HarkSrcWave  # @UnresolvedImport
+#from hark_msgs.msg import HarkSrcWaveVal  # @UnresolvedImport
+#from geometry_msgs.msg import Twist
+#from sensor_msgs.msg import Image as SIm
+#from std_msgs.msg import String
+#from std_msgs.msg import Bool
+#from cv_bridge import CvBridge, CvBridgeError
+#from std_msgs.msg import Header
 #from ui_alt.msg import tf_uialt
-from sensor_msgs.msg import Joy
+#from sensor_msgs.msg import Joy
 
-import sys
-from PyQt4 import QtCore
-from PyQt4 import QtGui
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
-import cv
-import threading
-import time
-import math
-import tf
-import os
+#import sys
+#from PyQt4 import QtCore
+#from PyQt4 import QtGui
+#from PyQt4.QtCore import *
+#from PyQt4.QtGui import *
+#import cv
+#import threading
+#import time
+#import math
+#import tf
+#import os
 
 
 #グローバル変数
