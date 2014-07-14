@@ -4,7 +4,7 @@ import global_var
 import const
 import time
 import thetaimg
-from hark_msgs.msg import HarkJuliusSrc
+from hark_msgs.msg import HarkJuliusSrc  # @UnresolvedImport
 
 from PyQt4 import QtCore
 from PyQt4 import QtGui
@@ -85,9 +85,9 @@ def adjustWordsPosition():
 				break
 
 
-def sortWordsByXaxis():
-	global_var.recogWordList
-	sorted(student_objects, key=attrgetter('age'), reverse=True)
+#def sortWordsByXaxis():
+#	global_var.recogWordList
+#	sorted(student_objects, key=attrgetter('age'), reverse=True)
 
 def getBoundBox(azimuth,word):
 	size = getWordDrawSize(word)

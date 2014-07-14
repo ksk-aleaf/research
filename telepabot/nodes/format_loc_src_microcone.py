@@ -14,103 +14,36 @@ from hark_msgs.msg import HarkSrcWaveVal  # @UnusedImport @UnresolvedImport
 from hark_msgs.msg import HarkSource  # @UnresolvedImport
 import math
 import thetaimg
-#from std_msgs.msg import Bool
 import csvlog
+from PyQt4.QtCore import *
+from PyQt4.QtGui import *
+
 
 #定位した音源情報を格納するクラス
 class LocSrc():
-	def __init__(self,srcId,azimuth,power,draw_left_x,draw_top_y,powerCode):
-		self.srcId, self.azimuth, self.power, self.draw_left_x, self.draw_top_y,self.powerCode = srcId,azimuth,power,draw_left_x,draw_top_y,powerCode
-# class LocSrc():
-# 	def __init__(self,srcId,theta,power,x_onImage,y_arrow,onImageFlag,powerCode):
-# 		self.srcId, self.theta, self.power, self.x_onImage, self.y_arrow, self.onImageFlag,self.deletedTime,self.powerCode = srcId,theta,power,x_onImage,y_arrow,onImageFlag,0,powerCode
+	def __init__(self,srcId,azimuth,power,drawBottomLeft,powerCode):
+		self.srcId, self.azimuth, self.power, self.drawBottomLeft,self.powerCode = srcId,azimuth,power,drawBottomLeft,powerCode
+
+#microcone用(microconeの正面が0、左が＋、右がー)に角度を変換
+def getMcAzimuth(azimuth):
+	return -azimuth - const.MIC_ROTATE
+
+#UI用(左端が-180,右端が+180)に角度を変換
+def getUIAzimuth(azimuth):
+	return -(azimuth + const.MIC_ROTATE)
 
 
-
-#音源の角度を引数にとり、付与するIDを返す
-# def getSourceDirectionId(theta):
-# 	if(theta >= global_var.listenRangeStartAngle and theta < global_var.listenRangeEndAngle):
-# 		return const.LISTENABLE
-# 	else:
-# 		return const.UNLISTENABLE
-
-#Show localization information
+#format localization information
 def localization_callback(data):
+	global_var.locSrcList = []
 	for index in range(len(data.src)):
-		azimuth = data.src[index].azimuth
+		azimuth = getUIAzimuth(data.src[index].azimuth)
 		x = thetaimg.getXAxisFromAzimuth(azimuth) - const.LOC_STR_WIDTH / 2
 		if x < 0:
 			x = 0
 		y = const.LOC_STR_Y_POS
-		src = LocSrc(data.src[index].id,azimuth,data.src[index].power,x,y,0)
+		src = LocSrc(data.src[index].id,azimuth,data.src[index].power,QPoint(x,y),0)
 		global_var.locSrcList.append(src)
-	#global_var.locSrcList = data
-	#global_var.locSrcList = []
-
-# 	#音源リスト内の最大パワーを求める
-# 	if len(data.src) > 0:
-# 		global_var.max_power = data.src[0].power
-# 		for j in range(len(data.src)):
-# 			if data.src[j].power - global_var.max_power > 0:
-# 				global_var.max_power = data.src[j].power
-# 
-# 	#harkSourceに画像上のx座標情報を追加してglobal_var.locSrcListに格納
-# 	for i in range(len(data.src)):
-# 		if(data.src[i].azimuth >= -const.IMG_HOR_HALF_VIEW_AGL and data.src[i].azimuth <= const.IMG_HOR_HALF_VIEW_AGL):#映像視野内
-# 			x_onImage = (const.CAM_WHOLE_IMG_WID / 2)*(1-(math.tan(math.radians(data.src[i].azimuth))/math.tan(math.radians(const.IMG_HOR_HALF_VIEW_AGL))))
-# 			onImageFlag = True
-# 			y_arrow = -100
-# 		else:#画面外
-# 			if(data.src[i].azimuth > 0):
-# 				y_arrow = 0#const.PIXEL_BY_STRIDE*(int( (data.src[i].azimuth - const.IMG_HOR_HALF_VIEW_AGL) / const.THETA_STRIDE ))
-# 			else:
-# 				y_arrow = 0#-const.PIXEL_BY_STRIDE*(int( (data.src[i].azimuth + const.IMG_HOR_HALF_VIEW_AGL) / const.THETA_STRIDE ))
-# 			x_onImage = -100
-# 			onImageFlag = False
-# 
-# 		if (global_var.max_power - data.src[i].power) < const.STRONG_POW_THR:
-# 			powerCode = const.STRONG_POW_CODE
-# 		elif (global_var.max_power - data.src[i].power) < const.MEDIUM_POW_THR:
-# 			powerCode = const.MEDIUM_POW_CODE
-# 		else:
-# 			powerCode = const.WEAK_POW_CODE
-# 
-# 		src = LocSrc(data.src[i].id, data.src[i].azimuth, data.src[i].power,x_onImage,y_arrow,onImageFlag,powerCode)
-# 		global_var.locSrcList.append(src)
-# 
-# 
-# 
-# 	#消えた音源があればリストに格納
-# 	for prevIndex in range(len(global_var.prevLocSrcList)):
-# 		#if not prevLocSrcList[prevIndex].onImageFlag:
-# 		flag = False
-# 		for locIndex in range(len(global_var.locSrcList)):
-# 			if(global_var.prevLocSrcList[prevIndex].srcId == global_var.locSrcList[locIndex].srcId):
-# 				flag = True
-# 		if not flag:
-# 			global_var.prevLocSrcList[prevIndex].deletedTime = time.time()
-# 			global_var.vanLocSrcList.append(global_var.prevLocSrcList[prevIndex])
-# 
-# 	global_var.prevLocSrcList = global_var.locSrcList[:]#リストの中身をコピー
-# 
-# 	#消えて五秒経過した音源は削除
-# 	tmpList = []
-# 	for index in range(len(global_var.vanLocSrcList)):
-# 		if (time.time() - global_var.vanLocSrcList[index].deletedTime) < const.VAN_SRC_KEEP_SEC:
-# 			tmpList.append(global_var.vanLocSrcList[index])
-# 	global_var.vanLocSrcList= tmpList[:]
-# 
-# 	#存在する音源と角度が被っていたら消えた音源の情報は削除
-# 	tmpList = []
-# 	for vanishIndex in range(len(global_var.vanLocSrcList)):
-# 		deleteFlag = False
-# 		for locIndex in range(len(global_var.locSrcList)):
-# 			if global_var.locSrcList[locIndex].y_arrow == global_var.vanLocSrcList[vanishIndex].y_arrow:
-# 				deleteFlag = True
-# 		if not deleteFlag:
-# 			tmpList.append(global_var.vanLocSrcList[vanishIndex])
-# 	global_var.vanLocSrcList= tmpList[:]
-
 
 def getAgainstAzimuthInPm180(azimuth):
 	if azimuth > 0:
@@ -132,6 +65,10 @@ def getListenRangeSource(startAzimuth,endAzimuth):
 		tmp = startAzimuth
 		startAzimuth = endAzimuth
 		endAzimuth = tmp
+	print "UI_startAzimuth:"+str(startAzimuth)
+	startAzimuth = getMcAzimuth(startAzimuth)
+	print "MC_startAzimuth:"+str(startAzimuth)
+	endAzimuth = getMcAzimuth(endAzimuth)
 	
 	selectorSource = HarkSource()
 	separateSource = HarkSource()
@@ -151,7 +88,7 @@ def getListenRangeSource(startAzimuth,endAzimuth):
 	
 	separateSource = copy.deepcopy(selectorSource)
 	print "addSrcId:"+str(sourceid)
-	separateSource.src.append(getHarkSourceVal(sourceid + 1, getAgainstAzimuthInPm180((startAzimuth + endAzimuth) / 2)))
+	separateSource.src.append(getHarkSourceVal(sourceid + 1, getAgainstAzimuthInPm180(azimuth)))
 	selectorSource.exist_src_num = len(selectorSource.src)
 	separateSource.exist_src_num = len(separateSource.src)
 	
@@ -184,17 +121,6 @@ def makeSoundSrcInRange():
 	msg_select = HarkSource()
 	return msg_select
 
-#音源視聴範囲内の音源情報を返す
-# def getSoundSrcInRange(harkSource):
-# 	msg_select = HarkSource()
-# 	for index in range(len(harkSource)):
-# 		if ifThetaInRange(harkSource[index].azimuth):
-# 			append = HarkSourceVal()
-# 			append.id = getSourceDirectionId(harkSource[index].azimuth)
-# 			append.azimuth = harkSource[index].azimuth
-# 			msg_select.src.append(append)
-# 			msg_select.exist_src_num += 1
-# 	return msg_select
 
 #角度が音源視聴範囲内か判定する
 def ifThetaInRange(theta):

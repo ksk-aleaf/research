@@ -5,23 +5,11 @@
 
 import roslib; roslib.load_manifest("telepabot")
 import rospy
-#import copy
+import copy
 
 #必要なメッセージファイル
-#import hark_msgs  # @UnresolvedImport
-#from hark_msgs.msg import HarkSource  # @UnresolvedImport
-#from hark_msgs.msg import HarkSourceVal  # @UnresolvedImport
-#from hark_msgs.msg import HarkSrcWave  # @UnresolvedImport
-#from hark_msgs.msg import HarkSrcWaveVal  # @UnresolvedImport
-#from hark_msgs.msg import HarkJuliusSrc  # @UnresolvedImport
-#from hark_msgs.msg import HarkJuliusSrcVal  # @UnresolvedImport
+
 from geometry_msgs.msg import Twist
-#from sensor_msgs.msg import Image# as SIm
-#from std_msgs.msg import String
-#from std_msgs.msg import Bool
-#from cv_bridge import CvBridge, CvBridgeError
-#from std_msgs.msg import Header
-#from telepabot.msg import tf_telepabot
 #from sensor_msgs.msg import Joy
 
 import sys
@@ -29,14 +17,7 @@ from PyQt4 import QtCore
 from PyQt4 import QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
-#import cv
-#import cv2
-#import threading
-#import time
 import math
-#import tf
-#import os
-#import signal
 
 #グローバル変数モジュール
 import global_var
@@ -127,8 +108,14 @@ class CentralWidget(QtGui.QWidget):
 				painter.begin(self)
 				painter.drawText(word.boundBox.bottomLeft(),QString(word.text.decode("utf-8")))
 
-# 	def paintLocVoice(self):
-# 		for index in range(len(global_var.locSrcList)):
+	def paintLocVoice(self):
+		tmpLocSrcList = copy.deepcopy(global_var.locSrcList)
+		for locSrc in tmpLocSrcList:
+			painter = QtGui.QPainter()
+			painter.begin(self)
+			painter.setPen(QPen(QColor(255,0,0,255)))
+			painter.setFont(QFont('Decorative',14))
+			painter.drawText(locSrc.drawBottomLeft,QString(const.LOC_STR.decode("utf-8")))
 
 
 	def paintCamImg(self,event):
@@ -148,7 +135,7 @@ class CentralWidget(QtGui.QWidget):
 	def paintEvent(self, event):
 		#draw recog word
 		self.paintRecogWord(event)
-
+		self.paintLocVoice()
 		#tmpLocSrcList = global_var.locSrcList[:]
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]
 
@@ -183,8 +170,8 @@ class CentralWidget(QtGui.QWidget):
 			global_var.listenSeparateSoundFlag = False
 			format_loc_src_microcone.listenWholeSound()
 		print "separate"
-		print "from:" + str(global_var.listenRangeStartAngle)
-		print "to:" + str(global_var.listenRangeEndAngle)
+		print "from(onUI):" + str(global_var.listenRangeStartAngle)
+		print "to(onUI):" + str(global_var.listenRangeEndAngle)
 
 
 

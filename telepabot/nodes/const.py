@@ -3,13 +3,13 @@
 
 import rospy
 from geometry_msgs.msg import Twist
-from geometry_msgs.msg import Vector3
-from hark_msgs.msg import HarkSource
+#from geometry_msgs.msg import Vector3
+from hark_msgs.msg import HarkSource  # @UnresolvedImport
 from std_msgs.msg import Bool
 
 #openCV import
 from cv_bridge import CvBridge, CvBridgeError
-import cv
+#import cv
 
 #PyQt import
 from PyQt4.QtCore import *
@@ -30,7 +30,6 @@ RIGHT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/right"
 CAM_DEFAULT_FPS = 30
 
 #カメラ映像の大きさと画面内の表示位置
-#CAM_IMG_WID = 640
 CAM_WHOLE_IMG_WID = 2560
 CAM_CENTER_IMG_WID = 1280
 CAM_LEFT_IMG_WID = 640
@@ -75,10 +74,13 @@ HARK_SEPARATION_RESOLUTION = 30
 #THETA IMG
 PIXEL_PER_AZIMUTH = int(CAM_WHOLE_IMG_WID / IMG_HOR_VIEW_AGL)
 
-#定数(言語仕様では定数は無く、書き換え可能なので注意)
+
 #ウィンドウの大きさ
 WIN_WID = CAM_WHOLE_IMG_WID + CAM_IMG_OFS_X*2
 WIN_HT = CAM_IMG_HT + CAM_IMG_OFS_Y
+
+#microcone用の角度補正(左方向が＋、右方向がー。マイクを回転させたい分だけ)
+MIC_ROTATE = 90
 
 #画像切り出し用の矩形領域
 # LEFT_IMG_ROI = cv.Rect()
@@ -122,8 +124,6 @@ SEND_CMD_OVERHEAD = 1.0
 WEAK_POW_CODE = 0
 MEDIUM_POW_CODE = 1
 STRONG_POW_CODE = 2
-#STRONG_POW_THR = 33.6
-#MEDIUM_POW_THR = 33.3
 STRONG_POW_THR = 0.5
 MEDIUM_POW_THR = 1
 
@@ -136,20 +136,18 @@ IGNOR_PIX_THR = 20
 
 #recognize result draw
 RECOG_WORD_HEIGHT_RANGE = 20
-#RECOG_WORD_DEFAULT_HEIGHT = 100
-#MAX_RESULT_NUM = 100
-
-#localize result draw
-LOC_STR_HEIGHT = 20
-LOC_STR_WIDTH = 64
-LOC_STR_Y_POS = 100
-
 VERT_WORD_MGN = 10
 CAM_WORD_MGN = 10
 VERT_MAX_WORD_NUM = int((CAM_IMG_OFS_Y - CAM_WORD_MGN) / (RECOG_WORD_HEIGHT_RANGE + VERT_WORD_MGN))
 RECOG_DRAW_BTM_YAXIS = CAM_IMG_OFS_Y - CAM_WORD_MGN
 WIDTH_PER_CHAR = 19
 HEIGHT_PER_CHAR = 20
+
+#localize result draw
+LOC_STR_HEIGHT = 20
+LOC_STR_WIDTH = 64
+LOC_STR_Y_POS = CAM_IMG_OFS_Y - LOC_STR_HEIGHT
+LOC_STR = "talking!"
 
 #topic publisher
 SEPARATE_SOURCE_PUB = rospy.Publisher("SeparateSource", HarkSource)

@@ -1,27 +1,14 @@
 #! /usr/bin/env python
 # -*-coding: utf-8 -*-
 
-
-
 import roslib; roslib.load_manifest("telepabot")
 import rospy
-#import copy
-#import const
-#import types
-
 
 #pyqt import
-#from PyQt4 import QtCore
 from PyQt4 import QtGui
-#from PyQt4.QtCore import *
-#from PyQt4.QtGui import *
 
 #openCV import
-#from cv_bridge import CvBridge, CvBridgeError
 import cv
-
-
-#import numpy
 
 #ros camera image msg
 from sensor_msgs.msg import Image
