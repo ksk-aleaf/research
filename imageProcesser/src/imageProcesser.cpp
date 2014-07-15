@@ -12,8 +12,10 @@
 using namespace std;
 using namespace cv;
 
-const string CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed";
-const string SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam_side/image_raw/decompressed";
+//const string CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed";
+//const string SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam_side/image_raw/decompressed";
+const string CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw";
+const string SIDE_CAM_IMG_TOPIC_NAME = "/usb_cam_side/image_raw";
 const string PUBLISH_CENTER_IMG_TOPIC_NAME = "/usb_cam/processed_image/center";
 const string PUBLISH_RIGHT_IMG_TOPIC_NAME = "/usb_cam/processed_image/right";
 const string PUBLISH_LEFT_IMG_TOPIC_NAME = "/usb_cam/processed_image/left";
@@ -35,7 +37,7 @@ void centerImageCallback(const sensor_msgs::ImageConstPtr& msg){
 }
 
 void sideImageCallback(const sensor_msgs::ImageConstPtr& msg){
-	sideCvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::MONO8);
+	sideCvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
 }
 
 //void getNBitPixVal(int _8BitPixVal,int n){
@@ -72,17 +74,17 @@ void processCenterImage(){
 }
 
 void publishSideImg(image_transport::Publisher &leftImgPublisher,image_transport::Publisher &rightImgPublisher){
-	static cv::Mat leftCvMat;
-	static cv::Mat rightCvMat;
 
 	if(sideCvPtr != 0 && sideCvPtr.get() != 0){
-			//cv::flip(sideCvPtr.get()->image,sideCvPtr.get()->image,1);
-			cv::Mat leftCvMat = sideCvPtr.get()->image(LEFT_ROI);
-			cv::Mat rightCvMat = sideCvPtr.get()->image(RIGHT_ROI);
-			sideCvPtr.get()->image = leftCvMat;
-			leftImgPublisher.publish(	sideCvPtr.get()->toImageMsg());
-			sideCvPtr.get()->image = rightCvMat;
-			rightImgPublisher.publish( sideCvPtr.get()->toImageMsg());
+		cv_bridge::CvImagePtr leftCvImagePtr;
+		cv_bridge::CvImagePtr rightCvImagePtr;
+		//cv::flip(sideCvPtr.get()->image,sideCvPtr.get()->image,1);
+		static cv::Mat leftCvMat = sideCvPtr.get()->image(LEFT_ROI);
+		static cv::Mat rightCvMat = sideCvPtr.get()->image(RIGHT_ROI);
+		sideCvPtr.get()->image = leftCvMat;
+		leftImgPublisher.publish( sideCvPtr.get()->toImageMsg());
+		sideCvPtr.get()->image = rightCvMat;
+		rightImgPublisher.publish( sideCvPtr.get()->toImageMsg());
 	}
 }
 
