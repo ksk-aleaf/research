@@ -32,7 +32,7 @@ import cameraimage
 #csv log module
 import csvlog
 
-
+#testcommit
 
 #turtlebotへコマンドを送信
 def sendCommand(command):
