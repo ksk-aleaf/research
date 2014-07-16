@@ -5,8 +5,8 @@
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.6</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
-<path>/home/koike/Dropbox/HRI/workspace/imageProcesser/src</path>
-<path>/home/koike/Dropbox/HRI/workspace/imageProcesser/lib</path>
+<path>/home/koike/Dropbox/HRI/workspace/research/imageProcesser/src</path>
+<path>/home/koike/Dropbox/HRI/workspace/research/imageProcesser/lib</path>
 <path>/opt/ros/hydro/share/mk</path>
 <path>/opt/ros/hydro/lib/python2.7/dist-packages</path>
 <path>/usr/lib/python2.7</path>

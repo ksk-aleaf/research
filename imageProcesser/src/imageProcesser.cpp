@@ -31,7 +31,6 @@ cv_bridge::CvImagePtr sideCvPtr;
 
 
 
-
 void centerImageCallback(const sensor_msgs::ImageConstPtr& msg){
 	centerCvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
 }
@@ -74,7 +73,7 @@ void processCenterImage(){
 }
 
 void publishSideImg(image_transport::Publisher &leftImgPublisher,image_transport::Publisher &rightImgPublisher){
-
+	//testcommit
 	if(sideCvPtr != 0 && sideCvPtr.get() != 0){
 		cv_bridge::CvImagePtr leftCvImagePtr;
 		cv_bridge::CvImagePtr rightCvImagePtr;
