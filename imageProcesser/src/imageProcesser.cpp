@@ -25,10 +25,10 @@ const int CAM_IMG_WID = 1280;
 const int CENTER_IMG_WID = 1280;
 const int SIDE_IMG_WID = 640;
 const double RESIZE_SCALE = 0.5;
-const Rect LEFT_ROI(CAM_IMG_WID / 2 ,0,SIDE_IMG_WID  ,IMG_HEIGHT );
-const Rect RIGHT_ROI( 0, 0, SIDE_IMG_WID ,IMG_HEIGHT );
-//const Rect LEFT_ROI(int(CAM_IMG_WID * RESIZE_SCALE / 2) ,0,int(SIDE_IMG_WID  * RESIZE_SCALE) ,int(IMG_HEIGHT  * RESIZE_SCALE) );
-//const Rect RIGHT_ROI( 0, 0, int(SIDE_IMG_WID * RESIZE_SCALE) ,int(IMG_HEIGHT  * RESIZE_SCALE) );
+//const Rect LEFT_ROI(CAM_IMG_WID / 2 ,0,SIDE_IMG_WID  ,IMG_HEIGHT );
+//const Rect RIGHT_ROI( 0, 0, SIDE_IMG_WID ,IMG_HEIGHT );
+const Rect LEFT_ROI(int(CAM_IMG_WID * RESIZE_SCALE / 2) ,0,int(SIDE_IMG_WID  * RESIZE_SCALE) ,int(IMG_HEIGHT  * RESIZE_SCALE) );
+const Rect RIGHT_ROI( 0, 0, int(SIDE_IMG_WID * RESIZE_SCALE) ,int(IMG_HEIGHT  * RESIZE_SCALE) );
 const string CENTER_CAM_IMG_ENCORDING = sensor_msgs::image_encodings::RGB8;
 const string SIDE_CAM_IMG_ENCORDING = sensor_msgs::image_encodings::RGB8;
 
@@ -40,7 +40,8 @@ cv_bridge::CvImagePtr centerCvImagePtr;
 cv_bridge::CvImagePtr sideCvImagePtr;
 cv_bridge::CvImagePtr leftCvImagePtr(new cv_bridge::CvImage);
 cv_bridge::CvImagePtr rightCvImagePtr(new cv_bridge::CvImage);
-const cv::Mat inputCenterMat;
+const cv::Mat centerSrcMat;
+const cv::Mat sideSrcMat;
 cv::Mat resizeCenterImageMat(CENTER_IMG_WID * RESIZE_SCALE , IMG_HEIGHT * RESIZE_SCALE , CV_8UC3);
 cv::Mat resizeSideImageMat(SIDE_IMG_WID * RESIZE_SCALE , IMG_HEIGHT * RESIZE_SCALE , CV_8UC3);
 bool resizeFlag = false;
@@ -56,16 +57,17 @@ void sideImageCallback(const sensor_msgs::ImageConstPtr& msg){
 	sideCvImagePtr = cv_bridge::toCvCopy(msg, SIDE_CAM_IMG_ENCORDING);
 }
 
-//void resizeImage(){
-//	if(centerCvImagePtr != 0 && centerCvImagePtr.get() != 0){
-//		const cv::Mat mat = centerCvImagePtr.get();
-//		centerCvImagePtr->image = cv::resize(mat,centerCvImagePtr.get(),centerCvImagePtr.get()->image.size,RESIZE_SCALE,RESIZE_SCALE,cv::INTER_LINEAR);
-//	}
-//
-//	if(sideCvImagePtr != 0 && sideCvImagePtr.get() != 0){
-//
-//	}
-//}
+void resizeImage(){
+	if(centerCvImagePtr != 0 && centerCvImagePtr.get() != 0){
+		cv::resize(centerCvImagePtr->image,resizeCenterImageMat,cv::Size(),RESIZE_SCALE,RESIZE_SCALE,cv::INTER_LINEAR);
+		centerCvImagePtr->image = resizeCenterImageMat;
+	}
+
+	if(sideCvImagePtr != 0 && sideCvImagePtr.get() != 0){
+		cv::resize(sideCvImagePtr->image,resizeSideImageMat,cv::Size(),RESIZE_SCALE,RESIZE_SCALE,cv::INTER_LINEAR);
+		sideCvImagePtr->image = resizeSideImageMat;
+	}
+}
 
 void processCenterImage(){
 
@@ -157,10 +159,11 @@ int main(int argc, char **argv)
 
 	while (ros::ok())
 	{
+		resizeImage();
 		//processCenterImage();
 		processSideImg();
 		publishSideImg(leftImgPublisher,rightImgPublisher);
-		//publishCenterImg(centerImgPublisher);
+		publishCenterImg(centerImgPublisher);
 
 		ros::spinOnce();
 
