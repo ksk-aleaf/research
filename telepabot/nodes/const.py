@@ -22,7 +22,8 @@ SYSTEM_NAME = "telepabot"
 #TOPIC NAME
 #CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
 #CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed"
-CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw"
+#CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw"
+CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
 LEFT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/left"
 RIGHT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/right"
 
@@ -30,12 +31,13 @@ RIGHT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/right"
 CAM_DEFAULT_FPS = 30
 
 #カメラ映像の大きさと画面内の表示位置
-CAM_WHOLE_IMG_WID = 2560
-CAM_CENTER_IMG_WID = 1280
-CAM_LEFT_IMG_WID = 640
-CAM_RIGHT_IMG_WID = 640
+CAM_RESIZE_SCALE = 0.5
+CAM_WHOLE_IMG_WID = 2560 * CAM_RESIZE_SCALE
+CAM_CENTER_IMG_WID = 1280 * CAM_RESIZE_SCALE
+CAM_LEFT_IMG_WID = 640 * CAM_RESIZE_SCALE
+CAM_RIGHT_IMG_WID = 640 * CAM_RESIZE_SCALE
 CAM_IMG_HALF_WID = CAM_WHOLE_IMG_WID /2
-CAM_IMG_HT = 480
+CAM_IMG_HT = 480 * CAM_RESIZE_SCALE
 CAM_IMG_HALF_HT = CAM_IMG_HT / 2
 CAM_IMG_OFS_X = 0
 CAM_IMG_OFS_Y = 200
