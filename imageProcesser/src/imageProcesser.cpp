@@ -20,36 +20,60 @@ const string PUBLISH_CENTER_IMG_TOPIC_NAME = "/usb_cam/processed_image/center";
 const string PUBLISH_RIGHT_IMG_TOPIC_NAME = "/usb_cam/processed_image/right";
 const string PUBLISH_LEFT_IMG_TOPIC_NAME = "/usb_cam/processed_image/left";
 const int WHOLE_IMG_WID = 2560;
-const int IMG_HT = 480;
-const int CENTER_IMAGE_WID = 1280;
+const int IMG_HEIGHT = 480;
+const int CAM_IMG_WID = 1280;
+const int CENTER_IMG_WID = 1280;
 const int SIDE_IMG_WID = 640;
-const Rect LEFT_ROI(SIDE_IMG_WID,0,SIDE_IMG_WID,IMG_HT);
-const Rect RIGHT_ROI(0,0,SIDE_IMG_WID,IMG_HT);
+const double RESIZE_SCALE = 0.5;
+const Rect LEFT_ROI(CAM_IMG_WID / 2 ,0,SIDE_IMG_WID  ,IMG_HEIGHT );
+const Rect RIGHT_ROI( 0, 0, SIDE_IMG_WID ,IMG_HEIGHT );
+//const Rect LEFT_ROI(int(CAM_IMG_WID * RESIZE_SCALE / 2) ,0,int(SIDE_IMG_WID  * RESIZE_SCALE) ,int(IMG_HEIGHT  * RESIZE_SCALE) );
+//const Rect RIGHT_ROI( 0, 0, int(SIDE_IMG_WID * RESIZE_SCALE) ,int(IMG_HEIGHT  * RESIZE_SCALE) );
+const string CENTER_CAM_IMG_ENCORDING = sensor_msgs::image_encodings::RGB8;
+const string SIDE_CAM_IMG_ENCORDING = sensor_msgs::image_encodings::RGB8;
 
-cv_bridge::CvImagePtr centerCvPtr;
-cv_bridge::CvImagePtr sideCvPtr;
+
+//subscribe or publish image pointer
+cv_bridge::CvImage leftCvImage;
+cv_bridge::CvImage rightCvImage;
+cv_bridge::CvImagePtr centerCvImagePtr;
+cv_bridge::CvImagePtr sideCvImagePtr;
+cv_bridge::CvImagePtr leftCvImagePtr(new cv_bridge::CvImage);
+cv_bridge::CvImagePtr rightCvImagePtr(new cv_bridge::CvImage);
+const cv::Mat inputCenterMat;
+cv::Mat resizeCenterImageMat(CENTER_IMG_WID * RESIZE_SCALE , IMG_HEIGHT * RESIZE_SCALE , CV_8UC3);
+cv::Mat resizeSideImageMat(SIDE_IMG_WID * RESIZE_SCALE , IMG_HEIGHT * RESIZE_SCALE , CV_8UC3);
+bool resizeFlag = false;
+
 
 
 
 void centerImageCallback(const sensor_msgs::ImageConstPtr& msg){
-	centerCvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+	centerCvImagePtr = cv_bridge::toCvCopy(msg, CENTER_CAM_IMG_ENCORDING);
 }
 
 void sideImageCallback(const sensor_msgs::ImageConstPtr& msg){
-	sideCvPtr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::RGB8);
+	sideCvImagePtr = cv_bridge::toCvCopy(msg, SIDE_CAM_IMG_ENCORDING);
 }
 
-//void getNBitPixVal(int _8BitPixVal,int n){
+//void resizeImage(){
+//	if(centerCvImagePtr != 0 && centerCvImagePtr.get() != 0){
+//		const cv::Mat mat = centerCvImagePtr.get();
+//		centerCvImagePtr->image = cv::resize(mat,centerCvImagePtr.get(),centerCvImagePtr.get()->image.size,RESIZE_SCALE,RESIZE_SCALE,cv::INTER_LINEAR);
+//	}
 //
+//	if(sideCvImagePtr != 0 && sideCvImagePtr.get() != 0){
+//
+//	}
 //}
 
 void processCenterImage(){
 
-	if (centerCvPtr == NULL || centerCvPtr.get() == NULL){
+	if (centerCvImagePtr == NULL || centerCvImagePtr.get() == NULL){
 		return;
 	}
 
-	cv::Mat mat = centerCvPtr.get()->image;
+	cv::Mat mat = centerCvImagePtr.get()->image;
 	int mat_channnel = mat.channels();
 	int pixVal = 0;
 	int pixValRem = 0;
@@ -69,27 +93,39 @@ void processCenterImage(){
 		}
 	}
 
-	centerCvPtr.get()->image = mat;
+	centerCvImagePtr.get()->image = mat;
 }
 
-void publishSideImg(image_transport::Publisher &leftImgPublisher,image_transport::Publisher &rightImgPublisher){
-	//testcommit
-	if(sideCvPtr != 0 && sideCvPtr.get() != 0){
-		cv_bridge::CvImagePtr leftCvImagePtr;
-		cv_bridge::CvImagePtr rightCvImagePtr;
-		//cv::flip(sideCvPtr.get()->image,sideCvPtr.get()->image,1);
-		static cv::Mat leftCvMat = sideCvPtr.get()->image(LEFT_ROI);
-		static cv::Mat rightCvMat = sideCvPtr.get()->image(RIGHT_ROI);
-		sideCvPtr.get()->image = leftCvMat;
-		leftImgPublisher.publish( sideCvPtr.get()->toImageMsg());
-		sideCvPtr.get()->image = rightCvMat;
-		rightImgPublisher.publish( sideCvPtr.get()->toImageMsg());
+
+
+void processSideImg(){
+	if(sideCvImagePtr != 0 && sideCvImagePtr.get() != 0){
+		if(	sideCvImagePtr.get()->image.rows >= LEFT_ROI.height && sideCvImagePtr.get()->image.cols >= (LEFT_ROI.width + LEFT_ROI.x)){
+			if(leftCvImagePtr != 0 && leftCvImagePtr.get() != 0){
+				leftCvImagePtr.get()->image = sideCvImagePtr.get()->image(LEFT_ROI);
+			}
+
+			if(rightCvImagePtr != 0 && rightCvImagePtr.get() != 0){
+				rightCvImagePtr.get()->image = sideCvImagePtr.get()->image(RIGHT_ROI);
+			}
+		}
 	}
 }
 
+void publishSideImg(image_transport::Publisher &leftImgPublihser,image_transport::Publisher &rightImgPublihser){
+	if(leftCvImagePtr != 0 && leftCvImagePtr.get() != 0){
+		leftImgPublihser.publish(leftCvImagePtr.get()->toImageMsg());
+	}
+
+	if(rightCvImagePtr != 0 && rightCvImagePtr.get() != 0){
+		rightImgPublihser.publish(rightCvImagePtr.get()->toImageMsg());
+	}
+}
+
+
 void publishCenterImg(image_transport::Publisher &centerImgPublihser){
-	if(centerCvPtr != 0 && centerCvPtr.get() != 0){
-		centerImgPublihser.publish(centerCvPtr.get()->toImageMsg());
+	if(centerCvImagePtr != 0 && centerCvImagePtr.get() != 0){
+		centerImgPublihser.publish(centerCvImagePtr.get()->toImageMsg());
 	}
 }
 
@@ -114,16 +150,17 @@ int main(int argc, char **argv)
 	image_transport::Publisher leftImgPublisher = pubLeftIt.advertise(PUBLISH_LEFT_IMG_TOPIC_NAME, 1);
 	image_transport::Publisher rightImgPublisher = pubRightIt.advertise(PUBLISH_RIGHT_IMG_TOPIC_NAME, 1);
 
-	//leftCvPtr.get() = *cv_bridge::CvImage();
-	//rightCvPtr.get() = *cv_bridge::CvImage();
+	leftCvImagePtr->encoding = SIDE_CAM_IMG_ENCORDING;
+	rightCvImagePtr->encoding = SIDE_CAM_IMG_ENCORDING;
 
 	ros::Rate loop_rate(10);
 
 	while (ros::ok())
 	{
 		//processCenterImage();
+		processSideImg();
 		publishSideImg(leftImgPublisher,rightImgPublisher);
-		publishCenterImg(centerImgPublisher);
+		//publishCenterImg(centerImgPublisher);
 
 		ros::spinOnce();
 
