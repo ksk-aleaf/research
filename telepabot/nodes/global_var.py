@@ -40,3 +40,7 @@ listenRangeEndAngle = 0
 listenSeparateSoundFlag = False
 sendSeparateAngleInfoTime = 0
 sendSeparateAngleInfoDuration = 1.0
+
+#定位ソース
+harkSource = HarkSource()
+msg_select_gl = HarkSource()

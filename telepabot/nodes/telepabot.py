@@ -141,6 +141,8 @@ class CentralWidget(QtGui.QWidget):
 
 		self.paintCamImg(event)
 		self.paintListenRange(event)
+		const.SELECTOR_SOURCE_PUB.publish(global_var.msg_select_gl)
+		format_loc_src_microcone.getSoundSrcInRange()
 
 
 	def mousePressEvent(self,event):

@@ -112,6 +112,8 @@ BACK_CMD.linear.x = 0.1
 #image convert static instance
 CV_BRIDGE = CvBridge()
 
+#HARK_SOURCE = HarkSource()
+
 #turtlebotにタイムアウトを設定する用
 #SET_TO_STR = "rosparam set /turtlebot_node/cmd_vel_timeout "
 KOBUKI_VEL_NODE_STR = "/mobile_base/commands/velocity"
