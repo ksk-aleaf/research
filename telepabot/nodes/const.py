@@ -74,7 +74,7 @@ HARK_SEPARATION_RESOLUTION = 30
 
 
 #THETA IMG
-PIXEL_PER_AZIMUTH = int(CAM_WHOLE_IMG_WID / IMG_HOR_VIEW_AGL)
+PIXEL_PER_AZIMUTH = float(CAM_WHOLE_IMG_WID / IMG_HOR_VIEW_AGL)
 
 
 #ウィンドウの大きさ
@@ -82,7 +82,7 @@ WIN_WID = CAM_WHOLE_IMG_WID + CAM_IMG_OFS_X*2
 WIN_HT = CAM_IMG_HT + CAM_IMG_OFS_Y
 
 #microcone用の角度補正(左方向が＋、右方向がー。マイクを回転させたい分だけ)
-MIC_ROTATE = 90
+MIC_ROTATE = 0
 
 #画像切り出し用の矩形領域
 # LEFT_IMG_ROI = cv.Rect()

@@ -49,7 +49,13 @@ def localization_callback(data):
 		#print "mcAzimuth:"+str(data.src[index].azimuth)
 		azimuth = getUIAzimuth(data.src[index].azimuth)
 		#print "uiAzimuth:"+str(azimuth)
-		x = thetaimg.getXAxisFromAzimuth(azimuth) + const.LOC_STR_WIDTH / 2 
+		
+		x = thetaimg.getXAxisFromAzimuth(azimuth) - const.LOC_STR_WIDTH / 2 
+		
+		#print "azimuth:"+str(azimuth)
+		#print "getXAxis"+str(thetaimg.getXAxisFromAzimuth(azimuth))
+		#print "x:"+str(x)
+		
 		if x < 0:
 			x = 0
 		y = const.LOC_STR_Y_POS
