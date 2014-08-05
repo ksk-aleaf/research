@@ -2,6 +2,7 @@
 # -*-coding: utf-8 -*-
 
 import roslib; roslib.load_manifest("telepabot")
+import const
 
 #必要なメッセージファイル
 from hark_msgs.msg import HarkSource  # @UnresolvedImport
@@ -44,3 +45,7 @@ sendSeparateAngleInfoDuration = 1.0
 #定位ソース
 harkSource = HarkSource()
 msg_select_gl = HarkSource()
+
+#joy stick 入力
+joyInput = {const.JOY_FRONT_BACK_LABEL:0.0, const.JOY_LEFT_RIGHT_LABEL:0.0,const.JOY_BUTTON_LABEL:0}
+ifAutoRotate = False

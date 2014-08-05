@@ -9,7 +9,7 @@ import copy
 
 #必要なメッセージファイル
 
-from geometry_msgs.msg import Twist
+
 #from sensor_msgs.msg import Joy
 
 import sys
@@ -31,6 +31,8 @@ import recogword
 import cameraimage
 #csv log module
 import csvlog
+#manipulate robot module
+import manipulate_turtlebot2
 
 #testcommit
 
@@ -253,6 +255,7 @@ def subscriber():
 	format_loc_src_microcone.subscriber()
 	recogword.subscriber()
 	cameraimage.subscriber()
+	manipulate_turtlebot2.subscriber()
 	#rospy.spin()
 
 #メイン関数

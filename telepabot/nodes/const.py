@@ -114,15 +114,7 @@ CV_BRIDGE = CvBridge()
 
 #HARK_SOURCE = HarkSource()
 
-#turtlebotにタイムアウトを設定する用
-#SET_TO_STR = "rosparam set /turtlebot_node/cmd_vel_timeout "
-KOBUKI_VEL_NODE_STR = "/mobile_base/commands/velocity"
-MAN_ROT_TO = 0.4
-KEY_MAN_ROT_TO = 0.5
-JOY_MAN_ROT_TO = 0.4
-DEFAULT_TO = 0.0
-TO_PER_THETA = 0.022222
-SEND_CMD_OVERHEAD = 1.0
+
 
 #音源パワー分類用
 WEAK_POW_CODE = 0
@@ -162,6 +154,36 @@ SEP_LIS_TRIG_PUB = rospy.Publisher("SeparateListenTrigger", Bool)
 HARK_JULIUS_SOURCE_TOPIC_NAME = "HarkJuliusSrc"
 HARK_LOC_SOURCE_TOPIC_NAME = "HarkSource"
 #JULIUS_RECOG_RESULT_TOPIC_NAME = "RecogResult"
+
+#manipulate omni
+JOY_FRONT_BACK_LABEL="front_back"
+JOY_LEFT_RIGHT_LABEL="left_right"
+JOY_BUTTON_LABEL="button"
+KOBUKI_VEL_NODE_STR = "/mobile_base/commands/velocity"
+
+JOY_FRONT_BACK_INDEX=1 #UP:+ DOWN:-
+JOY_LEFT_RIGHT_INDEX=0 #LEFT:+ RIGHT:-
+JOY_TRIGGER_BUTTON_INDEX=0 #push:1 release:0
+
+JOY_BUTTON_PUSH=1
+JOY_BUTTON_RELEASE=0
+JOY_FRONT=0
+JOY_BACK=1
+JOY_LEFT=2
+JOY_RIGHT=3
+JOYSTICK_TOPIC_NAME="joy"
+
+
+#turtlebotにタイムアウトを設定する用
+#SET_TO_STR = "rosparam set /turtlebot_node/cmd_vel_timeout "
+MAN_ROT_TO = 0.4
+KEY_MAN_ROT_TO = 0.5
+JOY_MAN_ROT_TO = 0.4
+DEFAULT_TO = 0.0
+TO_PER_THETA = 0.022222
+SEND_CMD_OVERHEAD = 1.0
+
+
 
 #CSV log
 CSV_LOG_FILE_NAME_HEADER = "listenRange_"

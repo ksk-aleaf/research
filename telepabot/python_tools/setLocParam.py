@@ -12,14 +12,14 @@ HOST = 'localhost'	# The remote host
 PORT = 9999		   # The same port as used by the server
 
 #HARK LOCALIZE PARAM
-NUM_SOURCE = 3 #int index:0
+NUM_SOURCE = 2 #int index:0
 MIN_DEG = -180 #int index:1
 MAX_DEG = 180 #int index:2
 LOWER_BOUND_FREQUENCY = 500 #int index:3
 UPPER_BOUND_FREQUENCY = 2800 #int index:4
-THRESH = 32 #float index:5
-PAUSE_LENGTH = 2000 # float index:6
-MIN_SRC_INTERVAL = 100 # float index:7
+THRESH = 34 #float index:5
+PAUSE_LENGTH = 1000 # float index:6
+MIN_SRC_INTERVAL = 20 # float index:7
 MIN_TFINDEX_INTERVAL = 6.0 # float index:8
 COMPARE_MODE = 0.0 #index:9
 
