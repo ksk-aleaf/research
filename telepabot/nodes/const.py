@@ -15,6 +15,10 @@ from cv_bridge import CvBridge, CvBridgeError
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
+#ROS INFO
+ROS_DIST = "indigo"
+ROS_DIST_HYDRO = "hydro"
+ROS_DIST_INDIGO = "indigo"
 
 #SYSTEM NAME
 SYSTEM_NAME = "telepabot"
@@ -114,6 +118,9 @@ CV_BRIDGE = CvBridge()
 
 #HARK_SOURCE = HarkSource()
 
+
+#画像形式
+RGB8 = "rgb8"
 
 
 #音源パワー分類用

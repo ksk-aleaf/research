@@ -14,7 +14,8 @@
   <depend package="hark_msgs"/>
   <depend package="sensor_msgs"/>
   <depend package="cv_bridge"/>
-  <depend package="opencv2"/>
+  <!--depend package="vision_opencv"/-->
+  <!--depend package="opencv2"/-->
   <depend package="tf"/>
 </package>
 
