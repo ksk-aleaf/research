@@ -18,6 +18,7 @@ from PyQt4 import QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import math
+import os
 
 #グローバル変数モジュール
 import global_var
@@ -145,7 +146,14 @@ class CentralWidget(QtGui.QWidget):
 		self.paintListenRange(event)
 		const.SELECTOR_SOURCE_PUB.publish(global_var.msg_select_gl)
 		format_loc_src_microcone.getSoundSrcInRange()
-
+		if global_var.ifAutoRotate is not True:
+			manipulate_turtlebot2.moveRobot(global_var.robotMoveDirection)
+		else:
+			if time.time() - global_var.autoRotateStartPeriod > global_var.autoRotateTimeout:
+				global_var.ifAutoRotate = False
+				global_var.robotMoveDirection = const.JOY_STAY
+			else:
+				manipulate_turtlebot2.moveRobot(global_var.robotMoveDirection)
 
 	def mousePressEvent(self,event):
 		self.listenRangeStartX = event.x()
@@ -176,10 +184,6 @@ class CentralWidget(QtGui.QWidget):
 		print "separate"
 		print "from(onUI):" + str(global_var.listenRangeStartAngle)
 		print "to(onUI):" + str(global_var.listenRangeEndAngle)
-
-
-
-
 
 	def getPaintRect(self,startX,endX):
 		absRange = math.fabs(endX - startX)
@@ -245,6 +249,7 @@ def initialize():
 	window.setWindowTitle(const.SYSTEM_NAME)
 	window.show()
 	recogword.initRecogData()
+	os.system(const.SET_TO_STR + str(const.MAN_ROT_TO))
 	#signal.signal(signal.SIGINT, signal_handler)
 	return app,window
 

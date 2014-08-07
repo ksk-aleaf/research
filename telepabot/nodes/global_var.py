@@ -49,3 +49,6 @@ msg_select_gl = HarkSource()
 #joy stick 入力
 joyInput = {const.JOY_FRONT_BACK_LABEL:0.0, const.JOY_LEFT_RIGHT_LABEL:0.0,const.JOY_BUTTON_LABEL:0}
 ifAutoRotate = False
+robotMoveDirection = const.JOY_STAY
+autoRotateStartPeriod = 0
+autoRotateTimeout = 0
