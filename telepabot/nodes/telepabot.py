@@ -32,8 +32,12 @@ import recogword
 import cameraimage
 #csv log module
 import csvlog
+
+import thetaimg
+
 #manipulate robot module
 import manipulate_turtlebot2
+import time
 
 #testcommit
 
@@ -146,12 +150,24 @@ class CentralWidget(QtGui.QWidget):
 		self.paintListenRange(event)
 		const.SELECTOR_SOURCE_PUB.publish(global_var.msg_select_gl)
 		format_loc_src_microcone.getSoundSrcInRange()
-		if global_var.ifAutoRotate is not True:
+		
+		#manipulate omni
+		if global_var.ifAutoRotate is False:#manual
 			manipulate_turtlebot2.moveRobot(global_var.robotMoveDirection)
-		else:
+		else:#auto
+# 			curtime = time.time()
+# 			print "time:"+str(curtime)
+# 			print "if auto rotate:"+str(global_var.ifAutoRotate)
+# 			print "auto rotate timeout:"+str(global_var.autoRotateTimeout)
+# 			print "auto rotate start period:"+str(global_var.autoRotateStartPeriod)
+# 			print "robot move direction:"+str(global_var.robotMoveDirection)
 			if time.time() - global_var.autoRotateStartPeriod > global_var.autoRotateTimeout:
 				global_var.ifAutoRotate = False
 				global_var.robotMoveDirection = const.JOY_STAY
+				global_var.listenRangeStartAngle = -10
+				self.listenRangeStartX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeStartAngle)
+				global_var.listenRangeEndAngle = 10
+				self.listenRangeEndX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeEndAngle)
 			else:
 				manipulate_turtlebot2.moveRobot(global_var.robotMoveDirection)
 

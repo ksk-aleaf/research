@@ -44,32 +44,27 @@ def getDirection(joyInput):
 		return const.JOY_STAY
 
 def autoRotate(joyInput):
-	print "trigbtnpushflg:"+str(joyInput.triggerButtonPushFlag)
 	if joyInput.triggerButtonPushFlag is True and global_var.ifAutoRotate is not True:
 		azimuth = (global_var.listenRangeStartAngle + global_var.listenRangeEndAngle) /2
 		if azimuth > 0:
 			global_var.robotMoveDirection = const.JOY_RIGHT
-			command = const.R_ROT_CMD
+			#command = const.R_ROT_CMD
 		else:
 			global_var.robotMoveDirection = const.JOY_LEFT
-			command = const.L_ROT_CMD
+			#command = const.L_ROT_CMD
 		
+		#set auto rotate param
 		global_var.autoRotateTimeout = abs(azimuth)*const.TO_PER_THETA - const.MAN_ROT_TO
-		#os.system(const.SET_TO_STR + str(global_var.autoRotateTimeout))
-		#print "timeout:"+str(global_var.autoRotateTimeout)
-		#sendCommand(command)
+		global_var.ifAutoRotate = True
 		global_var.autoRotateStartPeriod = time.time()
-		
+
 
 def sendCommand(command):
-	#os.system(const.SET_TO_STR + str(timeout))
-	#pub = rospy.Publisher('/cmd_vel', Twist)
 	pub = rospy.Publisher(const.KOBUKI_VEL_NODE_STR, Twist)
 	pub.publish(command)
-	rospy.loginfo(command)
+	#rospy.loginfo(command)
 
 def moveRobot(direction):
-	#os.system(const.SET_TO_STR + str(const.MAN_ROT_TO))
 	if direction is const.JOY_FRONT:
 		sendCommand(const.FWD_CMD)
 	elif direction is const.JOY_BACK:
@@ -82,19 +77,12 @@ def moveRobot(direction):
 		print "robot move direction error"
 
 def joy_callback(joydata):
-	#print "joy_callback"
 	triggerButtonPushFlag = getButtonPushFlag(joydata.buttons[const.JOY_TRIGGER_BUTTON_INDEX])
 	joyInput = JoyInput(joydata.axes[const.JOY_FRONT_BACK_INDEX],joydata.axes[const.JOY_LEFT_RIGHT_INDEX],triggerButtonPushFlag)
-	global_var.robotMoveDirection = getDirection(joyInput)
+	if global_var.ifAutoRotate is False:
+		global_var.robotMoveDirection = getDirection(joyInput)
 	autoRotate(joyInput)
-	#print "input:"+str(joyInput)
-	#print "direction"+str(global_var.robotMoveDirection)
-	#moveRobot(getDirection(joyInput))
-# 	global_var.joyInput.frontBackInput = joydata.axes[const.JOY_FRONT_BACK_INDEX]
-# 	global_var.joyInput.leftRightInput = joydata.axes[const.JOY_LEFT_RIGHT_INDEX]
-# 	global_var.joyInput.triggerButtonPushFlag = getButtonPushFlag(joydata.buttons[const.JOY_TRIGGER_BUTTON_INDEX])
 
 def subscriber():
 	rospy.Subscriber(const.JOYSTICK_TOPIC_NAME, Joy, joy_callback, buff_size = 1)
 
-#def initialize():
