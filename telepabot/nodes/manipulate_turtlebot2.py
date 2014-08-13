@@ -8,6 +8,8 @@ import global_var
 import rospy
 import os
 import time
+import thetaimg
+import format_loc_src_microcone
 
 class JoyInput():
 	def __init__(self,frontBackInput,leftRightInput,triggerButtonPushFlag):
@@ -43,20 +45,44 @@ def getDirection(joyInput):
 	else:
 		return const.JOY_STAY
 
-def autoRotate(joyInput):
-	if joyInput.triggerButtonPushFlag is True and global_var.ifAutoRotate is not True:
-		azimuth = (global_var.listenRangeStartAngle + global_var.listenRangeEndAngle) /2
-		if azimuth > 0:
-			global_var.robotMoveDirection = const.JOY_RIGHT
-			#command = const.R_ROT_CMD
+def autoRotateStarter(joyInput):
+	#if joyInput.triggerButtonPushFlag is True and global_var.ifAutoRotate is not True:
+	azimuth = (global_var.listenRangeStartAngle + global_var.listenRangeEndAngle) /2
+	if azimuth > 0:
+		global_var.robotMoveDirection = const.JOY_RIGHT
+	else:
+		global_var.robotMoveDirection = const.JOY_LEFT
+	
+	#set auto rotate param
+	global_var.autoRotateTimeout = abs(azimuth)*const.TO_PER_THETA - const.MAN_ROT_TO
+	global_var.ifAutoRotate = True
+	global_var.autoRotateStartPeriod = time.time()
+	format_loc_src_microcone.listenWholeSound()
+
+
+def autoRotateFinisher():
+	global_var.ifAutoRotate = False
+	global_var.robotMoveDirection = const.JOY_STAY
+	#回転に合わせて視聴範囲を移動
+	azimuth = (global_var.listenRangeStartAngle + global_var.listenRangeEndAngle) /2
+	global_var.listenRangeStartAngle = global_var.listenRangeStartAngle - azimuth
+	global_var.listenRangeEndAngle = global_var.listenRangeEndAngle - azimuth
+	format_loc_src_microcone.setListenAxis(global_var.listenRangeStartAngle,global_var.listenRangeEndAngle)
+	format_loc_src_microcone.listenSeparateSound()
+# 	global_var.listenRangeStartAngle = -10
+# 	global_var.listenRangeStartX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeStartAngle)
+# 	global_var.listenRangeEndAngle = 10
+# 	global_var.listenRangeEndX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeEndAngle)	
+
+#移動機構の操作
+def manipulateOmni():
+	if global_var.ifAutoRotate is False:#manual
+		moveRobot(global_var.robotMoveDirection)
+	else:#auto
+		if time.time() - global_var.autoRotateStartPeriod > global_var.autoRotateTimeout:
+			autoRotateFinisher()
 		else:
-			global_var.robotMoveDirection = const.JOY_LEFT
-			#command = const.L_ROT_CMD
-		
-		#set auto rotate param
-		global_var.autoRotateTimeout = abs(azimuth)*const.TO_PER_THETA - const.MAN_ROT_TO
-		global_var.ifAutoRotate = True
-		global_var.autoRotateStartPeriod = time.time()
+			moveRobot(global_var.robotMoveDirection)
 
 
 def sendCommand(command):
@@ -80,8 +106,11 @@ def joy_callback(joydata):
 	triggerButtonPushFlag = getButtonPushFlag(joydata.buttons[const.JOY_TRIGGER_BUTTON_INDEX])
 	joyInput = JoyInput(joydata.axes[const.JOY_FRONT_BACK_INDEX],joydata.axes[const.JOY_LEFT_RIGHT_INDEX],triggerButtonPushFlag)
 	if global_var.ifAutoRotate is False:
-		global_var.robotMoveDirection = getDirection(joyInput)
-	autoRotate(joyInput)
+		if joyInput.triggerButtonPushFlag is True:
+			autoRotateStarter(joyInput)
+		else:
+			global_var.robotMoveDirection = getDirection(joyInput)
+
 
 def subscriber():
 	rospy.Subscriber(const.JOYSTICK_TOPIC_NAME, Joy, joy_callback, buff_size = 1)

@@ -116,7 +116,7 @@ class MainWindow(QtGui.QWidget):
 		CONFIG_PARAM_INFO.append(ConfigParamInfo(0,1,"NUM_SOURCE",NUM_SOURCE,1,4,1,1))
 		CONFIG_PARAM_INFO.append(ConfigParamInfo(6,2,"PAUSE_LENGTH",PAUSE_LENGTH,0,4000,10,100))
 		CONFIG_PARAM_INFO.append(ConfigParamInfo(7,3,"MIN_SRC_INTERVAL",MIN_SRC_INTERVAL,0,500,10,50))
-
+	
 	def initParamBtn(self):
 		for configParamInfo in CONFIG_PARAM_INFO:
 			#PARAM LABEL

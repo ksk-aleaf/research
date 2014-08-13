@@ -73,8 +73,8 @@ class CentralWidget(QtGui.QWidget):
 		self.setMaximumSize(const.WIN_WID, const.WIN_HT)
 
 		#listen range xaxis
-		self.listenRangeStartX = 0
-		self.listenRangeEndX = 0
+		#self.listenRangeStartX = 0
+		#self.listenRangeEndX = 0
 		
 		#camera painter
 		self.cameraPainter = QPainter(self)
@@ -82,7 +82,6 @@ class CentralWidget(QtGui.QWidget):
 		#loc src painter
 		self.locSrcPainter = QPainter(self)
 		self.locSrcPainter.setFont(QFont('Decorative',14))
-		
 
 
 	#@QtCore.pyqtSlot()
@@ -104,7 +103,7 @@ class CentralWidget(QtGui.QWidget):
 			qp.begin(self)
 			color = QtGui.QColor(255, 255, 0, 50)
 			qp.setBrush(color)
-			qp.drawRect(self.getPaintRect(self.listenRangeStartX,self.listenRangeEndX))
+			qp.drawRect(self.getPaintRect(global_var.listenRangeStartX,global_var.listenRangeEndX))
 
 	def paintRecogWord(self,e):
 		recogword.adjustWordsPosition()
@@ -138,42 +137,21 @@ class CentralWidget(QtGui.QWidget):
 		if global_var.cvRightImage is not None:
 			cameraimage.drawCameraImage(event,global_var.cvRightImage,QtGui.QImage.Format_RGB888,const.RIGHT_CAM_IMG_DRAW_POINT,rightCamImgPainter)
 
+
+
 	#描画処理全般（カメラ画像、情報提示）
 	def paintEvent(self, event):
-		#draw recog word
 		self.paintRecogWord(event)
 		self.paintLocVoice()
 		#tmpLocSrcList = global_var.locSrcList[:]
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]
-
 		self.paintCamImg(event)
 		self.paintListenRange(event)
-		const.SELECTOR_SOURCE_PUB.publish(global_var.msg_select_gl)
-		format_loc_src_microcone.getSoundSrcInRange()
-		
-		#manipulate omni
-		if global_var.ifAutoRotate is False:#manual
-			manipulate_turtlebot2.moveRobot(global_var.robotMoveDirection)
-		else:#auto
-# 			curtime = time.time()
-# 			print "time:"+str(curtime)
-# 			print "if auto rotate:"+str(global_var.ifAutoRotate)
-# 			print "auto rotate timeout:"+str(global_var.autoRotateTimeout)
-# 			print "auto rotate start period:"+str(global_var.autoRotateStartPeriod)
-# 			print "robot move direction:"+str(global_var.robotMoveDirection)
-			if time.time() - global_var.autoRotateStartPeriod > global_var.autoRotateTimeout:
-				global_var.ifAutoRotate = False
-				global_var.robotMoveDirection = const.JOY_STAY
-				global_var.listenRangeStartAngle = -10
-				self.listenRangeStartX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeStartAngle)
-				global_var.listenRangeEndAngle = 10
-				self.listenRangeEndX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeEndAngle)
-			else:
-				manipulate_turtlebot2.moveRobot(global_var.robotMoveDirection)
+		manipulate_turtlebot2.manipulateOmni()
 
 	def mousePressEvent(self,event):
-		self.listenRangeStartX = event.x()
-		self.listenRangeEndX =  self.listenRangeStartX
+		global_var.listenRangeStartX = event.x()
+		global_var.listenRangeEndX =  global_var.listenRangeStartX
 		global_var.listenSeparateSoundFlag = True
 		#p = QtGui.QPixmap.grabWindow(self.winId())
 		#p.save("scrshot"+str(time.time()),"png")
@@ -183,18 +161,17 @@ class CentralWidget(QtGui.QWidget):
 		global_var.listenSeparateSoundFlag = False
 
 	def mouseMoveEvent(self,event):
-		self.listenRangeEndX = event.x()
+		global_var.listenRangeEndX = event.x()
 
 	def mouseReleaseEvent(self, e):
 		#座標を角度に変換してグローバル変数にセット
-		print "startx:"+str(self.listenRangeStartX - const.CAM_IMG_OFS_X)
-		print "endx:" + str(self.listenRangeEndX - const.CAM_IMG_OFS_X)
-		if math.fabs(self.listenRangeEndX - self.listenRangeStartX) > const.IGNOR_PIX_THR:
-			format_loc_src_microcone.setListenAngles(self.listenRangeStartX,self.listenRangeEndX)
+		print "startx:"+str(global_var.listenRangeStartX - const.CAM_IMG_OFS_X)
+		print "endx:" + str(global_var.listenRangeEndX - const.CAM_IMG_OFS_X)
+		if math.fabs(global_var.listenRangeEndX - global_var.listenRangeStartX) > const.IGNOR_PIX_THR:
+			format_loc_src_microcone.setListenAngles(global_var.listenRangeStartX,global_var.listenRangeEndX)
 			format_loc_src_microcone.listenSeparateSound()
-			global_var.listenSeparateSoundFlag = True
 		else:
-			self.listenRangeEndX = self.listenRangeStartX
+			global_var.listenRangeEndX = global_var.listenRangeStartX
 			global_var.listenSeparateSoundFlag = False
 			format_loc_src_microcone.listenWholeSound()
 		print "separate"
