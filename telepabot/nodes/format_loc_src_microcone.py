@@ -124,7 +124,7 @@ def sendSrcForSoundSeparation():
 def listenSeparateSound():
 	global_var.listenSeparateSoundFlag = True
 	const.SEP_LIS_TRIG_PUB.publish(True)
-	csvlog.writeLog(const.CSV_START_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
+	#csvlog.writeLog(const.CSV_START_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
 def getSoundSrcInListenRange(harkSource):
 	sourceInRange = HarkSource()
@@ -139,9 +139,10 @@ def listenWholeSound():
 	const.SEP_LIS_TRIG_PUB.publish(False)
 	csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
-#reverse angle for microcone(microcone's right angle is minus
+#マイクロコーンは右側がマイナスなので角度を左右反転
 def getListenAngle(xaxis):
 	return -((xaxis * 2 * const.IMG_HOR_HALF_VIEW_AGL)/const.CAM_WHOLE_IMG_WID - const.IMG_HOR_HALF_VIEW_AGL)
+
 
 def setListenAngles(startX,endX):
 	global_var.listenRangeStartAngle = thetaimg.getAzimuthFromXAxis(startX)

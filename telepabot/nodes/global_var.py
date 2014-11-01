@@ -10,11 +10,11 @@ from hark_msgs.msg import HarkSourceVal  # @UnusedImport @UnresolvedImport
 
 
 #グローバル変数
-flag = []
-dflag = True
-cflag = True
-lflag = True
-sflag = True
+#flag = []
+#dflag = True
+#cflag = True
+#lflag = True
+#sflag = True
 #max_theta = []
 #min_theta = []
 #max_power = 0
@@ -39,10 +39,12 @@ listenRangeEndAngle = 0
 listenRangeStartX = 0
 listenRangeEndX = 0
 
-#分離音源視聴フラグ
+#分離音源視聴UI
+listenSeparateSoundCount = 0
 listenSeparateSoundFlag = False
 sendSeparateAngleInfoTime = 0
 sendSeparateAngleInfoDuration = 1.0
+listenRangeList = []
 
 #定位ソース
 harkSource = HarkSource()

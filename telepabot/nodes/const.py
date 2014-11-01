@@ -88,12 +88,6 @@ WIN_HT = CAM_IMG_HT + CAM_IMG_OFS_Y
 #microcone用の角度補正(左方向が＋、右方向がー。マイクを回転させたい分だけ)
 MIC_ROTATE = 0
 
-#画像切り出し用の矩形領域
-# LEFT_IMG_ROI = cv.Rect()
-# RIGHT_IMG_ROI = 
-
-
-##################画像データ################################
 
 #消えた音源ソース情報を保持する秒数
 VAN_SRC_KEEP_SEC= 3.0
@@ -130,14 +124,18 @@ STRONG_POW_CODE = 2
 STRONG_POW_THR = 0.5
 MEDIUM_POW_THR = 1
 
-#音源視聴範囲設定ID
+#分離音声視聴GUI
+LISTEN_SEPARATE_SOUND_MAX_NUM = 2
+IGNOR_PIX_THR = 20#この幅以下で指定されたら無視する
+RANGE_DRAW_COLOR_STR = "yellow"
+RANGE_DRAW_ALPHA = 50
+FILTER_DRAW_COLOR_STR = "black"
+FILTER_LISTEN_ALPHA = 50
+FILTER_UNLISTEN_ALPHA = 100
 LISTENABLE = 1
 UNLISTENABLE = 0
 
-#視聴範囲指定時にこの幅以下で指定されたら無視する
-IGNOR_PIX_THR = 20
-
-#recognize result draw
+#音声認識結果描画
 RECOG_WORD_HEIGHT_RANGE = 20
 VERT_WORD_MGN = 10
 CAM_WORD_MGN = 10
@@ -146,23 +144,25 @@ RECOG_DRAW_BTM_YAXIS = CAM_IMG_OFS_Y - CAM_WORD_MGN
 WIDTH_PER_CHAR = 19
 HEIGHT_PER_CHAR = 20
 
-#localize result draw
+#定位結果描画
 LOC_STR_HEIGHT = 20
 LOC_STR_WIDTH = 64
 LOC_STR_Y_POS = CAM_IMG_OFS_Y - LOC_STR_HEIGHT
 LOC_STR = "talking!"
 
-#topic publisher
+
+#トピックのパブリッシャ
 SEPARATE_SOURCE_PUB = rospy.Publisher("SeparateSource", HarkSource)
 SELECTOR_SOURCE_PUB = rospy.Publisher("SelectorSource", HarkSource)
 SEP_LIS_TRIG_PUB = rospy.Publisher("SeparateListenTrigger", Bool)
 
-#topic name
+#トピック名
 HARK_JULIUS_SOURCE_TOPIC_NAME = "HarkJuliusSrc"
 HARK_LOC_SOURCE_TOPIC_NAME = "HarkSource"
 #JULIUS_RECOG_RESULT_TOPIC_NAME = "RecogResult"
 
-#manipulate omni
+
+#ジョイスティック操作関連パラメータ
 JOY_FRONT_BACK_LABEL="front_back"
 JOY_LEFT_RIGHT_LABEL="left_right"
 JOY_BUTTON_LABEL="button"
@@ -172,30 +172,28 @@ JOY_FRONT_BACK_INDEX=1 #UP:+ DOWN:-
 JOY_LEFT_RIGHT_INDEX=0 #LEFT:+ RIGHT:-
 JOY_TRIGGER_BUTTON_INDEX=0 #push:1 release:0
 
-#BUTTON PUSH
+#ボタン押下コード
 JOY_BUTTON_PUSH=1
 JOY_BUTTON_RELEASE=0
 
-#MOVE DIRECTION
+#移動方向コード
 JOY_STAY=0
 JOY_FRONT=1
 JOY_BACK=2
 JOY_LEFT=3
 JOY_RIGHT=4
 
-#PLAY OF CONTROL LEVER(レバーの遊びしきい値)
 JOY_PLAY_THRESHOLD = 0.3
-
 JOYSTICK_TOPIC_NAME="joy"
 
 
-#turtlebotにタイムアウトを設定する用
+#turtlebot操作関連パラメータ
 SET_TO_STR = "rosparam set /mobile_base/cmd_vel_timeout "
 MAN_ROT_TO = 0.4
 KEY_MAN_ROT_TO = 0.5
 JOY_MAN_ROT_TO = 0.4
 DEFAULT_TO = 0.0
-TO_PER_THETA = 0.045#0.035
+TO_PER_THETA = 0.05#0.035
 SEND_CMD_OVERHEAD = 1.0
 
 

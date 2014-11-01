@@ -50,7 +50,19 @@ def sendCommand(command):
 	rospy.loginfo(command)
 
 
-#central widget
+#分離音声視聴範囲クラス
+class ListenRange():
+	def __init__(self,startX,endX,startAzimuth,endAzimuth):
+		self.startX,self.endX,self.startAzimuth,self.endAzimuth = startX,endX,startAzimuth,endAzimuth
+
+#分離音声視聴リスト初期化
+def initListenRange():
+	global_var.listenRangeList = []
+	for index in range(const.LISTEN_SEPARATE_SOUND_MAX_NUM):
+		global_var.listenRangeList.append(ListenRange(0,0,0,0))
+
+
+#ウィンドウ定義クラス
 class CentralWidget(QtGui.QWidget):
 	def __init__(self, parent=None):
 
@@ -72,9 +84,6 @@ class CentralWidget(QtGui.QWidget):
 		self.setMinimumSize(const.WIN_WID, const.WIN_HT)
 		self.setMaximumSize(const.WIN_WID, const.WIN_HT)
 
-		#listen range xaxis
-		#self.listenRangeStartX = 0
-		#self.listenRangeEndX = 0
 		
 		#camera painter
 		self.cameraPainter = QPainter(self)
@@ -97,13 +106,33 @@ class CentralWidget(QtGui.QWidget):
 				self.cameraDevice.newFrame.disconnect(self._onNewFrame)
 
 
-	def paintListenRange(self,e):
+	def paintListenRange(self,e,listenRange):
 		if global_var.listenSeparateSoundFlag:
 			qp = QtGui.QPainter()
 			qp.begin(self)
-			color = QtGui.QColor(255, 255, 0, 50)
+			#color = QtGui.QColor(255, 255, 0, 50)
+			color = QtGui.QColor()
+			color.setNamedColor(const.RANGE_DRAW_COLOR_STR)
+			color.setAlpha(const.RANGE_DRAW_ALPHA)
 			qp.setBrush(color)
-			qp.drawRect(self.getPaintRect(global_var.listenRangeStartX,global_var.listenRangeEndX))
+			#qp.drawRect(self.getPaintRect(global_var.listenRangeStartX,global_var.listenRangeEndX))
+			qp.drawRect(self.getPaintRect(listenRange.startX,listenRange.endX))
+	
+	def paintListenRanges(self,e):
+		#print "listenSound:"+str(global_var.listenSeparateSoundCount)		
+		for index in range(global_var.listenSeparateSoundCount):
+			self.paintListenRange(e,global_var.listenRangeList[index])
+	
+	def paintDarkFilter(self,event):
+		#if global_var.listenSeparateSoundFlag:
+			qp = QtGui.QPainter()
+			qp.begin(self)
+			#color = QtGui.QColor(255, 255, 0, 50)
+			color = QtGui.QColor()
+			color.setNamedColor(const.FILTER_DRAW_COLOR_STR)
+			color.setAlpha(const.FILTER_LISTEN_ALPHA)
+			qp.setBrush(color)
+			qp.drawRect(self.getPaintRect(0,100))
 
 	def paintRecogWord(self,e):
 		recogword.adjustWordsPosition()
@@ -146,38 +175,81 @@ class CentralWidget(QtGui.QWidget):
 		#tmpLocSrcList = global_var.locSrcList[:]
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]
 		self.paintCamImg(event)
-		self.paintListenRange(event)
+		self.paintListenRanges(event)
+		#self.paintListenRange(event)
 		manipulate_turtlebot2.manipulateOmni()
+		#self.paintDarkFilter(event)
 
+	#マウスクリック時のイベント
 	def mousePressEvent(self,event):
-		global_var.listenRangeStartX = event.x()
-		global_var.listenRangeEndX =  global_var.listenRangeStartX
+		#最大選択数分だけ選択されていなければ選択数を増やす
+		if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
+			global_var.listenSeparateSoundCount += 1
+			print "listenSound:"+str(global_var.listenSeparateSoundCount)
+
+		listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
+		listenRange.startX = event.x()
+		listenRange.endX = listenRange.startX
+		global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
 		global_var.listenSeparateSoundFlag = True
+		
+		#listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(xaxis)
+		
+		#従来コード
+		#global_var.listenRangeStartX = event.x()
+		#global_var.listenRangeEndX =  global_var.listenRangeStartX
+		#global_var.listenSeparateSoundFlag = True
+		
 		#p = QtGui.QPixmap.grabWindow(self.winId())
 		#p.save("scrshot"+str(time.time()),"png")
 
+	#ダブルクリック
 	def mouseDoubleClickEvent(self,event):
 		format_loc_src_microcone.listenWholeSound()
 		global_var.listenSeparateSoundFlag = False
+		global_var.listenSeparateSoundCount = 0
+		initListenRange()
 
+	#カーソル移動
 	def mouseMoveEvent(self,event):
-		global_var.listenRangeEndX = event.x()
+		global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
+		#global_var.listenRangeEndX = event.x()
 
+	#クリック離し
 	def mouseReleaseEvent(self, e):
+		listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
+		print "startx:"+str(listenRange.startX - const.CAM_IMG_OFS_X)
+		print "endx:" + str(listenRange.endX - const.CAM_IMG_OFS_X)
+		
 		#座標を角度に変換してグローバル変数にセット
-		print "startx:"+str(global_var.listenRangeStartX - const.CAM_IMG_OFS_X)
-		print "endx:" + str(global_var.listenRangeEndX - const.CAM_IMG_OFS_X)
-		if math.fabs(global_var.listenRangeEndX - global_var.listenRangeStartX) > const.IGNOR_PIX_THR:
-			format_loc_src_microcone.setListenAngles(global_var.listenRangeStartX,global_var.listenRangeEndX)
+		if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+			listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
+			listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
 			format_loc_src_microcone.listenSeparateSound()
+			global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
 		else:
-			global_var.listenRangeEndX = global_var.listenRangeStartX
-			global_var.listenSeparateSoundFlag = False
-			format_loc_src_microcone.listenWholeSound()
-		print "separate"
-		print "from(onUI):" + str(global_var.listenRangeStartAngle)
-		print "to(onUI):" + str(global_var.listenRangeEndAngle)
+			global_var.listenSeparateSoundCount -= 1
+			#global_var.listenSeparateSoundCount += 1
+		#else:
+		#	listenRange.endX = listenRange.startX
 
+
+		
+		print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
+
+		#座標を角度に変換してグローバル変数にセット
+# 		if math.fabs(global_var.listenRangeEndX - global_var.listenRangeStartX) > const.IGNOR_PIX_THR:
+# 			format_loc_src_microcone.setListenAngles(global_var.listenRangeStartX,global_var.listenRangeEndX)
+# 			format_loc_src_microcone.listenSeparateSound()
+# 		else:
+# 			global_var.listenRangeEndX = global_var.listenRangeStartX
+# 			global_var.listenSeparateSoundFlag = False
+# 			format_loc_src_microcone.listenWholeSound()
+# 		print "separate"
+# 		print "from(onUI):" + str(global_var.listenRangeStartAngle)
+# 		print "to(onUI):" + str(global_var.listenRangeEndAngle)
+
+	#視聴範囲用矩形枠取得
 	def getPaintRect(self,startX,endX):
 		absRange = math.fabs(endX - startX)
 		
@@ -187,7 +259,7 @@ class CentralWidget(QtGui.QWidget):
 			return QRect(endX,const.CAM_IMG_OFS_Y,absRange,const.CAM_IMG_HT)
 
 
-#ウィンドウ全体
+#ウィンドウ外枠のクラス
 class MainWindow(QtGui.QMainWindow):
 	
 	def __init__(self):
@@ -242,6 +314,7 @@ def initialize():
 	window.setWindowTitle(const.SYSTEM_NAME)
 	window.show()
 	recogword.initRecogData()
+	initListenRange()
 	os.system(const.SET_TO_STR + str(const.MAN_ROT_TO))
 	#signal.signal(signal.SIGINT, signal_handler)
 	return app,window
@@ -259,9 +332,8 @@ def subscriber():
 #メイン関数
 if __name__ == '__main__':
 	subscriber()
-	#need to get window
+	#代入してウィンドウ情報を取得しないと上手く動かない
 	app,window = initialize()
-
-	#do this method last in main(system loop start)
+	#このメソッドで描画ループがスタート(一番最後に実行する)
 	app.exec_()
 	#sys.exit(app.exec_())
