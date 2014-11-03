@@ -9,6 +9,7 @@ from PyQt4 import QtGui
 from PyQt4 import QtCore
 
 HOST = 'localhost'	# The remote host
+#HOST = '172.24.40.102'	# The remote host
 PORT = 9999		   # The same port as used by the server
 
 #HARK LOCALIZE PARAM

@@ -124,7 +124,6 @@ class CentralWidget(QtGui.QWidget):
 			self.paintListenRange(e,global_var.listenRangeList[index])
 	
 	def paintDarkFilter(self,event):
-		#if global_var.listenSeparateSoundFlag:
 			qp = QtGui.QPainter()
 			qp.begin(self)
 			#color = QtGui.QColor(255, 255, 0, 50)
@@ -192,14 +191,8 @@ class CentralWidget(QtGui.QWidget):
 		listenRange.endX = listenRange.startX
 		global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
 		global_var.listenSeparateSoundFlag = True
-		
-		#listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(xaxis)
-		
-		#従来コード
-		#global_var.listenRangeStartX = event.x()
-		#global_var.listenRangeEndX =  global_var.listenRangeStartX
-		#global_var.listenSeparateSoundFlag = True
-		
+
+		#スクリーンショット
 		#p = QtGui.QPixmap.grabWindow(self.winId())
 		#p.save("scrshot"+str(time.time()),"png")
 
@@ -223,10 +216,10 @@ class CentralWidget(QtGui.QWidget):
 		
 		#座標を角度に変換してグローバル変数にセット
 		if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+			
 			if listenRange.startX > listenRange.endX:
-				tmp = listenRange.startX
-				listenRange.startX = listenRange.endX
-				listenRange.endX = tmp
+				listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
+
 			listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
 			listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
 			format_loc_src_microcone.listenSeparateSound()
@@ -237,17 +230,6 @@ class CentralWidget(QtGui.QWidget):
 
 		print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
 
-		#座標を角度に変換してグローバル変数にセット
-# 		if math.fabs(global_var.listenRangeEndX - global_var.listenRangeStartX) > const.IGNOR_PIX_THR:
-# 			format_loc_src_microcone.setListenAngles(global_var.listenRangeStartX,global_var.listenRangeEndX)
-# 			format_loc_src_microcone.listenSeparateSound()
-# 		else:
-# 			global_var.listenRangeEndX = global_var.listenRangeStartX
-# 			global_var.listenSeparateSoundFlag = False
-# 			format_loc_src_microcone.listenWholeSound()
-# 		print "separate"
-# 		print "from(onUI):" + str(global_var.listenRangeStartAngle)
-# 		print "to(onUI):" + str(global_var.listenRangeEndAngle)
 
 	#視聴範囲用矩形枠取得
 	def getPaintRect(self,startX,endX):

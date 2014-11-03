@@ -41,7 +41,8 @@ def getUIAzimuth(azimuth):
 	return getPm180Azimuth(-(azimuth + const.MIC_ROTATE))
 
 
-#format localization information
+#定位情報コールバック関数
+#定位情報を描画用にフォーマット
 def localization_callback(data):
 	global_var.harkSource = data
 	global_var.locSrcList = []
@@ -58,12 +59,15 @@ def localization_callback(data):
 	if global_var.listenSeparateSoundFlag is True:
 		sendSrcForSoundSeparation()
 
+#±180度の範囲で反対側の角度を取得
 def getAgainstAzimuthInPm180(azimuth):
 	if azimuth > 0:
 		return azimuth - 180
 	else:
 		return azimuth + 180
 
+#角度からHarkSourceValインスタンスを生成
+#x,yをちゃんと入れないとharkの定位・分離周りが上手く動かない
 def getHarkSourceVal(sourceid,azimuth):
 	sourceVal = HarkSourceVal()
 	sourceVal.id = sourceid
@@ -87,57 +91,28 @@ def ifSoundSrcInListenRange(harkSource):
 #separateSource:GHDSSノードに入力するソース
 #selectorSource:mapSelectorに入力するソース
 def getSourceForSeparation(startAzimuth,endAzimuth):
-	# ensure startAzimuth < endAzimuth
-	if startAzimuth > endAzimuth:
-		tmp = startAzimuth
-		startAzimuth = endAzimuth
 	
 	separateSource = global_var.harkSource
 	selectorSource = getSoundSrcInListenRange(separateSource)
-
-# 	if len(selectorSource.src) == 0:
-# 		# 視聴範囲内に音源が定位できない場合は、分離性能は落ちるが定位情報を生成する
-# 		sourceid = 0
-# 		azimuthRange = endAzimuth - startAzimuth
-# 		if azimuthRange < const.HARK_SEPARATION_RESOLUTION:
-# 			azimuth = (startAzimuth + endAzimuth) / 2
-# 			selectorSource.src.append(getHarkSourceVal(sourceid, getMcAzimuth(azimuth)))
-# 		else:
-# 			sourcePointCount = int((azimuthRange - const.HARK_SEPARATION_RESOLUTION) / const.HARK_SEPARATION_RESOLUTION + 3)
-# 			azimuth = startAzimuth + const.HARK_SEPARATION_RESOLUTION / 2
-# 			for sourceid in range(0,sourcePointCount):
-# 				selectorSource.src.append(getHarkSourceVal(sourceid, getMcAzimuth(azimuth)))
-# 				azimuth = azimuth + (azimuthRange - const.HARK_SEPARATION_RESOLUTION) / (sourcePointCount -1)
-# 			separateSource = copy.deepcopy(selectorSource)
-# 			separateSource.src.append(getHarkSourceVal(sourceid + 1, getAgainstAzimuthInPm180(getMcAzimuth(azimuth))))
-# 			selectorSource.exist_src_num = len(selectorSource.src)
-# 			separateSource.exist_src_num = len(separateSource.src)
 
 	return [selectorSource,separateSource]
 
 #harkの音源分離モジュールに音源情報を送る
 def sendSrcForSoundSeparation():
-# 	selectorSource = []
-# 	separateSource = []
-# 
-# 	for index in range(global_var.listenSeparateSoundCount):
-# 		listenRange = global_var.listenRangeList[index]
-# 		tmpSelectorSource,tmpSeparateSource = getSourceForSeparation(listenRange.startAzimuth, listenRange.endAzimuth)
-# 		selectorSource.extend(tmpSelectorSource)
-# 		separateSource.extend(tmpSeparateSource)
-# 	
-# 	const.SEPARATE_SOURCE_PUB.publish(separateSource)
-# 	const.SELECTOR_SOURCE_PUB.publish(selectorSource)
-
-	selectorSource,separateSource = getSourceForSeparation(global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
+	separateSource = global_var.harkSource
+	selectorSource = getSoundSrcInListenRange(separateSource)
 	const.SEPARATE_SOURCE_PUB.publish(separateSource)
 	const.SELECTOR_SOURCE_PUB.publish(selectorSource)
 
+#分離音声視聴モードに切り替える
 def listenSeparateSound():
 	global_var.listenSeparateSoundFlag = True
 	const.SEP_LIS_TRIG_PUB.publish(True)
 	#csvlog.writeLog(const.CSV_START_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
+#視聴範囲内のharkSourceを返す
+#引数：全定位情報
+#返り値：視聴範囲内の定位情報
 def getSoundSrcInListenRange(harkSource):
 	sourceInRange = HarkSource()
 	for index in range(len(harkSource.src)):
@@ -146,15 +121,15 @@ def getSoundSrcInListenRange(harkSource):
 			sourceInRange.exist_src_num += 1
 	return sourceInRange
 
+#全体音声視聴モードに切り替える
 def listenWholeSound():
 	global_var.listenSeparateSoundFlag = False
 	const.SEP_LIS_TRIG_PUB.publish(False)
-	csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
+	#csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
 #マイクロコーンは右側がマイナスなので角度を左右反転
 def getListenAngle(xaxis):
 	return -((xaxis * 2 * const.IMG_HOR_HALF_VIEW_AGL)/const.CAM_WHOLE_IMG_WID - const.IMG_HOR_HALF_VIEW_AGL)
-
 
 def setListenAngles(startX,endX):
 	global_var.listenRangeStartAngle = thetaimg.getAzimuthFromXAxis(startX)
@@ -174,11 +149,6 @@ def ifThetaInRange(theta):
 			flag = True
 
 	return flag
-
-# 	if getUIAzimuth(theta) >= global_var.listenRangeStartAngle and getUIAzimuth(theta) <= global_var.listenRangeEndAngle:
-# 		return True
-# 	else :
-# 		return False
 
 
 #トピック購読処理
