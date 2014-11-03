@@ -151,6 +151,15 @@ def ifThetaInRange(theta):
 	return flag
 
 
+#分離音声視聴範囲数を減らす
+def decListenSeparateSoundCount():
+	if global_var.listenSeparateSoundCount > 0:
+		global_var.listenSeparateSoundCount -= 1
+		if global_var.listenSeparateSoundCount is 0:
+			listenWholeSound()
+	else:
+		print "decrement listen separate sound count error"
+
 #トピック購読処理
 def subscriber():
 	rospy.Subscriber(const.HARK_LOC_SOURCE_TOPIC_NAME, HarkSource, localization_callback, buff_size = 1)

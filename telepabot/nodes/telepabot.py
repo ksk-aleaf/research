@@ -181,6 +181,8 @@ class CentralWidget(QtGui.QWidget):
 
 	#マウスクリック時のイベント
 	def mousePressEvent(self,event):
+		print "single click"
+		
 		#最大選択数分だけ選択されていなければ選択数を増やす
 		if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
 			global_var.listenSeparateSoundCount += 1
@@ -189,8 +191,9 @@ class CentralWidget(QtGui.QWidget):
 		listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
 		listenRange.startX = event.x()
 		listenRange.endX = listenRange.startX
-		global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
-		global_var.listenSeparateSoundFlag = True
+		global_var.listenRangeList[global_var.listenSeparateSoundCount - 1] = listenRange
+		#global_var.listenSeparateSoundFlag = True
+		format_loc_src_microcone.listenSeparateSound()
 
 		#スクリーンショット
 		#p = QtGui.QPixmap.grabWindow(self.winId())
@@ -198,6 +201,7 @@ class CentralWidget(QtGui.QWidget):
 
 	#ダブルクリック
 	def mouseDoubleClickEvent(self,event):
+		print "double click"
 		format_loc_src_microcone.listenWholeSound()
 		global_var.listenSeparateSoundFlag = False
 		global_var.listenSeparateSoundCount = 0
@@ -206,29 +210,29 @@ class CentralWidget(QtGui.QWidget):
 	#カーソル移動
 	def mouseMoveEvent(self,event):
 		global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
-		#global_var.listenRangeEndX = event.x()
 
 	#クリック離し
 	def mouseReleaseEvent(self, e):
-		listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
-		print "startx:"+str(listenRange.startX - const.CAM_IMG_OFS_X)
-		print "endx:" + str(listenRange.endX - const.CAM_IMG_OFS_X)
-		
-		#座標を角度に変換してグローバル変数にセット
-		if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+		#ダブルクリック後は実行しない
+		if global_var.listenSeparateSoundCount > 0:
+			listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
+			print "startx:"+str(listenRange.startX - const.CAM_IMG_OFS_X)
+			print "endx:" + str(listenRange.endX - const.CAM_IMG_OFS_X)
 			
-			if listenRange.startX > listenRange.endX:
-				listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
-
-			listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
-			listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
-			format_loc_src_microcone.listenSeparateSound()
-			global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
-		else:
-			if global_var.listenSeparateSoundCount > 0:
-				global_var.listenSeparateSoundCount -= 1
-
-		print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
+			#座標を角度に変換してグローバル変数にセット
+			if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+				
+				if listenRange.startX > listenRange.endX:
+					listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
+	
+				listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
+				listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
+	
+				global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
+			else:
+				format_loc_src_microcone.decListenSeparateSoundCount()
+	
+			print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
 
 
 	#視聴範囲用矩形枠取得
