@@ -107,16 +107,16 @@ class CentralWidget(QtGui.QWidget):
 
 
 	def paintListenRange(self,e,listenRange):
-		if global_var.listenSeparateSoundFlag:
-			qp = QtGui.QPainter()
-			qp.begin(self)
-			#color = QtGui.QColor(255, 255, 0, 50)
-			color = QtGui.QColor()
-			color.setNamedColor(const.RANGE_DRAW_COLOR_STR)
-			color.setAlpha(const.RANGE_DRAW_ALPHA)
-			qp.setBrush(color)
-			#qp.drawRect(self.getPaintRect(global_var.listenRangeStartX,global_var.listenRangeEndX))
-			qp.drawRect(self.getPaintRect(listenRange.startX,listenRange.endX))
+		#if global_var.listenSeparateSoundFlag:
+		qp = QtGui.QPainter()
+		qp.begin(self)
+		#color = QtGui.QColor(255, 255, 0, 50)
+		color = QtGui.QColor()
+		color.setNamedColor(const.RANGE_DRAW_COLOR_STR)
+		color.setAlpha(const.RANGE_DRAW_ALPHA)
+		qp.setBrush(color)
+		#qp.drawRect(self.getPaintRect(global_var.listenRangeStartX,global_var.listenRangeEndX))
+		qp.drawRect(self.getPaintRect(listenRange.startX,listenRange.endX))
 	
 	def paintListenRanges(self,e):
 		#print "listenSound:"+str(global_var.listenSeparateSoundCount)		
@@ -185,7 +185,7 @@ class CentralWidget(QtGui.QWidget):
 		#最大選択数分だけ選択されていなければ選択数を増やす
 		if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
 			global_var.listenSeparateSoundCount += 1
-			print "listenSound:"+str(global_var.listenSeparateSoundCount)
+			print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
 
 		listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
 		listenRange.startX = event.x()
@@ -223,18 +223,18 @@ class CentralWidget(QtGui.QWidget):
 		
 		#座標を角度に変換してグローバル変数にセット
 		if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+			if listenRange.startX > listenRange.endX:
+				tmp = listenRange.startX
+				listenRange.startX = listenRange.endX
+				listenRange.endX = tmp
 			listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
 			listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
 			format_loc_src_microcone.listenSeparateSound()
 			global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
 		else:
-			global_var.listenSeparateSoundCount -= 1
-			#global_var.listenSeparateSoundCount += 1
-		#else:
-		#	listenRange.endX = listenRange.startX
+			if global_var.listenSeparateSoundCount > 0:
+				global_var.listenSeparateSoundCount -= 1
 
-
-		
 		print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
 
 		#座標を角度に変換してグローバル変数にセット

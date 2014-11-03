@@ -95,31 +95,43 @@ def getSourceForSeparation(startAzimuth,endAzimuth):
 	separateSource = global_var.harkSource
 	selectorSource = getSoundSrcInListenRange(separateSource)
 
-	if len(selectorSource.src) == 0:
-		# 視聴範囲内に音源が定位できない場合は、分離性能は落ちるが定位情報を生成する
-		sourceid = 0
-		azimuthRange = endAzimuth - startAzimuth
-		if azimuthRange < const.HARK_SEPARATION_RESOLUTION:
-			azimuth = (startAzimuth + endAzimuth) / 2
-			selectorSource.src.append(getHarkSourceVal(sourceid, getMcAzimuth(azimuth)))
-		else:
-			sourcePointCount = int((azimuthRange - const.HARK_SEPARATION_RESOLUTION) / const.HARK_SEPARATION_RESOLUTION + 3)
-			azimuth = startAzimuth + const.HARK_SEPARATION_RESOLUTION / 2
-			for sourceid in range(0,sourcePointCount):
-				selectorSource.src.append(getHarkSourceVal(sourceid, getMcAzimuth(azimuth)))
-				azimuth = azimuth + (azimuthRange - const.HARK_SEPARATION_RESOLUTION) / (sourcePointCount -1)
-			separateSource = copy.deepcopy(selectorSource)
-			separateSource.src.append(getHarkSourceVal(sourceid + 1, getAgainstAzimuthInPm180(getMcAzimuth(azimuth))))
-			selectorSource.exist_src_num = len(selectorSource.src)
-			separateSource.exist_src_num = len(separateSource.src)
+# 	if len(selectorSource.src) == 0:
+# 		# 視聴範囲内に音源が定位できない場合は、分離性能は落ちるが定位情報を生成する
+# 		sourceid = 0
+# 		azimuthRange = endAzimuth - startAzimuth
+# 		if azimuthRange < const.HARK_SEPARATION_RESOLUTION:
+# 			azimuth = (startAzimuth + endAzimuth) / 2
+# 			selectorSource.src.append(getHarkSourceVal(sourceid, getMcAzimuth(azimuth)))
+# 		else:
+# 			sourcePointCount = int((azimuthRange - const.HARK_SEPARATION_RESOLUTION) / const.HARK_SEPARATION_RESOLUTION + 3)
+# 			azimuth = startAzimuth + const.HARK_SEPARATION_RESOLUTION / 2
+# 			for sourceid in range(0,sourcePointCount):
+# 				selectorSource.src.append(getHarkSourceVal(sourceid, getMcAzimuth(azimuth)))
+# 				azimuth = azimuth + (azimuthRange - const.HARK_SEPARATION_RESOLUTION) / (sourcePointCount -1)
+# 			separateSource = copy.deepcopy(selectorSource)
+# 			separateSource.src.append(getHarkSourceVal(sourceid + 1, getAgainstAzimuthInPm180(getMcAzimuth(azimuth))))
+# 			selectorSource.exist_src_num = len(selectorSource.src)
+# 			separateSource.exist_src_num = len(separateSource.src)
 
 	return [selectorSource,separateSource]
 
 #harkの音源分離モジュールに音源情報を送る
 def sendSrcForSoundSeparation():
+# 	selectorSource = []
+# 	separateSource = []
+# 
+# 	for index in range(global_var.listenSeparateSoundCount):
+# 		listenRange = global_var.listenRangeList[index]
+# 		tmpSelectorSource,tmpSeparateSource = getSourceForSeparation(listenRange.startAzimuth, listenRange.endAzimuth)
+# 		selectorSource.extend(tmpSelectorSource)
+# 		separateSource.extend(tmpSeparateSource)
+# 	
+# 	const.SEPARATE_SOURCE_PUB.publish(separateSource)
+# 	const.SELECTOR_SOURCE_PUB.publish(selectorSource)
+
 	selectorSource,separateSource = getSourceForSeparation(global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 	const.SEPARATE_SOURCE_PUB.publish(separateSource)
-	const.SELECTOR_SOURCE_PUB.publish(selectorSource)	
+	const.SELECTOR_SOURCE_PUB.publish(selectorSource)
 
 def listenSeparateSound():
 	global_var.listenSeparateSoundFlag = True
@@ -154,10 +166,19 @@ def setListenAxis(startAzimuth,endAzimuth):
 
 #角度が音源視聴範囲内か判定する
 def ifThetaInRange(theta):
-	if getUIAzimuth(theta) >= global_var.listenRangeStartAngle and getUIAzimuth(theta) <= global_var.listenRangeEndAngle:
-		return True
-	else :
-		return False
+	flag = False
+	
+	for index in range(global_var.listenSeparateSoundCount):
+		listenRange = global_var.listenRangeList[index]
+		if getUIAzimuth(theta) >= listenRange.startAzimuth and getUIAzimuth(theta) <= listenRange.endAzimuth:
+			flag = True
+
+	return flag
+
+# 	if getUIAzimuth(theta) >= global_var.listenRangeStartAngle and getUIAzimuth(theta) <= global_var.listenRangeEndAngle:
+# 		return True
+# 	else :
+# 		return False
 
 
 #トピック購読処理

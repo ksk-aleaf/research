@@ -88,7 +88,7 @@
     <Node name="node_SourceSelectorByDirection_1" type="SourceSelectorByDirection" x="1000" y="410">
       <Parameter name="MIN_AZIMUTH" type="float" value="-180" description="Minimum azimuth for source selection in degree. [default: -20.0]"/>
       <Parameter name="MAX_AZIMUTH" type="float" value="180" description="Maximum azimuth for source selection in degree. [default: 20.0]"/>
-      <Parameter name="MIN_ELEVATION" type="float" value="-30" description="Minimum elevation for source selection in degree. [default: -90.0]"/>
+      <Parameter name="MIN_ELEVATION" type="float" value="0" description="Minimum elevation for source selection in degree. [default: -90.0]"/>
       <Parameter name="MAX_ELEVATION" type="float" value="30" description="Maximum elevation for source selection in degree. [default: 90.0]"/>
     </Node>
     <Node name="node_RosHarkMsgsPublisher_1" type="RosHarkMsgsPublisher" x="1430" y="440">
