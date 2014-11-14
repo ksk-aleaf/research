@@ -105,35 +105,95 @@ class CentralWidget(QtGui.QWidget):
 			else:
 				self.cameraDevice.newFrame.disconnect(self._onNewFrame)
 
+	#色情報を取得
+	#color:色 alpha:透過度
+	def getColor(self,colorStr,alpha):
+		color = QtGui.QColor()
+		color.setNamedColor(colorStr)
+		color.setAlpha(alpha)
+		return color
 
-	def paintListenRange(self,e,listenRange):
-		#if global_var.listenSeparateSoundFlag:
+	#聴取範囲を正面とそれ以外に分離
+	def separateListenRange(self,listenRange):
+		frontListenRange = None
+		leftSideListenRange = None
+		rightSideListenRange = None
+		
+		if listenRange.endX < const.LEFT_FRONT_AREA_X:
+			leftSideListenRange = listenRange
+		elif listenRange.startX > const.RIGHT_FRONT_AREA_X:
+			rightSideListenRange = listenRange
+		elif listenRange.startX < const.LEFT_FRONT_AREA_X and listenRange.endX > const.LEFT_FRONT_AREA_X:
+			leftSideListenRange = ListenRange(listenRange.startX,const.LEFT_FRONT_AREA_X,0,0)
+			if listenRange.endX < const.RIGHT_FRONT_AREA_X:
+				frontListenRange = ListenRange(const.LEFT_FRONT_AREA_X,listenRange.endX,0,0)
+			else:
+				frontListenRange = ListenRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X,0,0)
+				rightSideListenRange = ListenRange(const.RIGHT_FRONT_AREA_X,listenRange.endX,0,0)
+		elif listenRange.startX >= const.LEFT_FRONT_AREA_X:
+			if listenRange.endX < const.RIGHT_FRONT_AREA_X:
+				frontListenRange = listenRange
+			else:
+				frontListenRange = ListenRange(listenRange.startX,const.RIGHT_FRONT_AREA_X,0,0)
+				rightSideListenRange = ListenRange(const.RIGHT_FRONT_AREA_X,listenRange.endX,0,0)
+		
+		return leftSideListenRange,frontListenRange,rightSideListenRange
+
+			
+
+	#選択聴取範囲(単体)を描画
+	def paintListenRange(self,event,listenRange):
+		#正面、それ以外で明るさを分ける
+		if listenRange.startX > listenRange.endX:
+			listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
+
+		leftSideListenRange,frontListenRange,rightSideListenRange = self.separateListenRange(listenRange)
+		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
+		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
+		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
+
+	#選択聴取範囲(複数)を描画
+	def paintListenRanges(self,event):
+		#print "listenSound:"+str(global_var.listenSeparateSoundCount)		
+		for index in range(global_var.listenSeparateSoundCount):
+			self.paintListenRange(event,global_var.listenRangeList[index])
+
+	#正面以外、かつ選択聴取範囲外を暗くする
+	def paintDarkFilter(self,event):
+		
+		if global_var.listenSeparateSoundCount is const.LISTEN_SEPARATE_SOUND_MAX_NUM:
+			listenRangeList = []
+			
+			#視聴範囲を取得
+			for index in range(global_var.listenSeparateSoundCount):
+				listenRangeList.append(global_var.listenRangeList[index])
+			
+			#視聴範囲をx座標が小さい順に並び替える
+			if listenRangeList[const.MAIN_LISTEN_AREA].startX > listenRangeList[const.SUB_LISTEN_AREA].startX:
+				listenRangeList[const.MAIN_LISTEN_AREA],listenRangeList[const.SUB_LISTEN_AREA] = listenRangeList[const.SUB_LISTEN_AREA],listenRangeList[const.MAIN_LISTEN_AREA]
+
 		qp = QtGui.QPainter()
 		qp.begin(self)
 		#color = QtGui.QColor(255, 255, 0, 50)
 		color = QtGui.QColor()
-		color.setNamedColor(const.RANGE_DRAW_COLOR_STR)
-		color.setAlpha(const.RANGE_DRAW_ALPHA)
+		color.setNamedColor(const.FILTER_DRAW_COLOR_STR)
+		color.setAlpha(const.FILTER_LISTEN_ALPHA)
 		qp.setBrush(color)
-		#qp.drawRect(self.getPaintRect(global_var.listenRangeStartX,global_var.listenRangeEndX))
-		qp.drawRect(self.getPaintRect(listenRange.startX,listenRange.endX))
-	
-	def paintListenRanges(self,e):
-		#print "listenSound:"+str(global_var.listenSeparateSoundCount)		
-		for index in range(global_var.listenSeparateSoundCount):
-			self.paintListenRange(e,global_var.listenRangeList[index])
-	
-	def paintDarkFilter(self,event):
-			qp = QtGui.QPainter()
-			qp.begin(self)
-			#color = QtGui.QColor(255, 255, 0, 50)
-			color = QtGui.QColor()
-			color.setNamedColor(const.FILTER_DRAW_COLOR_STR)
-			color.setAlpha(const.FILTER_LISTEN_ALPHA)
-			qp.setBrush(color)
-			qp.drawRect(self.getPaintRect(0,100))
+		#qp.drawRect(self.getPaintRect(0,100))
+		#qp.drawRect(self.getPaintRect(100,200))
 
-	def paintRecogWord(self,e):
+
+	#矩形を描画
+	#引数：color 矩形の色(QColor)
+	#      startX,endX 矩形の始点、終点
+	def paintRect(self,event,color,listenRange):
+		if listenRange is not None:
+			painter = QtGui.QPainter()
+			painter.begin(self)
+			painter.setBrush(color)
+			painter.drawRect(self.getPaintRect(listenRange.startX,listenRange.endX))
+
+	def paintRecogWord(self,event):
 		recogword.adjustWordsPosition()
 		recogWordList = global_var.recogWordList
 		for horizonList in recogWordList:
@@ -175,7 +235,6 @@ class CentralWidget(QtGui.QWidget):
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]
 		self.paintCamImg(event)
 		self.paintListenRanges(event)
-		#self.paintListenRange(event)
 		manipulate_turtlebot2.manipulateOmni()
 		#self.paintDarkFilter(event)
 

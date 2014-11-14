@@ -63,7 +63,7 @@
       <Parameter name="MIN_FREQUENCY" type="int" value="125" description="Minimum frequency (Hz) [default: 125]"/>
       <Parameter name="MAX_FREQUENCY" type="int" value="7900" description="Maximum frequency (Hz) [default: 7900]"/>
       <Parameter name="WINDOW" type="string" value="HAMMING" description="A window function for overlap-add. WINDOW should be CONJ, HAMMING, RECTANGLE, or HANNING. [default: HAMMING]"/>
-      <Parameter name="OUTPUT_GAIN" type="float" value="1" description="Output gain factor. [default: 1.0]"/>
+      <Parameter name="OUTPUT_GAIN" type="float" value="3.0" description="Output gain factor. [default: 1.0]"/>
     </Node>
     <Node name="node_MapToVector_1" type="MapToVector" x="1047" y="1222">
       <Parameter name="ALGORITHM" type="string" value="SUMMATION" description="Algorithm to concatenate multiple maps into one vector"/>
@@ -79,7 +79,7 @@
       <Parameter name="ADVANCE" type="int" value="160" description="The shift length beween adjacent frames (in samples)[default: 160]."/>
       <Parameter name="ENABLE_SOFT_RESAMPLE" type="bool" value="true" description="Enable to change the sampling rate of playing sound automatically depending on the status of ALSA sound card."/>
       <Parameter name="LATENCY" type="int" value="10000" description="Buffers for playing sound [ns]."/>
-      <Parameter name="GAIN" type="float" value="1" description="Amplitude gain for playing sound."/>
+      <Parameter name="GAIN" type="float" value="10.0" description="Amplitude gain for playing sound."/>
     </Node>
     <Node name="node_ChannelSelector_1" type="ChannelSelector" x="750" y="360">
       <Parameter name="SELECTOR" type="object" value="&lt;Vector&lt;int&gt; 0 1 2 3 4 5 6&gt;" description="Channel selection setting which is a vector consisting of channel IDs (ID starts with 0). When the first three channels are selected from four channels, this should be set to &lt;Vector&lt;int&gt; 0 1 2&gt;."/>
