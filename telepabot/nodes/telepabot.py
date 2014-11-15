@@ -39,7 +39,12 @@ import thetaimg
 import manipulate_turtlebot2
 import time
 
-#testcommit
+#第一引数より第二引数が大きければ入れ替える
+def sortNums(var1,var2):
+	if var1 > var2:
+		return var2,var1
+	else:
+		return var1,var2
 
 #turtlebotへコマンドを送信
 def sendCommand(command):
@@ -51,15 +56,17 @@ def sendCommand(command):
 
 
 #分離音声視聴範囲クラス
-class ListenRange():
-	def __init__(self,startX,endX,startAzimuth,endAzimuth):
+class CrosswideRange():
+	def __init__(self,startX = 0,endX = 0,startAzimuth = 0,endAzimuth = 0):
 		self.startX,self.endX,self.startAzimuth,self.endAzimuth = startX,endX,startAzimuth,endAzimuth
+	def printRangeInfo(self):
+		print "startX:"+str(self.startX)+"  endX:"+str(self.endX)
 
 #分離音声視聴リスト初期化
 def initListenRange():
 	global_var.listenRangeList = []
 	for index in range(const.LISTEN_SEPARATE_SOUND_MAX_NUM):
-		global_var.listenRangeList.append(ListenRange(0,0,0,0))
+		global_var.listenRangeList.append(CrosswideRange())
 
 
 #ウィンドウ定義クラス
@@ -113,74 +120,123 @@ class CentralWidget(QtGui.QWidget):
 		color.setAlpha(alpha)
 		return color
 
-	#聴取範囲を正面とそれ以外に分離
-	def separateListenRange(self,listenRange):
+	#聴取範囲を正面(constのLEFT~RIGHT_FRONT_AREA)と左右に分離
+	def getDrawRanges(self,listenRange):
 		frontListenRange = None
 		leftSideListenRange = None
 		rightSideListenRange = None
+		#darkFilterRangeList = []
 		
 		if listenRange.endX < const.LEFT_FRONT_AREA_X:
 			leftSideListenRange = listenRange
+# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,listenRange.startX))
+# 			darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.LEFT_FRONT_AREA_X))
+# 			darkFilterRangeList.append(CrosswideRange(const.RIGHT_FRONT_AREA_X,const.CAM_IMG_END_X))
+
 		elif listenRange.startX > const.RIGHT_FRONT_AREA_X:
 			rightSideListenRange = listenRange
+# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,const.LEFT_FRONT_AREA_X))
+# 			darkFilterRangeList.append(CrosswideRange(const.RIGHT_FRONT_AREA_X,listenRange.startX))
+# 			darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.CAM_IMG_END_X))
+			
 		elif listenRange.startX < const.LEFT_FRONT_AREA_X and listenRange.endX > const.LEFT_FRONT_AREA_X:
-			leftSideListenRange = ListenRange(listenRange.startX,const.LEFT_FRONT_AREA_X,0,0)
+			leftSideListenRange = CrosswideRange(listenRange.startX,const.LEFT_FRONT_AREA_X)
+# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,listenRange.startX))
+
 			if listenRange.endX < const.RIGHT_FRONT_AREA_X:
-				frontListenRange = ListenRange(const.LEFT_FRONT_AREA_X,listenRange.endX,0,0)
+				frontListenRange = CrosswideRange(const.LEFT_FRONT_AREA_X,listenRange.endX)
+# 				darkFilterRangeList.append(CrosswideRange(const.LEFT_FRONT_AREA_X,const.CAM_IMG_END_X))
 			else:
-				frontListenRange = ListenRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X,0,0)
-				rightSideListenRange = ListenRange(const.RIGHT_FRONT_AREA_X,listenRange.endX,0,0)
+				frontListenRange = CrosswideRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X)
+				rightSideListenRange = CrosswideRange(const.RIGHT_FRONT_AREA_X,listenRange.endX)
+# 				darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.CAM_IMG_END_X))
+
 		elif listenRange.startX >= const.LEFT_FRONT_AREA_X:
+# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,const.LEFT_FRONT_AREA_X))
+
 			if listenRange.endX < const.RIGHT_FRONT_AREA_X:
 				frontListenRange = listenRange
+# 				darkFilterRangeList.append(CrosswideRange(const.RIGHT_FRONT_AREA_X,const.CAM_IMG_END_X))
 			else:
-				frontListenRange = ListenRange(listenRange.startX,const.RIGHT_FRONT_AREA_X,0,0)
-				rightSideListenRange = ListenRange(const.RIGHT_FRONT_AREA_X,listenRange.endX,0,0)
+				frontListenRange = CrosswideRange(listenRange.startX,const.RIGHT_FRONT_AREA_X)
+				rightSideListenRange = CrosswideRange(const.RIGHT_FRONT_AREA_X,listenRange.endX)
+# 				darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.CAM_IMG_END_X))
 		
-		return leftSideListenRange,frontListenRange,rightSideListenRange
+		return leftSideListenRange,frontListenRange,rightSideListenRange#,darkFilterRangeList
 
-			
+	#暗くする範囲(正面・選択聴取範囲以外)を取得
+	#listenRangeList:startX < endX 及び startXが小さい順にソートされていると仮定
+#	def getDarkFilterRange(self,listenRangeList):
+		
+		
+		
 
 	#選択聴取範囲(単体)を描画
 	def paintListenRange(self,event,listenRange):
-		#正面、それ以外で明るさを分ける
-		if listenRange.startX > listenRange.endX:
-			listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
+		
+		#startXの方が小さくなるようソート
+		listenRange.startX,listenRange.endX = sortNums(listenRange.startX, listenRange.endX)
+# 		if listenRange.startX > listenRange.endX:
+# 			listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
 
-		leftSideListenRange,frontListenRange,rightSideListenRange = self.separateListenRange(listenRange)
+		#正面、それ以外で明るさを分ける
+		leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(listenRange)
 		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
 		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
 		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
+		
 
 	#選択聴取範囲(複数)を描画
 	def paintListenRanges(self,event):
-		#print "listenSound:"+str(global_var.listenSeparateSoundCount)		
 		for index in range(global_var.listenSeparateSoundCount):
 			self.paintListenRange(event,global_var.listenRangeList[index])
 
+
+
 	#正面以外、かつ選択聴取範囲外を暗くする
 	def paintDarkFilter(self,event):
-		
-		if global_var.listenSeparateSoundCount is const.LISTEN_SEPARATE_SOUND_MAX_NUM:
-			listenRangeList = []
+
+		if global_var.listenSeparateSoundFlag is True:
+			rangeList = []
 			
 			#視聴範囲を取得
 			for index in range(global_var.listenSeparateSoundCount):
-				listenRangeList.append(global_var.listenRangeList[index])
+				rangeList.append(global_var.listenRangeList[index])
+			
+			#正面範囲を加える
+			rangeList.append(CrosswideRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X))
+			
+			#各範囲において startX < endX となるようソート
+			for eachRange in rangeList:
+				eachRange.startX,eachRange.endX = sortNums(eachRange.startX,eachRange.endX)
 			
 			#視聴範囲をx座標が小さい順に並び替える
-			if listenRangeList[const.MAIN_LISTEN_AREA].startX > listenRangeList[const.SUB_LISTEN_AREA].startX:
-				listenRangeList[const.MAIN_LISTEN_AREA],listenRangeList[const.SUB_LISTEN_AREA] = listenRangeList[const.SUB_LISTEN_AREA],listenRangeList[const.MAIN_LISTEN_AREA]
+			rangeList = sorted(rangeList,cmp=lambda range1,range2: cmp(range1.startX,range2.startX))#cmp=self.cmpRangeByStartX
 
-		qp = QtGui.QPainter()
-		qp.begin(self)
-		#color = QtGui.QColor(255, 255, 0, 50)
-		color = QtGui.QColor()
-		color.setNamedColor(const.FILTER_DRAW_COLOR_STR)
-		color.setAlpha(const.FILTER_LISTEN_ALPHA)
-		qp.setBrush(color)
-		#qp.drawRect(self.getPaintRect(0,100))
-		#qp.drawRect(self.getPaintRect(100,200))
+			#debug		
+			print "---listen and front range after sort ---"
+			for eachRange in rangeList:
+				eachRange.printRangeInfo()
+			
+			#包括関係の範囲があれば小さい方を消去
+			loopFinishFlag = False
+			while loopFinishFlag is False:
+				for index in range(len(rangeList)-1):
+					if rangeList[index].endX > rangeList[index+1].endX:
+						rangeList.pop(index+1)
+						break
+				loopFinishFlag = True
+			
+			#前の範囲の終点〜次の範囲の始点の間を暗くするエリアとする(幅が0以下なら何も加えない)
+			darkFilterRangeList = []
+			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,rangeList[0].startX))
+			for index in range(len(rangeList)-1):
+				if rangeList[index+1].startX > rangeList[index].endX:
+					darkFilterRangeList.append(CrosswideRange(rangeList[index].endX,rangeList[index+1].startX))
+			darkFilterRangeList.append(CrosswideRange(rangeList[len(rangeList)-1].endX,const.CAM_IMG_END_X))
+	
+			for eachRange in darkFilterRangeList:
+				self.paintRect(event, self.getColor(const.FILTER_DRAW_COLOR_STR, const.FILTER_UNLISTEN_ALPHA), eachRange)
 
 
 	#矩形を描画
@@ -235,8 +291,9 @@ class CentralWidget(QtGui.QWidget):
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]
 		self.paintCamImg(event)
 		self.paintListenRanges(event)
+		self.paintDarkFilter(event)
 		manipulate_turtlebot2.manipulateOmni()
-		#self.paintDarkFilter(event)
+		
 
 	#マウスクリック時のイベント
 	def mousePressEvent(self,event):
@@ -252,7 +309,7 @@ class CentralWidget(QtGui.QWidget):
 		listenRange.endX = listenRange.startX
 		global_var.listenRangeList[global_var.listenSeparateSoundCount - 1] = listenRange
 		#global_var.listenSeparateSoundFlag = True
-		format_loc_src_microcone.listenSeparateSound()
+		#format_loc_src_microcone.listenSeparateSound()
 
 		#スクリーンショット
 		#p = QtGui.QPixmap.grabWindow(self.winId())
@@ -288,6 +345,8 @@ class CentralWidget(QtGui.QWidget):
 				listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
 	
 				global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
+				format_loc_src_microcone.listenSeparateSound()
+				
 			else:
 				format_loc_src_microcone.decListenSeparateSoundCount()
 	
