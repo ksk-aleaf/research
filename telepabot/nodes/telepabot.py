@@ -125,62 +125,44 @@ class CentralWidget(QtGui.QWidget):
 		frontListenRange = None
 		leftSideListenRange = None
 		rightSideListenRange = None
-		#darkFilterRangeList = []
 		
 		if listenRange.endX < const.LEFT_FRONT_AREA_X:
 			leftSideListenRange = listenRange
-# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,listenRange.startX))
-# 			darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.LEFT_FRONT_AREA_X))
-# 			darkFilterRangeList.append(CrosswideRange(const.RIGHT_FRONT_AREA_X,const.CAM_IMG_END_X))
 
 		elif listenRange.startX > const.RIGHT_FRONT_AREA_X:
 			rightSideListenRange = listenRange
-# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,const.LEFT_FRONT_AREA_X))
-# 			darkFilterRangeList.append(CrosswideRange(const.RIGHT_FRONT_AREA_X,listenRange.startX))
-# 			darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.CAM_IMG_END_X))
-			
+
 		elif listenRange.startX < const.LEFT_FRONT_AREA_X and listenRange.endX > const.LEFT_FRONT_AREA_X:
 			leftSideListenRange = CrosswideRange(listenRange.startX,const.LEFT_FRONT_AREA_X)
-# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,listenRange.startX))
-
+			
 			if listenRange.endX < const.RIGHT_FRONT_AREA_X:
 				frontListenRange = CrosswideRange(const.LEFT_FRONT_AREA_X,listenRange.endX)
-# 				darkFilterRangeList.append(CrosswideRange(const.LEFT_FRONT_AREA_X,const.CAM_IMG_END_X))
 			else:
 				frontListenRange = CrosswideRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X)
 				rightSideListenRange = CrosswideRange(const.RIGHT_FRONT_AREA_X,listenRange.endX)
-# 				darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.CAM_IMG_END_X))
 
 		elif listenRange.startX >= const.LEFT_FRONT_AREA_X:
-# 			darkFilterRangeList.append(CrosswideRange(const.CAM_IMG_START_X,const.LEFT_FRONT_AREA_X))
 
 			if listenRange.endX < const.RIGHT_FRONT_AREA_X:
 				frontListenRange = listenRange
-# 				darkFilterRangeList.append(CrosswideRange(const.RIGHT_FRONT_AREA_X,const.CAM_IMG_END_X))
 			else:
 				frontListenRange = CrosswideRange(listenRange.startX,const.RIGHT_FRONT_AREA_X)
 				rightSideListenRange = CrosswideRange(const.RIGHT_FRONT_AREA_X,listenRange.endX)
-# 				darkFilterRangeList.append(CrosswideRange(listenRange.endX,const.CAM_IMG_END_X))
 		
 		return leftSideListenRange,frontListenRange,rightSideListenRange#,darkFilterRangeList
-
-	#暗くする範囲(正面・選択聴取範囲以外)を取得
-	#listenRangeList:startX < endX 及び startXが小さい順にソートされていると仮定
-#	def getDarkFilterRange(self,listenRangeList):
-		
-		
 		
 
 	#選択聴取範囲(単体)を描画
 	def paintListenRange(self,event,listenRange):
 		
 		#startXの方が小さくなるようソート
-		listenRange.startX,listenRange.endX = sortNums(listenRange.startX, listenRange.endX)
-# 		if listenRange.startX > listenRange.endX:
-# 			listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
+		startX,endX = sortNums(listenRange.startX, listenRange.endX)
+		
+		print "startX:"+str(startX)
+		print "endX:"+str(endX)
 
 		#正面、それ以外で明るさを分ける
-		leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(listenRange)
+		leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(CrosswideRange(startX,endX))
 		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
 		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
 		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
@@ -189,9 +171,7 @@ class CentralWidget(QtGui.QWidget):
 	#選択聴取範囲(複数)を描画
 	def paintListenRanges(self,event):
 		for index in range(global_var.listenSeparateSoundCount):
-			self.paintListenRange(event,global_var.listenRangeList[index])
-
-
+			self.paintListenRange(event,copy.deepcopy(global_var.listenRangeList[index]))
 
 	#正面以外、かつ選択聴取範囲外を暗くする
 	def paintDarkFilter(self,event):
@@ -201,7 +181,7 @@ class CentralWidget(QtGui.QWidget):
 			
 			#視聴範囲を取得
 			for index in range(global_var.listenSeparateSoundCount):
-				rangeList.append(global_var.listenRangeList[index])
+				rangeList.append(copy.deepcopy(global_var.listenRangeList[index]))
 			
 			#正面範囲を加える
 			rangeList.append(CrosswideRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X))
@@ -287,13 +267,13 @@ class CentralWidget(QtGui.QWidget):
 	def paintEvent(self, event):
 		self.paintRecogWord(event)
 		self.paintLocVoice()
-		#tmpLocSrcList = global_var.locSrcList[:]
-		#tmpVanLocSrcList= global_var.vanLocSrcList[:]
 		self.paintCamImg(event)
 		self.paintListenRanges(event)
 		self.paintDarkFilter(event)
 		manipulate_turtlebot2.manipulateOmni()
 		
+		#tmpLocSrcList = global_var.locSrcList[:]
+		#tmpVanLocSrcList= global_var.vanLocSrcList[:]		
 
 	#マウスクリック時のイベント
 	def mousePressEvent(self,event):
@@ -302,14 +282,10 @@ class CentralWidget(QtGui.QWidget):
 		#最大選択数分だけ選択されていなければ選択数を増やす
 		if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
 			global_var.listenSeparateSoundCount += 1
-			print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
 
 		listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
 		listenRange.startX = event.x()
 		listenRange.endX = listenRange.startX
-		global_var.listenRangeList[global_var.listenSeparateSoundCount - 1] = listenRange
-		#global_var.listenSeparateSoundFlag = True
-		#format_loc_src_microcone.listenSeparateSound()
 
 		#スクリーンショット
 		#p = QtGui.QPixmap.grabWindow(self.winId())
@@ -332,19 +308,15 @@ class CentralWidget(QtGui.QWidget):
 		#ダブルクリック後は実行しない
 		if global_var.listenSeparateSoundCount > 0:
 			listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
-			print "startx:"+str(listenRange.startX - const.CAM_IMG_OFS_X)
-			print "endx:" + str(listenRange.endX - const.CAM_IMG_OFS_X)
 			
 			#座標を角度に変換してグローバル変数にセット
 			if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
 				
-				if listenRange.startX > listenRange.endX:
-					listenRange.startX,listenRange.endX = listenRange.endX,listenRange.startX
+				listenRange.startX,listenRange.endX = sortNums(listenRange.startX,listenRange.endX)
 	
 				listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
 				listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
 	
-				global_var.listenRangeList[global_var.listenSeparateSoundCount -1] = listenRange
 				format_loc_src_microcone.listenSeparateSound()
 				
 			else:
