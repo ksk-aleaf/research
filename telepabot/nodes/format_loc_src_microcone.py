@@ -160,6 +160,21 @@ def decListenSeparateSoundCount():
 	else:
 		print "decrement listen separate sound count error"
 
+#視聴範囲の角度を引数の角度だけずらす
+def shiftListenRange(azimuth):
+	for listenRange in global_var.listenRangeList:
+		listenRange.startAzimuth += azimuth
+		listenRange.endAzimuth += azimuth
+		listenRange.startX = thetaimg.getXAxisFromAzimuth(listenRange.startAzimuth)
+		listenRange.endX = thetaimg.getXAxisFromAzimuth(listenRange.endAzimuth)
+
+#分離視聴角度(1番目)を取得
+def getSeparateListenAngle():
+	azimuth = 0
+	if global_var.listenSeparateSoundCount > 0:
+		azimuth = (global_var.listenRangeList[0].startAzimuth + global_var.listenRangeList[0].endAzimuth) /2
+	return azimuth
+		
 #トピック購読処理
 def subscriber():
 	rospy.Subscriber(const.HARK_LOC_SOURCE_TOPIC_NAME, HarkSource, localization_callback, buff_size = 1)

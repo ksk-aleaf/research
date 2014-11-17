@@ -201,10 +201,12 @@ JOYSTICK_TOPIC_NAME="joy"
 #turtlebot操作関連パラメータ
 SET_TO_STR = "rosparam set /mobile_base/cmd_vel_timeout "
 MAN_ROT_TO = 0.4
+#MAN_ROT_COR_VAL = 10#マニュアル回転時の角度補正値
+MAN_TO_PER_THETA = 0.026
 KEY_MAN_ROT_TO = 0.5
 JOY_MAN_ROT_TO = 0.4
 DEFAULT_TO = 0.0
-TO_PER_THETA = 0.05#0.035
+TO_PER_THETA = 0.035#0.035
 SEND_CMD_OVERHEAD = 1.0
 
 

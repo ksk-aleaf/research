@@ -157,9 +157,6 @@ class CentralWidget(QtGui.QWidget):
 		
 		#startXの方が小さくなるようソート
 		startX,endX = sortNums(listenRange.startX, listenRange.endX)
-		
-		print "startX:"+str(startX)
-		print "endX:"+str(endX)
 
 		#正面、それ以外で明るさを分ける
 		leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(CrosswideRange(startX,endX))
@@ -194,9 +191,9 @@ class CentralWidget(QtGui.QWidget):
 			rangeList = sorted(rangeList,cmp=lambda range1,range2: cmp(range1.startX,range2.startX))#cmp=self.cmpRangeByStartX
 
 			#debug		
-			print "---listen and front range after sort ---"
-			for eachRange in rangeList:
-				eachRange.printRangeInfo()
+# 			print "---listen and front range after sort ---"
+# 			for eachRange in rangeList:
+# 				eachRange.printRangeInfo()
 			
 			#包括関係の範囲があれば小さい方を消去
 			loopFinishFlag = False
@@ -363,20 +360,18 @@ class MainWindow(QtGui.QMainWindow):
 		key = event.key()
 		command = None
 		if key == Qt.Key_Right:
-			print "key_6_Pressed"
+			print "RIGHT"
 			command = const.R_ROT_CMD
+			manipulate_turtlebot2.moveRobot(const.JOY_RIGHT)
 		elif key == Qt.Key_Left:
-			print "key_4_Pressed"
-			command = const.L_ROT_CMD
+			print "LEFT"
+			manipulate_turtlebot2.moveRobot(const.JOY_LEFT)
 		elif key == Qt.Key_Up:
-			print "key_8_Pressed"
-			command = const.FWD_CMD
+			print "UP"
+			manipulate_turtlebot2.moveRobot(const.JOY_UP)
 		elif key == Qt.Key_Down:
-			print "key_2_Pressed"
-			command = const.BACK_CMD
-		#sendCommand(command,const.KEY_MAN_ROT_TO)
-		if command is not None:
-			sendCommand(command)
+			print "DOWN"
+			manipulate_turtlebot2.moveRobot(const.JOY_DOWN)
 
 def signal_handler(signal, frame):
 	print('You pressed Ctrl+C!')
