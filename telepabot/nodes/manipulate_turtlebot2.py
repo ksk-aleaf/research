@@ -67,21 +67,11 @@ def autoRotateStarter(joyInput):
 def autoRotateFinisher():
 	global_var.ifAutoRotate = False
 	global_var.robotMoveDirection = const.JOY_STAY
-	#回転に合わせて視聴範囲を移動
-# 	if global_var.listenSeparateSoundCount > 0:
-# 		azimuth = (global_var.listenRangeList[0].startAzimuth + global_var.listenRangeList[0].endAzimuth) /2
-# 	global_var.listenRangeStartAngle = global_var.listenRangeStartAngle - azimuth
-# 	global_var.listenRangeEndAngle = global_var.listenRangeEndAngle - azimuth
-# 	format_loc_src_microcone.setListenAxis(global_var.listenRangeStartAngle,global_var.listenRangeEndAngle)
 
 	#回転分を調節
-	format_loc_src_microcone.shiftListenRange(format_loc_src_microcone.getSeparateListenAngle())
-
+	format_loc_src_microcone.shiftListenRange(-(format_loc_src_microcone.getSeparateListenAngle()))
 	format_loc_src_microcone.listenSeparateSound()
-# 	global_var.listenRangeStartAngle = -10
-# 	global_var.listenRangeStartX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeStartAngle)
-# 	global_var.listenRangeEndAngle = 10
-# 	global_var.listenRangeEndX = thetaimg.getXAxisFromAzimuth(global_var.listenRangeEndAngle)	
+
 
 def manualRotateStarter():
 	print "manualRotateStarter"
@@ -90,8 +80,8 @@ def manualRotateStarter():
 
 def manualRotateFinisher():
 	print "manualRotateFinisher"
-	print "rotating time:" + str(time.time() - global_var.manualRotateStartPeriod)
-	print "rotating azimuth:" + str((time.time() - global_var.manualRotateStartPeriod)/const.TO_PER_THETA)
+# 	print "rotating time:" + str(time.time() - global_var.manualRotateStartPeriod)
+# 	print "rotating azimuth:" + str((time.time() - global_var.manualRotateStartPeriod)/const.TO_PER_THETA)
 	rotateAzimuth = (time.time() - global_var.manualRotateStartPeriod)/const.MAN_TO_PER_THETA# - 10
 	if global_var.manualRotateDirection is const.JOY_RIGHT:
 		rotateAzimuth = - rotateAzimuth
@@ -99,9 +89,9 @@ def manualRotateFinisher():
 
 #操作とマニュアル操作フラグが食い違っていたら合わせる
 def checkManualRotatingFlag():
-	print "chekcManualRotating"
-	print "manualRotatingFlag:"+str(global_var.manualRotatingFlag)
-	print "robotMoveDirection:"+str(global_var.robotMoveDirection)
+# 	print "chekcManualRotating"
+# 	print "manualRotatingFlag:"+str(global_var.manualRotatingFlag)
+# 	print "robotMoveDirection:"+str(global_var.robotMoveDirection)
 	#print "leftRightInput:"+str(joyInput.leftRightInput)
 	
 	if global_var.manualRotatingFlag is True and global_var.robotMoveDirection is const.JOY_STAY:
@@ -148,8 +138,9 @@ def joy_callback(joydata):
 			autoRotateStarter(joyInput)
 		else:
 			global_var.robotMoveDirection = getDirection(joyInput)
+			checkManualRotatingFlag()
 
-	checkManualRotatingFlag()
+
 
 def subscriber():
 	rospy.Subscriber(const.JOYSTICK_TOPIC_NAME, Joy, joy_callback, buff_size = 1)
