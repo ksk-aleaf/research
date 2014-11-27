@@ -168,6 +168,12 @@ def shiftListenRange(azimuth):
 		listenRange.startX = thetaimg.getXAxisFromAzimuth(listenRange.startAzimuth)
 		listenRange.endX = thetaimg.getXAxisFromAzimuth(listenRange.endAzimuth)
 
+#メインとサブの視聴範囲を入れ替える
+def switchListenRange():
+	if len(global_var.listenRangeList) == const.LISTEN_SEPARATE_SOUND_MAX_NUM:
+		global_var.listenRangeList[const.MAIN_LISTEN_AREA],	global_var.listenRangeList[const.SUB_LISTEN_AREA] = global_var.listenRangeList[const.SUB_LISTEN_AREA],	global_var.listenRangeList[const.MAIN_LISTEN_AREA]
+
+
 #分離視聴角度(1番目)を取得
 def getSeparateListenAngle():
 	azimuth = 0

@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist
 #from geometry_msgs.msg import Vector3
 from hark_msgs.msg import HarkSource  # @UnresolvedImport
 from std_msgs.msg import Bool
-
+from std_msgs.msg import Empty
 #openCV import
 from cv_bridge import CvBridge, CvBridgeError
 #import cv
@@ -96,18 +96,16 @@ VAN_SRC_KEEP_SEC= 3.0
 
 #staticに使いたいインスタンス(今のところコマンド送信用)
 L_ROT_CMD = Twist()
-#L_ROT_CMD.angular = Vector3()
 L_ROT_CMD.angular.z = 0.88
 R_ROT_CMD = Twist()
-#R_ROT_CMD.angular = Vector3()
 R_ROT_CMD.angular.z = -0.88
+STOP_ROT_CMD = Twist()
+STOP_ROT_CMD.angular.z = 0
+
 FWD_CMD = Twist()
-#FWD_CMD.linear = Vector3()
 FWD_CMD.linear.x = -0.1
 BACK_CMD = Twist()
-#BACK_CMD.linear = Vector3()
 BACK_CMD.linear.x = 0.1
-#CMD_PUBLISHER = rospy.Publisher('/cmd_vel', Twist)
 
 #image convert static instance
 CV_BRIDGE = CvBridge()
@@ -129,9 +127,11 @@ MEDIUM_POW_THR = 1
 #分離音声視聴GUI
 LISTEN_SEPARATE_SOUND_MAX_NUM = 2
 IGNOR_PIX_THR = 20#この幅以下で指定されたら無視する
-RANGE_DRAW_COLOR_STR = "yellow"
+#RANGE_DRAW_COLOR_STR = "yellow"
+MAIN_RANGE_DRAW_COLOR_STR = "red"
+SUB_RANGE_DRAW_COLOR_STR = "blue"
 RANGE_DRAW_FRONT_ALPHA = 50
-RANGE_DRAW_SIDE_ALPHA = 100
+RANGE_DRAW_SIDE_ALPHA = 150
 FILTER_DRAW_COLOR_STR = "black"
 FILTER_FRONT_ALPHA = 50
 FILTER_LISTEN_ALPHA = 30
@@ -141,6 +141,8 @@ SUB_LISTEN_AREA = 1
 FRONT_AREA_ANGLE_WIDTH = 60
 LEFT_FRONT_AREA_X = CAM_WHOLE_IMG_WID * (180 - FRONT_AREA_ANGLE_WIDTH / 2 ) / 360
 RIGHT_FRONT_AREA_X = CAM_WHOLE_IMG_WID * (180 + FRONT_AREA_ANGLE_WIDTH / 2 ) / 360
+MAIN_RANGE_INDEX = 0
+SUB_RANGE_INDEX = 1
 #使ってないかも
 LISTENABLE = 1
 UNLISTENABLE = 0
@@ -199,8 +201,17 @@ JOYSTICK_TOPIC_NAME="joy"
 
 
 #turtlebot操作関連パラメータ
+ODOMETRY_TOPIC_NAME = "/odom"
+#ODOMETRY_SUBSCRIBER = rospy.Subscriber('/odom', nav_msgs/Odometry)
+RESET_ODOMETRY_TOPIC = "/mobile_base/commands/reset_odometry"
+RESET_ODOMETRY_PUBLISHER = rospy.Publisher(RESET_ODOMETRY_TOPIC, Empty ,queue_size = 10)
+RESET_ODOMETRY_COMMAND = Empty()
+RESET_ODOMETRY_FRAME = 30
+ODOMETRY_PER_AZIMUTH = 0.00777777777
+AUTO_ROTATE_ODOMETRY_OFFSET = 0.1
 SET_TO_STR = "rosparam set /mobile_base/cmd_vel_timeout "
-MAN_ROT_TO = 0.4
+#MAN_ROT_TO = 0.4
+MAN_ROT_TO = 0.0
 #MAN_ROT_COR_VAL = 10#マニュアル回転時の角度補正値
 MAN_TO_PER_THETA = 0.026
 KEY_MAN_ROT_TO = 0.5

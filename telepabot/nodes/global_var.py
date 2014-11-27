@@ -9,16 +9,7 @@ from hark_msgs.msg import HarkSource  # @UnresolvedImport
 from hark_msgs.msg import HarkSourceVal  # @UnusedImport @UnresolvedImport
 
 
-#グローバル変数
-#flag = []
-#dflag = True
-#cflag = True
-#lflag = True
-#sflag = True
-#max_theta = []
-#min_theta = []
-#max_power = 0
-d_theta = []
+#d_theta = []
 locSrcList = [] #harkから得た定位音源情報を整形して入れる配列
 #prevLocSrcList = [] #直前の定位音源情報
 #vanLocSrcList = [] #消えた音源の情報をしばらく入れる配列
@@ -27,7 +18,7 @@ cvCenterImage = None
 cvLeftImage = None
 cvRightImage = None
 
-#cvImage
+
 harkMsg = HarkSource() #HarkSource型のままのメッセージ
 prev_msg = HarkSource()
 recogWordList = [] #have list from 0 to VERT_MAX_RESULT_NUM
@@ -50,9 +41,16 @@ listenRangeList = []
 harkSource = HarkSource()
 #harkSourceInListenRange = HarkSource()
 
+#kobuki
+odometry_orien_z = 0
+prev_odometry_orien_z = 0
+reset_odometry_counter = 0
+reset_odometry_flag = False
+autoRotateOdometry = 0
+
 #joy stick 入力
 joyInput = {const.JOY_FRONT_BACK_LABEL:0.0, const.JOY_LEFT_RIGHT_LABEL:0.0,const.JOY_BUTTON_LABEL:0}
-ifAutoRotate = False
+autoRotatingFlag = False
 manualRotatingFlag = False
 manualRotateStartPeriod = 0
 manualRotateDirection = const.JOY_STAY

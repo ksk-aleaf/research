@@ -46,6 +46,13 @@ def sortNums(var1,var2):
 	else:
 		return var1,var2
 
+#pointがstart,endの間にあるか判定
+def ifNumBetween(start,end,point):
+	if start <= point and point <= end:
+		return True
+	else:
+		return False
+
 #turtlebotへコマンドを送信
 def sendCommand(command):
 	#os.system(const.SET_TO_STR + str(timeout))
@@ -153,22 +160,28 @@ class CentralWidget(QtGui.QWidget):
 		
 
 	#選択聴取範囲(単体)を描画
-	def paintListenRange(self,event,listenRange):
+	def paintListenRange(self,event,listenRange,listenRangeIndex):
 		
 		#startXの方が小さくなるようソート
 		startX,endX = sortNums(listenRange.startX, listenRange.endX)
+		
+		#メイン視聴範囲、サブ視聴範囲で色を分ける
+		if listenRangeIndex == const.MAIN_RANGE_INDEX:
+			rangeDrawColor = const.MAIN_RANGE_DRAW_COLOR_STR
+		else:
+			rangeDrawColor = const.SUB_RANGE_DRAW_COLOR_STR
 
 		#正面、それ以外で明るさを分ける
 		leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(CrosswideRange(startX,endX))
-		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
-		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
-		self.paintRect(event,self.getColor(const.RANGE_DRAW_COLOR_STR,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
-		
+		self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
+		self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
+		self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
+
 
 	#選択聴取範囲(複数)を描画
 	def paintListenRanges(self,event):
 		for index in range(global_var.listenSeparateSoundCount):
-			self.paintListenRange(event,copy.deepcopy(global_var.listenRangeList[index]))
+			self.paintListenRange(event,copy.deepcopy(global_var.listenRangeList[index]),index)
 
 	#正面以外、かつ選択聴取範囲外を暗くする
 	def paintDarkFilter(self,event):
@@ -181,7 +194,7 @@ class CentralWidget(QtGui.QWidget):
 				rangeList.append(copy.deepcopy(global_var.listenRangeList[index]))
 			
 			#正面範囲を加える
-			rangeList.append(CrosswideRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X))
+			#rangeList.append(CrosswideRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X))
 			
 			#各範囲において startX < endX となるようソート
 			for eachRange in rangeList:
@@ -190,10 +203,6 @@ class CentralWidget(QtGui.QWidget):
 			#視聴範囲をx座標が小さい順に並び替える
 			rangeList = sorted(rangeList,cmp=lambda range1,range2: cmp(range1.startX,range2.startX))#cmp=self.cmpRangeByStartX
 
-			#debug		
-# 			print "---listen and front range after sort ---"
-# 			for eachRange in rangeList:
-# 				eachRange.printRangeInfo()
 			
 			#包括関係の範囲があれば小さい方を消去
 			loopFinishFlag = False
@@ -274,52 +283,69 @@ class CentralWidget(QtGui.QWidget):
 
 	#マウスクリック時のイベント
 	def mousePressEvent(self,event):
-		print "single click"
+		if manipulate_turtlebot2.ifRotating() is not True:
+			print "single click"
+			
+			if event.button() == Qt.LeftButton:
+				#最大選択数分だけ選択されていなければ選択数を増やす
+				if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
+					global_var.listenSeparateSoundCount += 1
 		
-		#最大選択数分だけ選択されていなければ選択数を増やす
-		if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
-			global_var.listenSeparateSoundCount += 1
-
-		listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
-		listenRange.startX = event.x()
-		listenRange.endX = listenRange.startX
-
-		#スクリーンショット
-		#p = QtGui.QPixmap.grabWindow(self.winId())
-		#p.save("scrshot"+str(time.time()),"png")
+				listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
+				listenRange.startX = event.x()
+				listenRange.endX = listenRange.startX
+	
+			elif event.button() == Qt.RightButton:
+				#サブ範囲上でクリックされたらサブとメインを入れ替える
+				if len(global_var.listenRangeList) == const.LISTEN_SEPARATE_SOUND_MAX_NUM:
+					startX = global_var.listenRangeList[const.SUB_LISTEN_AREA].startX
+					endX = global_var.listenRangeList[const.SUB_LISTEN_AREA].endX
+					if ifNumBetween(startX,endX,event.x()):
+						format_loc_src_microcone.switchListenRange()
+				
+				#メインの視聴範囲があればその方向を向く
+				if len(global_var.listenRangeList) > 0:
+					manipulate_turtlebot2.autoRotateStarter()
+			
+			#スクリーンショット
+			#p = QtGui.QPixmap.grabWindow(self.winId())
+			#p.save("scrshot"+str(time.time()),"png")
 
 	#ダブルクリック
 	def mouseDoubleClickEvent(self,event):
-		print "double click"
-		format_loc_src_microcone.listenWholeSound()
-		global_var.listenSeparateSoundFlag = False
-		global_var.listenSeparateSoundCount = 0
-		initListenRange()
+		if manipulate_turtlebot2.ifRotating() is not True:
+			print "double click"
+			format_loc_src_microcone.listenWholeSound()
+			global_var.listenSeparateSoundFlag = False
+			global_var.listenSeparateSoundCount = 0
+			initListenRange()
 
 	#カーソル移動
 	def mouseMoveEvent(self,event):
-		global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
+		if manipulate_turtlebot2.ifRotating() is not True:
+			global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
 
 	#クリック離し
 	def mouseReleaseEvent(self, e):
-		#ダブルクリック後は実行しない
-		if global_var.listenSeparateSoundCount > 0:
-			listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
-			
-			#座標を角度に変換してグローバル変数にセット
-			if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+		if manipulate_turtlebot2.ifRotating() is not True:
+			#ダブルクリック後は実行しない
+			if global_var.listenSeparateSoundCount > 0:
+				listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
 				
-				listenRange.startX,listenRange.endX = sortNums(listenRange.startX,listenRange.endX)
-	
-				listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
-				listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
-	
-				format_loc_src_microcone.listenSeparateSound()
-				
-			else:
-				format_loc_src_microcone.decListenSeparateSoundCount()
-	
-			print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
+				#座標を角度に変換してグローバル変数にセット
+				if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+					
+					listenRange.startX,listenRange.endX = sortNums(listenRange.startX,listenRange.endX)
+		
+					listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
+					listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
+		
+					format_loc_src_microcone.listenSeparateSound()
+					
+				else:
+					format_loc_src_microcone.decListenSeparateSoundCount()
+		
+				print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
 
 
 	#視聴範囲用矩形枠取得

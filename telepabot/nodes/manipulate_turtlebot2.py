@@ -3,6 +3,7 @@
 
 from sensor_msgs.msg import Joy
 from geometry_msgs.msg import Twist
+from nav_msgs.msg import Odometry
 import const
 import global_var
 import rospy
@@ -46,74 +47,73 @@ def getDirection(joyInput):
 	else:
 		return const.JOY_STAY
 
-def autoRotateStarter(joyInput):
+def autoRotateStarter():
 	print "autoRotateStarter"
 	
-	#if joyInput.triggerButtonPushFlag is True and global_var.ifAutoRotate is not True:
+	#回転角度と回転方向を指定
 	if global_var.listenSeparateSoundCount > 0:
-		azimuth = (global_var.listenRangeList[0].startAzimuth + global_var.listenRangeList[0].endAzimuth) /2
+		azimuth = (global_var.listenRangeList[const.MAIN_LISTEN_AREA].startAzimuth + global_var.listenRangeList[const.MAIN_LISTEN_AREA].endAzimuth) /2
 	if azimuth > 0:
 		global_var.robotMoveDirection = const.JOY_RIGHT
 	else:
 		global_var.robotMoveDirection = const.JOY_LEFT
 	
+	global_var.autoRotateOdometry = const.ODOMETRY_PER_AZIMUTH * azimuth
+	print "autoRotateOdom:"+str(global_var.autoRotateOdometry)
+	
 	#set auto rotate param
 	global_var.autoRotateTimeout = abs(azimuth)*const.TO_PER_THETA - const.MAN_ROT_TO
-	global_var.ifAutoRotate = True
+	global_var.autoRotatingFlag = True
 	global_var.autoRotateStartPeriod = time.time()
 	format_loc_src_microcone.listenWholeSound()
+	global_var.reset_odometry_flag = True
 
 
 def autoRotateFinisher():
-	global_var.ifAutoRotate = False
+	global_var.autoRotatingFlag = False
 	global_var.robotMoveDirection = const.JOY_STAY
+	sendCommand(const.STOP_ROT_CMD)
 
 	#回転分を調節
-	format_loc_src_microcone.shiftListenRange(-(format_loc_src_microcone.getSeparateListenAngle()))
+	format_loc_src_microcone.shiftListenRange(getRotateAzimuth())
 	format_loc_src_microcone.listenSeparateSound()
-
 
 def manualRotateStarter():
 	print "manualRotateStarter"
 	global_var.manualRotateStartPeriod = time.time()
 	global_var.manualRotateDirection = global_var.robotMoveDirection
+	global_var.reset_odometry_flag = True
 
 def manualRotateFinisher():
-	print "manualRotateFinisher"
-# 	print "rotating time:" + str(time.time() - global_var.manualRotateStartPeriod)
-# 	print "rotating azimuth:" + str((time.time() - global_var.manualRotateStartPeriod)/const.TO_PER_THETA)
-	rotateAzimuth = (time.time() - global_var.manualRotateStartPeriod)/const.MAN_TO_PER_THETA# - 10
-	if global_var.manualRotateDirection is const.JOY_RIGHT:
-		rotateAzimuth = - rotateAzimuth
-	format_loc_src_microcone.shiftListenRange(rotateAzimuth)
+	global_var.manualRotatingFlag = False
+	format_loc_src_microcone.shiftListenRange(getRotateAzimuth())
+
+def rotateFinisher():
+	if global_var.autoRotatingFlag is True:
+		autoRotateFinisher()
+	elif global_var.manualRotatingFlag is True:
+		manualRotateFinisher()
+
+def ifRotating():
+	if global_var.autoRotatingFlag is True or global_var.manualRotatingFlag is True:
+		return True
+	else:
+		return False
 
 #操作とマニュアル操作フラグが食い違っていたら合わせる
 def checkManualRotatingFlag():
-# 	print "chekcManualRotating"
-# 	print "manualRotatingFlag:"+str(global_var.manualRotatingFlag)
-# 	print "robotMoveDirection:"+str(global_var.robotMoveDirection)
-	#print "leftRightInput:"+str(joyInput.leftRightInput)
-	
-	if global_var.manualRotatingFlag is True and global_var.robotMoveDirection is const.JOY_STAY:
-		global_var.manualRotatingFlag = False
-		manualRotateFinisher()
-	elif global_var.manualRotatingFlag is False and (global_var.robotMoveDirection is const.JOY_RIGHT or global_var.robotMoveDirection is const.JOY_LEFT):
+	if global_var.manualRotatingFlag is False and (global_var.robotMoveDirection is const.JOY_RIGHT or global_var.robotMoveDirection is const.JOY_LEFT):
 		global_var.manualRotatingFlag = True
 		manualRotateStarter()
 
 #移動機構の操作
 def manipulateOmni():
-	if global_var.ifAutoRotate is False:#manual
+	if ifRotating() is True:
 		moveRobot(global_var.robotMoveDirection)
-	else:#auto
-		if time.time() - global_var.autoRotateStartPeriod > global_var.autoRotateTimeout:
-			autoRotateFinisher()
-		else:
-			moveRobot(global_var.robotMoveDirection)
 
 
 def sendCommand(command):
-	pub = rospy.Publisher(const.KOBUKI_VEL_NODE_STR, Twist)
+	pub = rospy.Publisher(const.KOBUKI_VEL_NODE_STR, Twist,queue_size=10)
 	pub.publish(command)
 	#rospy.loginfo(command)
 
@@ -133,15 +133,43 @@ def joy_callback(joydata):
 	triggerButtonPushFlag = getButtonPushFlag(joydata.buttons[const.JOY_TRIGGER_BUTTON_INDEX])
 	joyInput = JoyInput(joydata.axes[const.JOY_FRONT_BACK_INDEX],joydata.axes[const.JOY_LEFT_RIGHT_INDEX],triggerButtonPushFlag)
 	
-	if global_var.ifAutoRotate is False:
+	if global_var.autoRotatingFlag is False:
 		if joyInput.triggerButtonPushFlag is True:
-			autoRotateStarter(joyInput)
+			autoRotateStarter()
 		else:
 			global_var.robotMoveDirection = getDirection(joyInput)
 			checkManualRotatingFlag()
 
+def odometry_callback(odometry):
+	#RESET_ODOMETRY_FRAME回だけ実行される間にodometryに変化がなければリセット
+	if global_var.odometry_orien_z == odometry.pose.pose.orientation.z:
+		if global_var.reset_odometry_flag is True:
+			if global_var.reset_odometry_counter < const.RESET_ODOMETRY_FRAME:
+				global_var.reset_odometry_counter += 1
+			else:
+				if global_var.manualRotatingFlag is True:
+					manualRotateFinisher()
+				resetOdometry()
+				global_var.reset_odometry_counter = 0
+				global_var.reset_odometry_flag = False
+	else:
+		global_var.odometry_orien_z = odometry.pose.pose.orientation.z
+		global_var.reset_odometry_counter = 0
 
+	#自動回転の終了判定
+	if global_var.autoRotatingFlag is True:
+		if abs(odometry.pose.pose.orientation.z) > abs(global_var.autoRotateOdometry):# + const.AUTO_ROTATE_ODOMETRY_OFFSET):
+			autoRotateFinisher()
+
+
+def resetOdometry():
+	print "----------------reset Odometry----------------"
+	const.RESET_ODOMETRY_PUBLISHER.publish(const.RESET_ODOMETRY_COMMAND)
+
+def getRotateAzimuth():
+	return global_var.odometry_orien_z / const.ODOMETRY_PER_AZIMUTH
 
 def subscriber():
 	rospy.Subscriber(const.JOYSTICK_TOPIC_NAME, Joy, joy_callback, buff_size = 1)
+	rospy.Subscriber(const.ODOMETRY_TOPIC_NAME, Odometry, odometry_callback, buff_size = 1)
 
