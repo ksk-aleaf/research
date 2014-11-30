@@ -11,6 +11,7 @@ import os
 import time
 import thetaimg
 import format_loc_src_microcone
+import math
 
 class JoyInput():
 	def __init__(self,frontBackInput,leftRightInput,triggerButtonPushFlag):
@@ -55,11 +56,12 @@ def autoRotateStarter():
 		azimuth = (global_var.listenRangeList[const.MAIN_LISTEN_AREA].startAzimuth + global_var.listenRangeList[const.MAIN_LISTEN_AREA].endAzimuth) /2
 	if azimuth > 0:
 		global_var.robotMoveDirection = const.JOY_RIGHT
+		global_var.robotPrevMoveDirection = const.JOY_RIGHT
 	else:
 		global_var.robotMoveDirection = const.JOY_LEFT
-	
-	global_var.autoRotateOdometry = const.ODOMETRY_PER_AZIMUTH * azimuth
-	print "autoRotateOdom:"+str(global_var.autoRotateOdometry)
+		global_var.robotPrevMoveDirection = const.JOY_LEFT
+	global_var.autoRotateOdometry = math.fabs(const.ODOMETRY_PER_AZIMUTH * azimuth)
+	print "autoRotateOdometry:"+str(global_var.autoRotateOdometry)
 	
 	#set auto rotate param
 	global_var.autoRotateTimeout = abs(azimuth)*const.TO_PER_THETA - const.MAN_ROT_TO
@@ -70,23 +72,32 @@ def autoRotateStarter():
 
 
 def autoRotateFinisher():
+	print "auto rotate finisher"
+	
 	global_var.autoRotatingFlag = False
 	global_var.robotMoveDirection = const.JOY_STAY
 	sendCommand(const.STOP_ROT_CMD)
 
 	#回転分を調節
-	format_loc_src_microcone.shiftListenRange(getRotateAzimuth())
-	format_loc_src_microcone.listenSeparateSound()
+	if global_var.listenSeparateSoundCount > 0:
+		format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometry_orien_z))
+		format_loc_src_microcone.listenSeparateSound()
+	
+	format_loc_src_microcone.printListenRanges()#debug
+	initRotateParam()
 
 def manualRotateStarter():
 	print "manualRotateStarter"
 	global_var.manualRotateStartPeriod = time.time()
 	global_var.manualRotateDirection = global_var.robotMoveDirection
+	global_var.robotPrevMoveDirection = global_var.robotMoveDirection
 	global_var.reset_odometry_flag = True
 
 def manualRotateFinisher():
+	print "manual rotate finisher"
 	global_var.manualRotatingFlag = False
-	format_loc_src_microcone.shiftListenRange(getRotateAzimuth())
+	format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometry_orien_z))
+	initRotateParam()
 
 def rotateFinisher():
 	if global_var.autoRotatingFlag is True:
@@ -126,6 +137,8 @@ def moveRobot(direction):
 		sendCommand(const.L_ROT_CMD)
 	elif direction is const.JOY_RIGHT:
 		sendCommand(const.R_ROT_CMD)
+# 	elif direction is const.JOY_STAY:
+# 		sendCommand(const.STOP_ROT_CMD)
 	elif direction is not const.JOY_STAY:
 		print "robot move direction error"
 
@@ -133,14 +146,31 @@ def joy_callback(joydata):
 	triggerButtonPushFlag = getButtonPushFlag(joydata.buttons[const.JOY_TRIGGER_BUTTON_INDEX])
 	joyInput = JoyInput(joydata.axes[const.JOY_FRONT_BACK_INDEX],joydata.axes[const.JOY_LEFT_RIGHT_INDEX],triggerButtonPushFlag)
 	
+	#マニュアル入力終了時
+	if global_var.manualRotatingFlag is True and joyInput.frontBackInput == 0 and joyInput.leftRightInput == 0:
+		sendCommand(const.STOP_ROT_CMD)
+	
 	if global_var.autoRotatingFlag is False:
 		if joyInput.triggerButtonPushFlag is True:
 			autoRotateStarter()
-		else:
+		else:#マニュアル入力受付
 			global_var.robotMoveDirection = getDirection(joyInput)
 			checkManualRotatingFlag()
 
+
+
 def odometry_callback(odometry):
+	
+	#ODOMETRY_MAXを超えたら値をリセットしてカウンタを加算する
+	if math.fabs(odometry.pose.pose.orientation.z) >= const.ODOMETRY_MAX and math.fabs(global_var.odometry_orien_z) < const.ODOMETRY_MAX:
+		resetOdometry()
+		global_var.odometryOverThresholdCount += 1
+
+	#自動回転の終了判定
+	if global_var.autoRotatingFlag is True:
+		if getRotateOdometry(odometry.pose.pose.orientation.z) > global_var.autoRotateOdometry:
+			autoRotateFinisher()
+
 	#RESET_ODOMETRY_FRAME回だけ実行される間にodometryに変化がなければリセット
 	if global_var.odometry_orien_z == odometry.pose.pose.orientation.z:
 		if global_var.reset_odometry_flag is True:
@@ -150,26 +180,48 @@ def odometry_callback(odometry):
 				if global_var.manualRotatingFlag is True:
 					manualRotateFinisher()
 				resetOdometry()
-				global_var.reset_odometry_counter = 0
-				global_var.reset_odometry_flag = False
-	else:
+				initOdometryParam()
+	else:#odometry値を取得
 		global_var.odometry_orien_z = odometry.pose.pose.orientation.z
 		global_var.reset_odometry_counter = 0
 
-	#自動回転の終了判定
-	if global_var.autoRotatingFlag is True:
-		if abs(odometry.pose.pose.orientation.z) > abs(global_var.autoRotateOdometry):# + const.AUTO_ROTATE_ODOMETRY_OFFSET):
-			autoRotateFinisher()
+	manipulateOmni()
 
 
 def resetOdometry():
 	print "----------------reset Odometry----------------"
 	const.RESET_ODOMETRY_PUBLISHER.publish(const.RESET_ODOMETRY_COMMAND)
 
-def getRotateAzimuth():
-	return global_var.odometry_orien_z / const.ODOMETRY_PER_AZIMUTH
+
+def initOdometryParam():
+	global_var.odometryOverThresholdCount = 0
+	global_var.reset_odometry_counter = 0
+	global_var.reset_odometry_flag = False
+
+def initRotateParam():
+	global_var.autoRotateOdometry = 0
+
+
+#総回転odometryの絶対値を返す
+def getRotateOdometry(currentOdometry):
+	odometry = math.fabs(currentOdometry) + global_var.odometryOverThresholdCount * const.ODOMETRY_MAX
+	
+	#まだリセットが適用されていないのでその分減算
+	if currentOdometry > const.ODOMETRY_MAX:
+		odometry -= const.ODOMETRY_MAX
+	
+	return odometry
+
+def getRotateAzimuth(currentOdometry):
+	odometry = getRotateOdometry(currentOdometry)
+	if global_var.robotPrevMoveDirection == const.JOY_LEFT:
+		odometry *= -1	
+	return odometry / const.ODOMETRY_PER_AZIMUTH
 
 def subscriber():
 	rospy.Subscriber(const.JOYSTICK_TOPIC_NAME, Joy, joy_callback, buff_size = 1)
 	rospy.Subscriber(const.ODOMETRY_TOPIC_NAME, Odometry, odometry_callback, buff_size = 1)
 
+def initializer():
+	subscriber()
+	resetOdometry()

@@ -25,16 +25,16 @@ recogWordList = [] #have list from 0 to VERT_MAX_RESULT_NUM
 
 
 #音源視聴範囲角度
-listenRangeStartAngle = 0
-listenRangeEndAngle = 0
-listenRangeStartX = 0
-listenRangeEndX = 0
+# listenRangeStartAngle = 0
+# listenRangeEndAngle = 0
+# listenRangeStartX = 0
+# listenRangeEndX = 0
 
 #分離音源視聴UI
 listenSeparateSoundCount = 0
-listenSeparateSoundFlag = False
-sendSeparateAngleInfoTime = 0
-sendSeparateAngleInfoDuration = 1.0
+#listenSeparateSoundFlag = False
+#sendSeparateAngleInfoTime = 0
+#sendSeparateAngleInfoDuration = 1.0
 listenRangeList = []
 
 #定位ソース
@@ -43,10 +43,12 @@ harkSource = HarkSource()
 
 #kobuki
 odometry_orien_z = 0
-prev_odometry_orien_z = 0
+#odometry_orien_z_no_reset = 0
 reset_odometry_counter = 0
 reset_odometry_flag = False
-autoRotateOdometry = 0
+autoRotateOdometry = 0 #自動回転のodometry値
+odometryOverThresholdCount = 0 #odometryが1またぐ場合のためのカウンタ
+#rotateOverOneOdometryCount = 0
 
 #joy stick 入力
 joyInput = {const.JOY_FRONT_BACK_LABEL:0.0, const.JOY_LEFT_RIGHT_LABEL:0.0,const.JOY_BUTTON_LABEL:0}
@@ -55,5 +57,6 @@ manualRotatingFlag = False
 manualRotateStartPeriod = 0
 manualRotateDirection = const.JOY_STAY
 robotMoveDirection = const.JOY_STAY
+robotPrevMoveDirection = const.JOY_STAY
 autoRotateStartPeriod = 0
 autoRotateTimeout = 0

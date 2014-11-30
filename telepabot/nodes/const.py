@@ -202,17 +202,14 @@ JOYSTICK_TOPIC_NAME="joy"
 
 #turtlebot操作関連パラメータ
 ODOMETRY_TOPIC_NAME = "/odom"
-#ODOMETRY_SUBSCRIBER = rospy.Subscriber('/odom', nav_msgs/Odometry)
 RESET_ODOMETRY_TOPIC = "/mobile_base/commands/reset_odometry"
 RESET_ODOMETRY_PUBLISHER = rospy.Publisher(RESET_ODOMETRY_TOPIC, Empty ,queue_size = 10)
 RESET_ODOMETRY_COMMAND = Empty()
 RESET_ODOMETRY_FRAME = 30
 ODOMETRY_PER_AZIMUTH = 0.00777777777
-AUTO_ROTATE_ODOMETRY_OFFSET = 0.1
+ODOMETRY_MAX = 0.7#0.7からは回転角に対して線形に変化しない...
 SET_TO_STR = "rosparam set /mobile_base/cmd_vel_timeout "
-#MAN_ROT_TO = 0.4
 MAN_ROT_TO = 0.0
-#MAN_ROT_COR_VAL = 10#マニュアル回転時の角度補正値
 MAN_TO_PER_THETA = 0.026
 KEY_MAN_ROT_TO = 0.5
 JOY_MAN_ROT_TO = 0.4

@@ -39,6 +39,10 @@ import thetaimg
 import manipulate_turtlebot2
 import time
 
+# class globalVar():
+# 	def __init__(self):
+# 	self.
+
 #第一引数より第二引数が大きければ入れ替える
 def sortNums(var1,var2):
 	if var1 > var2:
@@ -106,6 +110,9 @@ class CentralWidget(QtGui.QWidget):
 		self.locSrcPainter = QPainter(self)
 		self.locSrcPainter.setFont(QFont('Decorative',14))
 
+		#Input Status
+		self.ifDragging = False
+		self.ifDoubleClicked = False
 
 	#@QtCore.pyqtSlot()
 	def redraw(self):
@@ -183,10 +190,17 @@ class CentralWidget(QtGui.QWidget):
 		for index in range(global_var.listenSeparateSoundCount):
 			self.paintListenRange(event,copy.deepcopy(global_var.listenRangeList[index]),index)
 
+	#暗くするフィルタを描画するか判断(最低1つの選択範囲が選択完了されている時のみ)
+	def ifPaintDarkFilter(self):
+		if global_var.listenSeparateSoundCount == const.LISTEN_SEPARATE_SOUND_MAX_NUM or (global_var.listenSeparateSoundCount > 0 and self.ifDragging is False):
+			return True
+		else:
+			return False
+
 	#正面以外、かつ選択聴取範囲外を暗くする
 	def paintDarkFilter(self,event):
 
-		if global_var.listenSeparateSoundFlag is True:
+		if self.ifPaintDarkFilter() is True:#listenSeparateSoundCount > 0 を保証
 			rangeList = []
 			
 			#視聴範囲を取得
@@ -276,16 +290,17 @@ class CentralWidget(QtGui.QWidget):
 		self.paintCamImg(event)
 		self.paintListenRanges(event)
 		self.paintDarkFilter(event)
-		manipulate_turtlebot2.manipulateOmni()
+
 		
 		#tmpLocSrcList = global_var.locSrcList[:]
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]		
 
 	#マウスクリック時のイベント
 	def mousePressEvent(self,event):
+		self.ifDragging = True
 		if manipulate_turtlebot2.ifRotating() is not True:
 			print "single click"
-			
+				
 			if event.button() == Qt.LeftButton:
 				#最大選択数分だけ選択されていなければ選択数を増やす
 				if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
@@ -316,9 +331,10 @@ class CentralWidget(QtGui.QWidget):
 		if manipulate_turtlebot2.ifRotating() is not True:
 			print "double click"
 			format_loc_src_microcone.listenWholeSound()
-			global_var.listenSeparateSoundFlag = False
+			#global_var.listenSeparateSoundFlag = False
 			global_var.listenSeparateSoundCount = 0
 			initListenRange()
+			self.ifDoubleClicked = True
 
 	#カーソル移動
 	def mouseMoveEvent(self,event):
@@ -327,9 +343,11 @@ class CentralWidget(QtGui.QWidget):
 
 	#クリック離し
 	def mouseReleaseEvent(self, e):
+		self.ifDragging = False
+		
 		if manipulate_turtlebot2.ifRotating() is not True:
 			#ダブルクリック後は実行しない
-			if global_var.listenSeparateSoundCount > 0:
+			if self.ifDoubleClicked is not True:
 				listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
 				
 				#座標を角度に変換してグローバル変数にセット
@@ -346,6 +364,8 @@ class CentralWidget(QtGui.QWidget):
 					format_loc_src_microcone.decListenSeparateSoundCount()
 		
 				print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
+			else:
+				self.ifDoubleClicked = False
 
 
 	#視聴範囲用矩形枠取得
@@ -380,6 +400,8 @@ class MainWindow(QtGui.QMainWindow):
 		#self.setAutoFillBackground(False)
 		self.statusBar().showMessage("Welcome to telepabot!")
 		#self.click.triggered.connect(self.Click)
+		
+
 	
 	def keyPressEvent(self,event):
 		print "keyPressed"
@@ -398,6 +420,11 @@ class MainWindow(QtGui.QMainWindow):
 		elif key == Qt.Key_Down:
 			print "DOWN"
 			manipulate_turtlebot2.moveRobot(const.JOY_DOWN)
+		elif key == Qt.Key_Space:
+			print "SPACE"
+			manipulate_turtlebot2.rotateFinisher()
+			format_loc_src_microcone.listenWholeSound()
+			format_loc_src_microcone.initSeparateListenParam()
 
 def signal_handler(signal, frame):
 	print('You pressed Ctrl+C!')
@@ -423,7 +450,7 @@ def subscriber():
 	format_loc_src_microcone.subscriber()
 	recogword.subscriber()
 	cameraimage.subscriber()
-	manipulate_turtlebot2.subscriber()
+	manipulate_turtlebot2.initializer()
 	#rospy.spin()
 
 #メイン関数

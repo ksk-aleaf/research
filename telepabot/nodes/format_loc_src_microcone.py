@@ -56,7 +56,9 @@ def localization_callback(data):
 		src = LocSrc(data.src[index].id,azimuth,data.src[index].power,QPoint(x,y),0)
 		global_var.locSrcList.append(src)
 
-	if global_var.listenSeparateSoundFlag is True:
+# 	if global_var.listenSeparateSoundFlag is True:
+# 		sendSrcForSoundSeparation()
+	if global_var.listenSeparateSoundCount > 0:
 		sendSrcForSoundSeparation()
 
 #±180度の範囲で反対側の角度を取得
@@ -106,7 +108,7 @@ def sendSrcForSoundSeparation():
 
 #分離音声視聴モードに切り替える
 def listenSeparateSound():
-	global_var.listenSeparateSoundFlag = True
+	#global_var.listenSeparateSoundFlag = True
 	const.SEP_LIS_TRIG_PUB.publish(True)
 	#csvlog.writeLog(const.CSV_START_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
@@ -123,7 +125,7 @@ def getSoundSrcInListenRange(harkSource):
 
 #全体音声視聴モードに切り替える
 def listenWholeSound():
-	global_var.listenSeparateSoundFlag = False
+	#initSeparateListenParam()
 	const.SEP_LIS_TRIG_PUB.publish(False)
 	#csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
@@ -180,7 +182,20 @@ def getSeparateListenAngle():
 	if global_var.listenSeparateSoundCount > 0:
 		azimuth = (global_var.listenRangeList[0].startAzimuth + global_var.listenRangeList[0].endAzimuth) /2
 	return azimuth
-		
+
+#分離音声視聴に関するパラメータを初期化
+def initSeparateListenParam():
+	global_var.listenSeparateSoundCount = 0
+	#global_var.listenSeparateSoundFlag = False
+
+#debug用
+def printListenRanges():
+	for listenRange in global_var.listenRangeList:
+		print "startX:" + str(listenRange.startX)
+		print "endX:" + str(listenRange.endX)
+		print "startAzimuth:" + str(listenRange.startAzimuth)
+		print "endAzimuth:" + str(listenRange.endAzimuth)
+
 #トピック購読処理
 def subscriber():
 	rospy.Subscriber(const.HARK_LOC_SOURCE_TOPIC_NAME, HarkSource, localization_callback, buff_size = 1)
