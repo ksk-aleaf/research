@@ -42,21 +42,26 @@ harkSource = HarkSource()
 #harkSourceInListenRange = HarkSource()
 
 #kobuki
-odometry_orien_z = 0
+odometryOrienZ = 0
 #odometry_orien_z_no_reset = 0
-reset_odometry_counter = 0
-reset_odometry_flag = False
+resetOdometryCounter = 0
 autoRotateOdometry = 0 #自動回転のodometry値
 odometryOverThresholdCount = 0 #odometryが1またぐ場合のためのカウンタ
 #rotateOverOneOdometryCount = 0
 
 #joy stick 入力
 joyInput = {const.JOY_FRONT_BACK_LABEL:0.0, const.JOY_LEFT_RIGHT_LABEL:0.0,const.JOY_BUTTON_LABEL:0}
-autoRotatingFlag = False
-manualRotatingFlag = False
+isAutoRotating = False
+isManualRotating = False
 manualRotateStartPeriod = 0
-manualRotateDirection = const.JOY_STAY
-robotMoveDirection = const.JOY_STAY
-robotPrevMoveDirection = const.JOY_STAY
+manualRotateDirection = const.STAY
+robotMoveDirection = const.STAY
+robotPrevMoveDirection = const.STAY
 autoRotateStartPeriod = 0
 autoRotateTimeout = 0
+
+#キー入力
+rightKeyPressFlag = False
+leftKeyPressFlag = False
+upKeyPressFlag = False
+downKeyPressFlag = False

@@ -38,6 +38,7 @@ import thetaimg
 #manipulate robot module
 import manipulate_turtlebot2
 import time
+from geometry_msgs.msg import Twist
 
 # class globalVar():
 # 	def __init__(self):
@@ -404,27 +405,53 @@ class MainWindow(QtGui.QMainWindow):
 
 	
 	def keyPressEvent(self,event):
-		print "keyPressed"
-		key = event.key()
-		command = None
-		if key == Qt.Key_Right:
-			print "RIGHT"
-			command = const.R_ROT_CMD
-			manipulate_turtlebot2.moveRobot(const.JOY_RIGHT)
-		elif key == Qt.Key_Left:
-			print "LEFT"
-			manipulate_turtlebot2.moveRobot(const.JOY_LEFT)
-		elif key == Qt.Key_Up:
-			print "UP"
-			manipulate_turtlebot2.moveRobot(const.JOY_UP)
-		elif key == Qt.Key_Down:
-			print "DOWN"
-			manipulate_turtlebot2.moveRobot(const.JOY_DOWN)
-		elif key == Qt.Key_Space:
-			print "SPACE"
-			manipulate_turtlebot2.rotateFinisher()
-			format_loc_src_microcone.listenWholeSound()
-			format_loc_src_microcone.initSeparateListenParam()
+		#print "isAutoRepeat:" + str(event.isAutoRepeat())
+		if event.isAutoRepeat() is False:
+			print "keyPressed"
+			key = event.key()
+			command = None
+			if key == Qt.Key_Right:
+				if global_var.rightKeyPressFlag is False:
+					print "RIGHT"
+					global_var.robotMoveDirection = const.RIGHT
+					manipulate_turtlebot2.checkManualRotatingFlag()
+					global_var.rightKeyPressFlag = True
+			elif key == Qt.Key_Left:
+				print "LEFT"
+				manipulate_turtlebot2.moveRobot(const.JOY_LEFT)
+			elif key == Qt.Key_Up:
+				print "UP"
+				manipulate_turtlebot2.moveRobot(const.JOY_UP)
+			elif key == Qt.Key_Down:
+				print "DOWN"
+				manipulate_turtlebot2.moveRobot(const.JOY_DOWN)
+			elif key == Qt.Key_Space:
+				print "SPACE"
+				manipulate_turtlebot2.rotateFinisher()
+				format_loc_src_microcone.listenWholeSound()
+				format_loc_src_microcone.initSeparateListenParam()
+
+	
+	def keyReleaseEvent(self,event):
+		if event.isAutoRepeat() is False:
+			print "keyReleased"
+			key = event.key()
+			command = None
+			if key == Qt.Key_Right:
+				print "RIGHT"
+				#sendCommand(const.STOP_ROT_CMD)
+				global_var.robotMoveDirection = const.STAY
+				global_var.rightKeyPressFlag = False
+			elif key == Qt.Key_Left:
+				print "LEFT"
+				manipulate_turtlebot2.moveRobot(const.JOY_LEFT)
+			elif key == Qt.Key_Up:
+				print "UP"
+				manipulate_turtlebot2.moveRobot(const.JOY_UP)
+			elif key == Qt.Key_Down:
+				print "DOWN"
+				manipulate_turtlebot2.moveRobot(const.JOY_DOWN)
+		
 
 def signal_handler(signal, frame):
 	print('You pressed Ctrl+C!')
