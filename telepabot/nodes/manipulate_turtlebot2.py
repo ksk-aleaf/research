@@ -204,10 +204,13 @@ def initRotateParam():
 
 #総回転odometryの絶対値を返す
 def getRotateOdometry(currentOdometry):
-	odometry = math.fabs(currentOdometry) + global_var.odometryOverThresholdCount * const.ODOMETRY_MAX
+	currentOdometryAbs = math.fabs(currentOdometry)
+
+	#odometry値 = 現在のodometryの絶対値 + 閾値を超えてリセットされた回数 * 閾値
+	odometry = currentOdometryAbs + global_var.odometryOverThresholdCount * const.ODOMETRY_MAX
 	
 	#まだリセットが適用されていないのでその分減算
-	if currentOdometry > const.ODOMETRY_MAX:
+	if currentOdometryAbs > const.ODOMETRY_MAX:
 		odometry -= const.ODOMETRY_MAX
 	
 	return odometry

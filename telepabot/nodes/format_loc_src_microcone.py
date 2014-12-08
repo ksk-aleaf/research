@@ -147,7 +147,7 @@ def ifThetaInRange(theta):
 	
 	for index in range(global_var.listenSeparateSoundCount):
 		listenRange = global_var.listenRangeList[index]
-		if getUIAzimuth(theta) >= listenRange.startAzimuth and getUIAzimuth(theta) <= listenRange.endAzimuth:
+		if getUIAzimuth(theta) >= listenRange.startAzimuth - const.AZIMUTH_RANGE_BUF and getUIAzimuth(theta) <= listenRange.endAzimuth + const.AZIMUTH_RANGE_BUF:
 			flag = True
 
 	return flag
