@@ -74,7 +74,7 @@ def autoRotateFinisher():
 	print "auto rotate finisher"
 	
 	global_var.isAutoRotating = False
-	global_var.robotMoveDirection = const.JOY_STAY
+	global_var.robotMoveDirection = const.STAY
 	sendCommand(const.STOP_ROT_CMD)
 
 	#回転分を調節
@@ -87,7 +87,6 @@ def autoRotateFinisher():
 
 def manualRotateStarter():
 	print "manualRotateStarter"
-	#global_var.manualRotateDirection = global_var.robotMoveDirection
 	global_var.robotPrevMoveDirection = global_var.robotMoveDirection
 
 
@@ -103,14 +102,14 @@ def rotateFinisher():
 	elif global_var.isManualRotating is True:
 		manualRotateFinisher()
 
-def ifRotating():
+def isRotating():
 	if global_var.isAutoRotating is True or global_var.isManualRotating is True:
 		return True
 	else:
 		return False
 
-#操作とマニュアル操作フラグが食い違っていたら合わせる
-def checkManualRotatingFlag():
+#robotMoveDirectionを確かめる
+def checkInput():
 	if global_var.isManualRotating is False and (global_var.robotMoveDirection is const.RIGHT or global_var.robotMoveDirection is const.LEFT):
 		global_var.isManualRotating = True
 		manualRotateStarter()
@@ -139,17 +138,13 @@ def joy_callback(joydata):
 	triggerButtonPushFlag = getButtonPushFlag(joydata.buttons[const.JOY_TRIGGER_BUTTON_INDEX])
 	joyInput = JoyInput(joydata.axes[const.JOY_FRONT_BACK_INDEX],joydata.axes[const.JOY_LEFT_RIGHT_INDEX],triggerButtonPushFlag)
 	
-	#マニュアル入力終了時
-	#if global_var.manualRotatingFlag is True and joyInput.frontBackInput == 0 and joyInput.leftRightInput == 0:
-	#	sendCommand(const.STOP_ROT_CMD)
-	
 	#joy stick 入力受付
 	if global_var.isAutoRotating is False:
 		if joyInput.triggerButtonPushFlag is True:
 			autoRotateStarter()
 		else:#マニュアル入力受付
 			global_var.robotMoveDirection = getDirection(joyInput)
-			checkManualRotatingFlag()
+			checkInput()
 
 
 
@@ -178,7 +173,7 @@ def odometry_callback(odometry):
 		global_var.odometryOrienZ = odometry.pose.pose.orientation.z
 		global_var.resetOdometryCounter = 0
 
-	if ifRotating() is True:
+	if isRotating() is True:
 		sendRobotMoveDirection(global_var.robotMoveDirection)
 
 

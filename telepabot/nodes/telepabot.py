@@ -299,7 +299,7 @@ class CentralWidget(QtGui.QWidget):
 	#マウスクリック時のイベント
 	def mousePressEvent(self,event):
 		self.ifDragging = True
-		if manipulate_turtlebot2.ifRotating() is not True:
+		if manipulate_turtlebot2.isRotating() is not True:
 			print "single click"
 				
 			if event.button() == Qt.LeftButton:
@@ -329,7 +329,7 @@ class CentralWidget(QtGui.QWidget):
 
 	#ダブルクリック
 	def mouseDoubleClickEvent(self,event):
-		if manipulate_turtlebot2.ifRotating() is not True:
+		if manipulate_turtlebot2.isRotating() is not True:
 			print "double click"
 			format_loc_src_microcone.listenWholeSound()
 			#global_var.listenSeparateSoundFlag = False
@@ -339,14 +339,14 @@ class CentralWidget(QtGui.QWidget):
 
 	#カーソル移動
 	def mouseMoveEvent(self,event):
-		if manipulate_turtlebot2.ifRotating() is not True:
+		if manipulate_turtlebot2.isRotating() is not True:
 			global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
 
 	#クリック離し
 	def mouseReleaseEvent(self, e):
 		self.ifDragging = False
 		
-		if manipulate_turtlebot2.ifRotating() is not True:
+		if manipulate_turtlebot2.isRotating() is not True:
 			#ダブルクリック後は実行しない
 			if self.ifDoubleClicked is not True:
 				listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
