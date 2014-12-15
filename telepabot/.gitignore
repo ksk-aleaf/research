@@ -1,0 +1,10 @@
+/bin
+/build
+/icon
+/lib
+/log
+/msg
+/msg_gen
+
+/nodes/!*.py
+/python_tools/!*.py

@@ -1,0 +1,106 @@
+# Copyright (c) 1991-2002 Kyoto University
+# Copyright (c) 2000-2002 NAIST
+# All rights reserved
+#
+# Julian 設定ファイル サンプル for rev.3.3
+#
+# 1) 重要: 相対パスは，＊このファイルを起点に＊指定してください．
+# 2) 空行および # から行末まではコメントとみなします．
+#    `#'をコマンドに含めたい場合は '\#' としてください．
+# 3) 1行の長さは 512 バイト以内に収めてください．
+# 4) 各オプションの書式は，コマンドラインで与える場合と同一です．
+# 5) このファイル内の各値は Julius のデフォルト値です．
+#
+
+#---
+#-plugindir /home/keisuke/hnakamura_work/julius/plugin_20110426
+-plugindir /usr/lib/julius_plugin
+
+######################################################################
+#### ファイル指定
+######################################################################
+##
+## 文法ファイル
+##
+#-gram isoword216
+#-gram GrammarforJulian/asimoforadapted
+#-gram asimo8
+#-gram asr/grammar/dummy
+#-gram asr/grammar/webnavi
+#-gram asr/grammar/keisan
+#-gram /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/grammar/demo
+-gram order
+#-gram /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/grammar/janken
+#-dfa /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/grammar/demo.dfa
+#-v /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/grammar/demo.dict
+#-d /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/takemaru/lang/adult.bingram.gz
+#-v /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/takemaru/lang/adult.htkdic
+
+##
+## 音響HMM定義ファイル
+##
+# for ver1.5 (created by miyazaki)
+#-h asr/GSS/v15_Imp_2007_12_hmmdefs
+#-h /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/GSS/mems_v15_RASP24bit_gss_Nfbank_hmmdefs
+#-h /home/keisuke/hnakamura_work/DEMO/model/GSS/hearbo20101028_ghdss-3_15dB_hmmdefs
+#-h /home/keisuke/hnakamura_work/DEMO/model/GSS/hearbo20101028_ghdss-3_15dB_D030-D090-D270-D330_separate_hmmdefs
+#-h /home/keisuke/hnakamura_work/DEMO/model/GSS/hearbo20101028_ghdss_hrle_WN100_synth-3_15dB_hmmdefs
+-h hmmdefs.gz
+
+## triphoneモデルの場合，さらに
+##     論理的に出現しうる triphone -> 定義されている triphone
+## の対応を指定した「HMMListファイル」が必要です．
+#-hlist logicalTri_ATRDB
+#-hlist logicalTri.added-kyo2
+#-hlist asr/GSS/logicalTri.added-kyo2
+#-hlist /home/keisuke/hnakamura_work/takemaru/rubyTakemaru/diagsys/asr/GSS/logicalTri.added-kyo2
+-hlist allTriphones
+
+##
+## 特徴パラメータの型チェックをスキップしたい場合は，
+## 以下を試してみてください．
+##
+-notypecheck
+#
+
+#-1pass
+#-nostrip
+
+-b 1000
+-b2 70
+-n 30
+-output 10
+
+
+#-separatescore		# 言語スコアと音響スコアを分けて出力する
+
+-lv 1000
+-rejectshort 300
+
+-input mfcnet           # 
+#-input mic
+#-input mfcfile		# HTK形式のパラメータファイル(MFCC) 
+#-input rawfile		# 音声波形データファイル(フォーマット自動判別)
+			# 形式：WAV(16bit) または
+			#	RAW(16bit(signed short),mono,big-endian) 
+			#	16kHz以外のファイルは -smpFreq で周波数指定
+#-input mic		# マイクから直接入力
+#-input netaudio -NA host:0    # host上のDatLink(NetAudio)から入力
+#-input adinnet -adport portnum # adinnet クライアントからの入力
+#-input stdin		# 標準入力からの入力
+
+#-adport 5530
+#-adport 5570
+
+######################################################################
+#### サーバーモジュールモード
+######################################################################
+#-module 10505
+#-module 10500
+
+-module		# サーバーモジュールモードで起動
+#-module 5530		# (ポート番号を指定する場合)
+-realtime
+
+#---
+-outcode WLPSC

@@ -1,0 +1,15 @@
+Stat: init_voca: read 33 words
+Error: gzfile: unable to open order.term
+3 categories, 33 words
+DFA has 4 nodes and 3 arcs
+----- 
+ <s> プリン </s>
+ <s> ハンバーガー </s>
+ <s> オレンジジュース </s>
+ <s> 紅茶 </s>
+ <s> 大トロにぎりサビ抜き </s>
+ <s> とんかつ定食 </s>
+ <s> ナタデココ </s>
+ <s> シーフードカレー辛口 </s>
+ <s> <sp> </s>
+ <s> 豚骨ラーメン脂少なめ麺固め </s>
