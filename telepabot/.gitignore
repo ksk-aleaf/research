@@ -6,5 +6,7 @@
 /msg
 /msg_gen
 
-/nodes/!*.py
-/python_tools/!*.py
+/hark/network/bkup
+/hark/julius
+/nodes/*.pyc
+/python_tools/*.pyc
