@@ -56,8 +56,6 @@ def localization_callback(data):
 		src = LocSrc(data.src[index].id,azimuth,data.src[index].power,QPoint(x,y),0)
 		global_var.locSrcList.append(src)
 
-# 	if global_var.listenSeparateSoundFlag is True:
-# 		sendSrcForSoundSeparation()
 	if global_var.listenSeparateSoundCount > 0:
 		sendSrcForSoundSeparation()
 
@@ -157,7 +155,7 @@ def ifThetaInRange(theta):
 def decListenSeparateSoundCount():
 	if global_var.listenSeparateSoundCount > 0:
 		global_var.listenSeparateSoundCount -= 1
-		if global_var.listenSeparateSoundCount is 0:
+		if global_var.listenSeparateSoundCount == 0:
 			listenWholeSound()
 	else:
 		print "decrement listen separate sound count error"
