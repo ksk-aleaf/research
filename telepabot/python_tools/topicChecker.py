@@ -13,11 +13,11 @@ NODE_ALIVE_CHECK_TIME_INTERVAL = 1.0
 STATUS_PUBLISH_TIME_INTERVAL = 1.0
 ROSNODE_PING_COMMAND = "rosnode ping -c 1 "
 PING_FAILED_STR = "cannot ping"
-#LOCALIZATION_TOPIC_NAME = "/HARK_MASTER_NODE2"
+#LOCALIZATION_TOPIC_NAME = "/HARK_LOCALIZATION_NODE"
 LOCALIZATION_TOPIC_NAME = "/HARK_MASTER_NODE2"
 #SEPARATION_TOPIC_NAME = "/HARK_SEPARATE_PLAY_NODE"
 SEPARATION_TOPIC_NAME = "/SEPARATE"
-SYSTEM_STATUS_TOPIC_NAME = "SYSTEM_STATUS"
+SYSTEM_STATUS_NODE_NAME = "SystemStatus"
 LOCALIZATION_FLAG_INDEX = 0
 SEPARATION_FLAG_INDEX = 1
 
@@ -30,8 +30,8 @@ class SystemStatusPublisher(threading.Thread):
 	def __init__(self):
 		super(SystemStatusPublisher, self).__init__()
 		self.setDaemon(True)
-		rospy.init_node(SYSTEM_STATUS_TOPIC_NAME, anonymous=True)
-		self.publisher = rospy.Publisher(SYSTEM_STATUS_TOPIC_NAME, Bool, queue_size=10)
+		rospy.init_node(SYSTEM_STATUS_NODE_NAME, anonymous=True)
+		self.publisher = rospy.Publisher(SYSTEM_STATUS_NODE_NAME, Bool, queue_size=10)
 
 	def isSystemCorrect(self):
 		global aliveFlags

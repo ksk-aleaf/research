@@ -23,6 +23,19 @@ ROS_DIST_INDIGO = "indigo"
 #SYSTEM NAME
 SYSTEM_NAME = "telepabot"
 
+#システムステータス
+SYSTEM_STATUS_TOPIC_NAME = "/SystemStatus"
+SYSTEM_ERROR_DRAW_COLOR = "red"
+SYSTEM_ERROR_DRAW_ALPHA = 255
+SYSTEM_ERROR_STR = "システム異常です 実験を中断してください"
+SYSTEM_ERROR_DRAW_X = 300
+SYSTEM_ERROR_DRAW_Y = 150
+SYSTEM_ERROR_FONT = "Decorative"
+SYSTEM_ERROR_FONT_SIZE = 30
+
+#文字コード
+UTF_CODE_STR = "utf-8"
+
 #TOPIC NAME
 #CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
 #CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam_center/image_raw/decompressed"
@@ -30,6 +43,7 @@ SYSTEM_NAME = "telepabot"
 CENTER_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/center"
 LEFT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/left"
 RIGHT_CAM_IMG_TOPIC_NAME = "/usb_cam/processed_image/right"
+
 
 #CAM PARAMETER
 CAM_DEFAULT_FPS = 30
@@ -107,22 +121,19 @@ FWD_CMD.linear.x = -0.1
 BACK_CMD = Twist()
 BACK_CMD.linear.x = 0.1
 
-#image convert static instance
+#OpenCV ROS 間の画像形式変換
 CV_BRIDGE = CvBridge()
-
-#HARK_SOURCE = HarkSource()
-
 
 #画像形式
 RGB8 = "rgb8"
 
 
 #音源パワー分類用
-WEAK_POW_CODE = 0
-MEDIUM_POW_CODE = 1
-STRONG_POW_CODE = 2
-STRONG_POW_THR = 0.5
-MEDIUM_POW_THR = 1
+# WEAK_POW_CODE = 0
+# MEDIUM_POW_CODE = 1
+# STRONG_POW_CODE = 2
+# STRONG_POW_THR = 0.5
+# MEDIUM_POW_THR = 1
 
 #分離音声視聴GUI
 LISTEN_SEPARATE_SOUND_MAX_NUM = 2
@@ -163,7 +174,10 @@ LOC_STR_HEIGHT = 20
 LOC_STR_WIDTH = 64
 LOC_STR_Y_POS = CAM_IMG_OFS_Y - LOC_STR_HEIGHT
 LOC_STR = "talking!"
-
+LOC_STR_COLOR = "red"
+LOC_STR_ALPHA = 255
+LOC_STR_FONT = "Decorative"
+LOC_STR_FONT_SIZE = 14
 
 #トピックのパブリッシャ
 SEPARATE_SOURCE_PUB = rospy.Publisher("SeparateSource", HarkSource)

@@ -20,29 +20,19 @@ from PyQt4.QtGui import *
 import math
 import os
 
-#グローバル変数モジュール
+#自作モジュール
 import global_var
-#定数モジュール
 import const
-#定位データフォーマットモジュール
 import format_loc_src_microcone
-#recognition word getter
 import recogword
-#camera image processer
 import cameraimage
-#csv log module
 import csvlog
-
 import thetaimg
-
-#manipulate robot module
 import manipulate_turtlebot2
+
 import time
 from geometry_msgs.msg import Twist
-
-# class globalVar():
-# 	def __init__(self):
-# 	self.
+from std_msgs.msg import Bool
 
 #第一引数より第二引数が大きければ入れ替える
 def sortNums(var1,var2):
@@ -250,6 +240,7 @@ class CentralWidget(QtGui.QWidget):
 			painter.setBrush(color)
 			painter.drawRect(self.getPaintRect(listenRange.startX,listenRange.endX))
 
+	#音声認識結果を描画
 	def paintRecogWord(self,event):
 		recogword.adjustWordsPosition()
 		recogWordList = global_var.recogWordList
@@ -259,18 +250,19 @@ class CentralWidget(QtGui.QWidget):
 				painter.begin(self)
 				painter.drawText(word.boundBox.bottomLeft(),QString(word.text.decode("utf-8")))
 
+	#定位音声の方向を描画
 	def paintLocVoice(self):
 		tmpLocSrcList = copy.deepcopy(global_var.locSrcList)
 		for locSrc in tmpLocSrcList:
 			painter = QtGui.QPainter()
 			painter.begin(self)
-			painter.setPen(QPen(QColor(255,0,0,255)))
-			painter.setFont(QFont('Decorative',14))
-			painter.drawText(locSrc.drawBottomLeft,QString(const.LOC_STR.decode("utf-8")))
+			#painter.setPen(QPen(QColor(255,0,0,255)))
+			painter.setPen(QPen(self.getColor(const.LOC_STR_COLOR,const.LOC_STR_ALPHA)))
+			painter.setFont(QFont(const.LOC_STR_FONT,const.LOC_STR_FONT_SIZE))
+			painter.drawText(locSrc.drawBottomLeft,QString(const.LOC_STR.decode(const.UTF_CODE_STR)))
 
-
+	#ロボットのカメラ映像を描画
 	def paintCamImg(self,event):
-		#have to init in paintEvent
 		centerCamImgPainter = QPainter(self)
 		leftCamImgPainter = QPainter(self)
 		rightCamImgPainter = QPainter(self)
@@ -282,6 +274,15 @@ class CentralWidget(QtGui.QWidget):
 		if global_var.cvRightImage is not None:
 			cameraimage.drawCameraImage(event,global_var.cvRightImage,QtGui.QImage.Format_RGB888,const.RIGHT_CAM_IMG_DRAW_POINT,rightCamImgPainter)
 
+	#システムエラーが起きた際にそれを画面に描画
+	def paintSystemError(self,event):
+
+		if global_var.systemStatusFlag == False:
+			painter = QtGui.QPainter()
+			painter.begin(self)
+			painter.setPen(QPen(self.getColor(const.LOC_STR_COLOR,const.LOC_STR_ALPHA)))
+			painter.setFont(QFont(const.SYSTEM_ERROR_FONT,const.SYSTEM_ERROR_FONT_SIZE))
+			painter.drawText(QPoint(const.SYSTEM_ERROR_DRAW_X,const.SYSTEM_ERROR_DRAW_Y),QString(const.SYSTEM_ERROR_STR.decode(const.UTF_CODE_STR)))
 
 
 	#描画処理全般（カメラ画像、情報提示）
@@ -291,7 +292,7 @@ class CentralWidget(QtGui.QWidget):
 		self.paintCamImg(event)
 		self.paintListenRanges(event)
 		self.paintDarkFilter(event)
-
+		self.paintSystemError(event)
 		
 		#tmpLocSrcList = global_var.locSrcList[:]
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]		
@@ -417,14 +418,26 @@ class MainWindow(QtGui.QMainWindow):
 					manipulate_turtlebot2.checkManualRotatingFlag()
 					global_var.rightKeyPressFlag = True
 			elif key == Qt.Key_Left:
-				print "LEFT"
-				manipulate_turtlebot2.moveRobot(const.JOY_LEFT)
+				if global_var.leftKeyPressFlag is False:
+					print "LEFT"
+					global_var.robotMoveDirection = const.LEFT
+					manipulate_turtlebot2.checkManualRotatingFlag()
+					global_var.leftKeyPressFlag = True
+
 			elif key == Qt.Key_Up:
-				print "UP"
-				manipulate_turtlebot2.moveRobot(const.JOY_UP)
+				if global_var.leftKeyPressFlag is False:
+					print "UP"
+					global_var.robotMoveDirection = const.UP
+					manipulate_turtlebot2.checkManualRotatingFlag()
+					global_var.upKeyPressFlag = True
+
 			elif key == Qt.Key_Down:
-				print "DOWN"
-				manipulate_turtlebot2.moveRobot(const.JOY_DOWN)
+				if global_var.leftKeyPressFlag is False:
+					print "DOWN"
+					global_var.robotMoveDirection = const.DOWN
+					manipulate_turtlebot2.checkManualRotatingFlag()
+					global_var.downKeyPressFlag = True
+
 			elif key == Qt.Key_Space:
 				print "SPACE"
 				manipulate_turtlebot2.rotateFinisher()
@@ -438,20 +451,19 @@ class MainWindow(QtGui.QMainWindow):
 			key = event.key()
 			command = None
 			if key == Qt.Key_Right:
-				print "RIGHT"
-				#sendCommand(const.STOP_ROT_CMD)
 				global_var.robotMoveDirection = const.STAY
 				global_var.rightKeyPressFlag = False
 			elif key == Qt.Key_Left:
-				print "LEFT"
-				manipulate_turtlebot2.moveRobot(const.JOY_LEFT)
+				global_var.robotMoveDirection = const.STAY
+				global_var.leftKeyPressFlag = False
 			elif key == Qt.Key_Up:
-				print "UP"
-				manipulate_turtlebot2.moveRobot(const.JOY_UP)
+				global_var.robotMoveDirection = const.STAY
+				global_var.upKeyPressFlag = False
 			elif key == Qt.Key_Down:
-				print "DOWN"
-				manipulate_turtlebot2.moveRobot(const.JOY_DOWN)
-		
+				global_var.robotMoveDirection = const.STAY
+				global_var.downKeyPressFlag = False
+
+
 
 def signal_handler(signal, frame):
 	print('You pressed Ctrl+C!')
@@ -470,9 +482,16 @@ def initialize():
 	#signal.signal(signal.SIGINT, signal_handler)
 	return app,window
 
+def systemStatusCallback(systemStatusFlag):
+# 	print "systemStatusCallback"
+# 	print "systemStatusFlag_boolstr:"+str(bool(systemStatusFlag))
+# 	print "systemStatusFlag_str:"+str(systemStatusFlag)
+	global_var.systemStatusFlag = systemStatusFlag.data
+
 #トピック購読処理
 def subscriber():
 	rospy.init_node(const.SYSTEM_NAME, anonymous = True)
+	rospy.Subscriber(const.SYSTEM_STATUS_TOPIC_NAME, Bool, systemStatusCallback, buff_size = 1)
 	#kinect_tf.subscriber()
 	format_loc_src_microcone.subscriber()
 	recogword.subscriber()

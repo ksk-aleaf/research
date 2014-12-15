@@ -65,3 +65,6 @@ rightKeyPressFlag = False
 leftKeyPressFlag = False
 upKeyPressFlag = False
 downKeyPressFlag = False
+
+#システムステータス(現状、harkの定位・分離が動いているか)
+systemStatusFlag = True
