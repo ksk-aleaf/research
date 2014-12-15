@@ -9,8 +9,9 @@ import signal
 from std_msgs.msg import Bool
 
 #定数
-NODE_ALIVE_CHECK_TIME_INTERVAL = 1.0
+NODE_ALIVE_CHECK_TIME_INTERVAL = 3.0
 STATUS_PUBLISH_TIME_INTERVAL = 1.0
+SHUTDOWN_CHECK_TIME_INTERVAL = 1.0
 ROSNODE_PING_COMMAND = "rosnode ping -c 1 "
 PING_FAILED_STR = "cannot ping"
 #LOCALIZATION_TOPIC_NAME = "/HARK_LOCALIZATION_NODE"
@@ -63,6 +64,7 @@ class NodeCheckThread(threading.Thread):
 		print self.nodeName + ":check start"
 		while True:
 			time.sleep(self.timeInterval)
+			result = ""
 			result = commands.getoutput(ROSNODE_PING_COMMAND + self.nodeName)
 			if result[0:len(PING_FAILED_STR)] != PING_FAILED_STR:
 				aliveFlags[self.flagIndex] = True
@@ -87,6 +89,8 @@ if __name__ == '__main__':
 	systemStatusPublisher.start()
 
 	#Ctrl-C が入力されたら終了
-	while True:
-		if finalizeFlag:
-			break
+	
+ 	while True:
+ 		time.sleep(SHUTDOWN_CHECK_TIME_INTERVAL) 		
+ 		if finalizeFlag:
+ 			break
