@@ -5,27 +5,22 @@
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Default</pydev_property>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.6</pydev_property>
 <pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
-<path>/opt/ros/hydro/stacks/hark_ros_stacks/hark_common_msgs/hark_msgs/src</path>
-<path>/opt/ros/hydro/stacks/hark_ros_stacks/hark_common_msgs/hark_msgs/lib</path>
-<path>/home/koike/Dropbox/HRI/workspace/recogResultPublisher/src</path>
-<path>/home/koike/Dropbox/HRI/workspace/recogResultPublisher/lib</path>
-<path>/opt/ros/hydro/share/mk</path>
-<path>/opt/ros/hydro/lib/python2.7/dist-packages</path>
+<path>/home/koike/Downloads/svn/hark_ros_stacks/hark_common_msgs/hark_msgs/src</path>
+<path>/home/koike/Downloads/svn/hark_ros_stacks/hark_common_msgs/hark_msgs/lib</path>
+<path>/home/koike/git/research/recogResultPublisher/src</path>
+<path>/home/koike/git/research/recogResultPublisher/lib</path>
+<path>/opt/ros/indigo/share/mk</path>
+<path>/opt/ros/indigo/lib/python2.7/dist-packages</path>
 <path>/usr/lib/python2.7</path>
-<path>/usr/lib/python2.7/plat-linux2</path>
+<path>/usr/lib/python2.7/plat-x86_64-linux-gnu</path>
 <path>/usr/lib/python2.7/lib-tk</path>
 <path>/usr/lib/python2.7/lib-dynload</path>
 <path>/usr/local/lib/python2.7/dist-packages</path>
 <path>/usr/lib/python2.7/dist-packages</path>
-<path>/usr/lib/python2.7/dist-packages/PIL</path>
-<path>/usr/lib/python2.7/dist-packages/gst-0.10</path>
+<path>/usr/lib/python2.7/dist-packages/PILcompat</path>
 <path>/usr/lib/python2.7/dist-packages/gtk-2.0</path>
 <path>/usr/lib/pymodules/python2.7</path>
 <path>/usr/lib/python2.7/dist-packages/ubuntu-sso-client</path>
-<path>/usr/lib/python2.7/dist-packages/ubuntuone-client</path>
-<path>/usr/lib/python2.7/dist-packages/ubuntuone-control-panel</path>
-<path>/usr/lib/python2.7/dist-packages/ubuntuone-couch</path>
-<path>/usr/lib/python2.7/dist-packages/ubuntuone-storage-protocol</path>
 <path>/usr/lib/python2.7/dist-packages/wx-2.8-gtk2-unicode</path>
 </pydev_pathproperty>
 </pydev_project>
