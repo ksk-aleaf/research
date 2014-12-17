@@ -140,11 +140,12 @@ def joy_callback(joydata):
 	
 	#joy stick 入力受付
 	if global_var.isAutoRotating is False:
-		if joyInput.triggerButtonPushFlag is True:
-			autoRotateStarter()
-		else:#マニュアル入力受付
-			global_var.robotMoveDirection = getDirection(joyInput)
-			checkInput()
+		global_var.robotMoveDirection = getDirection(joyInput)
+		checkInput()
+# 		if joyInput.triggerButtonPushFlag is True:
+# 			autoRotateStarter()
+# 		else:#マニュアル入力受付
+
 
 
 

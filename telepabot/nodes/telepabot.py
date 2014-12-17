@@ -291,8 +291,10 @@ class CentralWidget(QtGui.QWidget):
 		self.paintLocVoice()
 		self.paintCamImg(event)
 		self.paintListenRanges(event)
-		self.paintDarkFilter(event)
 		self.paintSystemError(event)
+		
+		if const.EFFECT_MODE == const.EFFECT_ON:
+			self.paintDarkFilter(event)		
 		
 		#tmpLocSrcList = global_var.locSrcList[:]
 		#tmpVanLocSrcList= global_var.vanLocSrcList[:]		
@@ -313,7 +315,7 @@ class CentralWidget(QtGui.QWidget):
 				listenRange.endX = listenRange.startX
 	
 			elif event.button() == Qt.RightButton:
-				#サブ範囲上でクリックされたらサブとメインを入れ替える
+				#サブ範囲上で右クリックされたらサブとメインを入れ替える
 				if len(global_var.listenRangeList) == const.LISTEN_SEPARATE_SOUND_MAX_NUM:
 					startX = global_var.listenRangeList[const.SUB_LISTEN_AREA].startX
 					endX = global_var.listenRangeList[const.SUB_LISTEN_AREA].endX
@@ -321,8 +323,9 @@ class CentralWidget(QtGui.QWidget):
 						format_loc_src_microcone.switchListenRange()
 				
 				#メインの視聴範囲があればその方向を向く
-				if len(global_var.listenRangeList) > 0:
-					manipulate_turtlebot2.autoRotateStarter()
+				if const.GUI_MANIPULATE_MODE == const.GUI_MANIPULATE_AUTO:
+					if len(global_var.listenRangeList) > 0:
+						manipulate_turtlebot2.autoRotateStarter()
 			
 			#スクリーンショット
 			#p = QtGui.QPixmap.grabWindow(self.winId())
@@ -333,7 +336,6 @@ class CentralWidget(QtGui.QWidget):
 		if manipulate_turtlebot2.isRotating() is not True:
 			print "double click"
 			format_loc_src_microcone.listenWholeSound()
-			#global_var.listenSeparateSoundFlag = False
 			global_var.listenSeparateSoundCount = 0
 			initListenRange()
 			self.ifDoubleClicked = True
