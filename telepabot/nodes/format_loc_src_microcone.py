@@ -15,6 +15,8 @@ from hark_msgs.msg import HarkSource  # @UnresolvedImport
 import math
 import thetaimg
 import csvlog
+import telepabot
+
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -105,10 +107,17 @@ def sendSrcForSoundSeparation():
 	const.SELECTOR_SOURCE_PUB.publish(selectorSource)
 
 #分離音声視聴モードに切り替える
-def listenSeparateSound():
-	#global_var.listenSeparateSoundFlag = True
-	const.SEP_LIS_TRIG_PUB.publish(True)
+# def listenSeparateSound():
+# 	#global_var.listenSeparateSoundFlag = True
+# 	const.SEP_LIS_TRIG_PUB.publish(True)
 	#csvlog.writeLog(const.CSV_START_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
+
+#HARKの分離音声視聴フラグの切り替え
+def checkListenSoundMode():
+	if global_var.mainListenRange.selectFlag is True or global_var.subListenRange.selectFlag is True:
+		const.SEP_LIS_TRIG_PUB.publish(True)
+	else:
+		const.SEP_LIS_TRIG_PUB.publish(False)
 
 #視聴範囲内のharkSourceを返す
 #引数：全定位情報
@@ -116,16 +125,16 @@ def listenSeparateSound():
 def getSoundSrcInListenRange(harkSource):
 	sourceInRange = HarkSource()
 	for index in range(len(harkSource.src)):
-		if ifThetaInRange(harkSource.src[index].azimuth):
+		if ifThetaInRanges(harkSource.src[index].azimuth):
 			sourceInRange.src.append(harkSource.src[index])
 			sourceInRange.exist_src_num += 1
 	return sourceInRange
 
 #全体音声視聴モードに切り替える
-def listenWholeSound():
-	#initSeparateListenParam()
-	const.SEP_LIS_TRIG_PUB.publish(False)
-	#csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
+# def listenWholeSound():
+# 	#initSeparateListenParam()
+# 	const.SEP_LIS_TRIG_PUB.publish(False)
+# 	#csvlog.writeLog(const.CSV_END_LISTEN_TAG, global_var.listenRangeStartAngle, global_var.listenRangeEndAngle)
 
 #マイクロコーンは右側がマイナスなので角度を左右反転
 def getListenAngle(xaxis):
@@ -140,15 +149,23 @@ def setListenAxis(startAzimuth,endAzimuth):
 	global_var.listenRangeEndX = thetaimg.getXAxisFromAzimuth(endAzimuth)
 
 #角度が音源視聴範囲内か判定する
-def ifThetaInRange(theta):
-	flag = False
-	
-	for index in range(global_var.listenSeparateSoundCount):
-		listenRange = global_var.listenRangeList[index]
+def ifThetaInRanges(theta):
+	def ifThetaInRange(listenRange):
 		if getUIAzimuth(theta) >= listenRange.startAzimuth - const.AZIMUTH_RANGE_BUF and getUIAzimuth(theta) <= listenRange.endAzimuth + const.AZIMUTH_RANGE_BUF:
 			flag = True
+	
+#	flag = False
 
-	return flag
+	if ifThetaInRange(global_var.mainListenRange) or ifThetaInRange(global_var.subListenRange):
+		return True
+	else:
+		return False
+# 	for index in range(global_var.listenSeparateSoundCount):
+# 		listenRange = global_var.listenRangeList[index]
+# 		if getUIAzimuth(theta) >= listenRange.startAzimuth - const.AZIMUTH_RANGE_BUF and getUIAzimuth(theta) <= listenRange.endAzimuth + const.AZIMUTH_RANGE_BUF:
+# 			flag = True
+
+#	return flag
 
 
 #分離音声視聴範囲数を減らす
@@ -181,6 +198,12 @@ def getSeparateListenAngle():
 		azimuth = (global_var.listenRangeList[0].startAzimuth + global_var.listenRangeList[0].endAzimuth) /2
 	return azimuth
 
+#分離音声聴取範囲に角度をセット
+def setListenRangeAzimuth(listenRange):
+	listenRange.startX,listenRange.endX = telepabot.sortNums(listenRange.startX,listenRange.endX)
+	listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
+	listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
+
 #分離音声視聴に関するパラメータを初期化
 def initSeparateListenParam():
 	global_var.listenSeparateSoundCount = 0
@@ -188,11 +211,15 @@ def initSeparateListenParam():
 
 #debug用
 def printListenRanges():
-	for listenRange in global_var.listenRangeList:
+	def printListenRange(listenRange):
 		print "startX:" + str(listenRange.startX)
 		print "endX:" + str(listenRange.endX)
 		print "startAzimuth:" + str(listenRange.startAzimuth)
 		print "endAzimuth:" + str(listenRange.endAzimuth)
+	print "main"
+	printListenRange(global_var.mainListenRange)
+	print "sub"
+	printListenRange(global_var.subListenRange)
 
 #トピック購読処理
 def subscriber():

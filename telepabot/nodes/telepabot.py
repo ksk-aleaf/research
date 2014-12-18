@@ -64,11 +64,57 @@ class CrosswideRange():
 	def printRangeInfo(self):
 		print "startX:"+str(self.startX)+"  endX:"+str(self.endX)
 
+class ListenRange(CrosswideRange):
+	def __init__(self,crosswideRange):
+		CrosswideRange.__init__(self, crosswideRange.startX, crosswideRange.endX, crosswideRange.startAzimuth, crosswideRange.endAzimuth)
+		#self.drawRange = crosswideRange
+		self.selectFlag = False
+		self.drawColor = None
+	
+	def setRange(self,crosswideRange):
+		self.startX = crosswideRange.startX
+		self.endX = crosswideRange.endX
+		self.startAzimuth = crosswideRange.startAzimuth
+		self.endAzimuth = crosswideRange.endAzimuth
+
+	def resetRange(self):
+		self.startX = 0
+		self.endX = 0
+		self.startAzimuth = 0
+		self.endAzimuth = 0
+
+	def delete(self):
+		self.deleteButton.hide()
+		self.resetRange()
+		self.selectFlag = False
+		format_loc_src_microcone.checkListenSoundMode()
+	
+	def select(self,parent):
+		#self.drawRange = crossWideRange
+		self.deleteButton = QtGui.QPushButton(const.DELETE_RANGE_BUTTON_STR,parent)
+		self.deleteButton.setGeometry (self.endX - const.DELETE_RANGE_BUTTON_WIDTH,const.DELETE_RANGE_BUTTON_Y,const.DELETE_RANGE_BUTTON_WIDTH,const.DELETE_RANGE_BUTTON_HEIGHT)
+		self.deleteButton.clicked.connect(self.delete)
+		self.deleteButton.show()
+		self.selectFlag = True
+		format_loc_src_microcone.checkListenSoundMode()
+
+def getSettingListenRange():
+	if global_var.leftClickFlag is True:
+		return global_var.mainListenRange
+	elif global_var.rightClickFlag is True:
+		return global_var.subListenRange
+	else:
+		return None
+
 #分離音声視聴リスト初期化
 def initListenRange():
-	global_var.listenRangeList = []
-	for index in range(const.LISTEN_SEPARATE_SOUND_MAX_NUM):
-		global_var.listenRangeList.append(CrosswideRange())
+	global_var.mainListenRange = ListenRange(CrosswideRange())
+	global_var.mainListenRange.drawColor = const.MAIN_RANGE_DRAW_COLOR_STR
+	global_var.subListenRange = ListenRange(CrosswideRange())
+	global_var.subListenRange.drawColor = const.SUB_RANGE_DRAW_COLOR_STR
+# 	global_var.listenRangeList = []
+# 	for index in range(const.LISTEN_SEPARATE_SOUND_MAX_NUM):
+# 		global_var.listenRangeList.append(CrosswideRange())
 
 
 #ウィンドウ定義クラス
@@ -158,28 +204,34 @@ class CentralWidget(QtGui.QWidget):
 		
 
 	#選択聴取範囲(単体)を描画
-	def paintListenRange(self,event,listenRange,listenRangeIndex):
+	def paintListenRange(self,event,listenRange):
+		#drawRange = listenRange.drawRange
 		
-		#startXの方が小さくなるようソート
-		startX,endX = sortNums(listenRange.startX, listenRange.endX)
-		
-		#メイン視聴範囲、サブ視聴範囲で色を分ける
-		if listenRangeIndex == const.MAIN_RANGE_INDEX:
-			rangeDrawColor = const.MAIN_RANGE_DRAW_COLOR_STR
-		else:
-			rangeDrawColor = const.SUB_RANGE_DRAW_COLOR_STR
+		if listenRange.startX != listenRange.endX:
+			
+			#startXの方が小さくなるようソート
+			startX,endX = sortNums(listenRange.startX, listenRange.endX)
+			
+			#メイン視聴範囲、サブ視聴範囲で色を分ける
+	# 		if listenRangeIndex == const.MAIN_RANGE_INDEX:
+	# 			rangeDrawColor = const.MAIN_RANGE_DRAW_COLOR_STR
+	# 		else:
+	# 			rangeDrawColor = const.SUB_RANGE_DRAW_COLOR_STR
+			rangeDrawColor = listenRange.drawColor
 
-		#正面、それ以外で明るさを分ける
-		leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(CrosswideRange(startX,endX))
-		self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
-		self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
-		self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
+			#正面、それ以外で明るさを分ける
+			leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(CrosswideRange(startX,endX))
+			self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
+			self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
+			self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
 
 
 	#選択聴取範囲(複数)を描画
 	def paintListenRanges(self,event):
-		for index in range(global_var.listenSeparateSoundCount):
-			self.paintListenRange(event,copy.deepcopy(global_var.listenRangeList[index]),index)
+		self.paintListenRange(event, global_var.mainListenRange)
+		self.paintListenRange(event, global_var.subListenRange)
+# 		for index in range(global_var.listenSeparateSoundCount):
+# 			self.paintListenRange(event,copy.deepcopy(global_var.listenRangeList[index]),index)
 
 	#暗くするフィルタを描画するか判断(最低1つの選択範囲が選択完了されている時のみ)
 	def ifPaintDarkFilter(self):
@@ -188,7 +240,7 @@ class CentralWidget(QtGui.QWidget):
 		else:
 			return False
 
-	#正面以外、かつ選択聴取範囲外を暗くする
+	#選択聴取範囲外を暗くする
 	def paintDarkFilter(self,event):
 
 		if self.ifPaintDarkFilter() is True:#listenSeparateSoundCount > 0 を保証
@@ -280,7 +332,7 @@ class CentralWidget(QtGui.QWidget):
 		if global_var.systemStatusFlag == False:
 			painter = QtGui.QPainter()
 			painter.begin(self)
-			painter.setPen(QPen(self.getColor(const.LOC_STR_COLOR,const.LOC_STR_ALPHA)))
+			painter.setPen(QPen(self.getColor(const.SYSTEM_ERROR_DRAW_COLOR,const.SYSTEM_ERROR_DRAW_ALPHA)))
 			painter.setFont(QFont(const.SYSTEM_ERROR_FONT,const.SYSTEM_ERROR_FONT_SIZE))
 			painter.drawText(QPoint(const.SYSTEM_ERROR_DRAW_X,const.SYSTEM_ERROR_DRAW_Y),QString(const.SYSTEM_ERROR_STR.decode(const.UTF_CODE_STR)))
 
@@ -304,72 +356,113 @@ class CentralWidget(QtGui.QWidget):
 		self.ifDragging = True
 		if manipulate_turtlebot2.isRotating() is not True:
 			print "single click"
-				
+
 			if event.button() == Qt.LeftButton:
+				#listenRange = global_var.mainListenRange
+				global_var.leftClickFlag = True
 				#最大選択数分だけ選択されていなければ選択数を増やす
-				if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
-					global_var.listenSeparateSoundCount += 1
-		
-				listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
-				listenRange.startX = event.x()
-				listenRange.endX = listenRange.startX
-	
+# 				if global_var.listenSeparateSoundCount < const.LISTEN_SEPARATE_SOUND_MAX_NUM:
+# 					global_var.listenSeparateSoundCount += 1
+# 
+# 				listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount -1]
+# 				listenRange.startX = event.x()
+# 				listenRange.endX = listenRange.startX
+
 			elif event.button() == Qt.RightButton:
+				#listenRange = global_var.subListenRange
+				global_var.rightClickFlag = True
+
+			listenRange = getSettingListenRange()
+			listenRange.startX = event.x()
+			listenRange.endX = listenRange.startX
+			
 				#サブ範囲上で右クリックされたらサブとメインを入れ替える
-				if len(global_var.listenRangeList) == const.LISTEN_SEPARATE_SOUND_MAX_NUM:
-					startX = global_var.listenRangeList[const.SUB_LISTEN_AREA].startX
-					endX = global_var.listenRangeList[const.SUB_LISTEN_AREA].endX
-					if ifNumBetween(startX,endX,event.x()):
-						format_loc_src_microcone.switchListenRange()
+# 				if len(global_var.listenRangeList) == const.LISTEN_SEPARATE_SOUND_MAX_NUM:
+# 					startX = global_var.listenRangeList[const.SUB_LISTEN_AREA].startX
+# 					endX = global_var.listenRangeList[const.SUB_LISTEN_AREA].endX
+# 					if ifNumBetween(startX,endX,event.x()):
+# 						format_loc_src_microcone.switchListenRange()
 				
 				#メインの視聴範囲があればその方向を向く
-				if const.GUI_MANIPULATE_MODE == const.GUI_MANIPULATE_AUTO:
-					if len(global_var.listenRangeList) > 0:
-						manipulate_turtlebot2.autoRotateStarter()
+# 				if const.GUI_MANIPULATE_MODE == const.GUI_MANIPULATE_AUTO:
+# 					if len(global_var.listenRangeList) > 0:
+# 						manipulate_turtlebot2.autoRotateStarter()
 			
 			#スクリーンショット
 			#p = QtGui.QPixmap.grabWindow(self.winId())
 			#p.save("scrshot"+str(time.time()),"png")
 
 	#ダブルクリック
-	def mouseDoubleClickEvent(self,event):
-		if manipulate_turtlebot2.isRotating() is not True:
-			print "double click"
-			format_loc_src_microcone.listenWholeSound()
-			global_var.listenSeparateSoundCount = 0
-			initListenRange()
-			self.ifDoubleClicked = True
+# 	def mouseDoubleClickEvent(self,event):
+# 		if manipulate_turtlebot2.isRotating() is not True:
+# 			print "double click"
+# 			format_loc_src_microcone.listenWholeSound()
+# 			global_var.listenSeparateSoundCount = 0
+# 			initListenRange()
+# 			self.ifDoubleClicked = True
+
 
 	#カーソル移動
 	def mouseMoveEvent(self,event):
 		if manipulate_turtlebot2.isRotating() is not True:
-			global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
-
+			listenRange = getSettingListenRange()
+			listenRange.endX = event.x()
+			format_loc_src_microcone.printListenRanges()
+# 			print "mainListenRange:" + str(global_var.mainListenRange.printRangeInfo())
+			print "listenRange:"
+			listenRange.printRangeInfo()
+			#global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
+		
+			
 	#クリック離し
-	def mouseReleaseEvent(self, e):
+	def mouseReleaseEvent(self, event):
 		self.ifDragging = False
 		
 		if manipulate_turtlebot2.isRotating() is not True:
+			
 			#ダブルクリック後は実行しない
-			if self.ifDoubleClicked is not True:
-				listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
+			if self.ifDoubleClicked is False:
+				
+				#listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
 				
 				#座標を角度に変換してグローバル変数にセット
+# 				if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
+# 					
+# 					listenRange.startX,listenRange.endX = sortNums(listenRange.startX,listenRange.endX)
+# 		
+# 					listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
+# 					listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
+				listenRange = getSettingListenRange()
+
 				if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
-					
-					listenRange.startX,listenRange.endX = sortNums(listenRange.startX,listenRange.endX)
-		
-					listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
-					listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
-		
-					format_loc_src_microcone.listenSeparateSound()
-					
+					format_loc_src_microcone.setListenRangeAzimuth(listenRange)
+					listenRange.select(self)
+					format_loc_src_microcone.checkListenSoundMode()
 				else:
-					format_loc_src_microcone.decListenSeparateSoundCount()
-		
-				print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
+					print "ignore listen range"
+					getSettingListenRange().resetRange()
+					#format_loc_src_microcone.decListenSeparateSoundCount()
+
+				#print "listenSoundNum:"+str(global_var.listenSeparateSoundCount)
+
+				#クリックフラグ解除
+				if event.button() == Qt.LeftButton:
+# 					print "left release"
+# 					self.mainListenRange = ListenRange(listenRange.startX,listenRange.endX,listenRange.startAzimuth,listenRange.endAzimuth)
+# 					self.mainListenRange.select(listenRange.startX,listenRange.endX,listenRange.startAzimuth,listenRange.endAzimuth,self)
+					global_var.leftClickFlag = False
+				elif event.button() == Qt.RightButton:
+					global_var.rightClickFlag = False
+				
 			else:
 				self.ifDoubleClicked = False
+			
+			if event.button() == Qt.LeftButton:
+				global_var.leftClickFlag = False
+			elif event.button() == Qt.RightButton:
+				global_var.rightClickFlag = False
+
+
 
 
 	#視聴範囲用矩形枠取得

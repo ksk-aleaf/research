@@ -67,7 +67,7 @@ def autoRotateStarter():
 	global_var.autoRotateTimeout = abs(azimuth)*const.TO_PER_THETA - const.MAN_ROT_TO
 	global_var.isAutoRotating = True
 	global_var.autoRotateStartPeriod = time.time()
-	format_loc_src_microcone.listenWholeSound()
+	#format_loc_src_microcone.listenWholeSound()
 
 
 def autoRotateFinisher():
@@ -80,7 +80,7 @@ def autoRotateFinisher():
 	#回転分を調節
 	if global_var.listenSeparateSoundCount > 0:
 		format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometryOrienZ))
-		format_loc_src_microcone.listenSeparateSound()
+		#format_loc_src_microcone.listenSeparateSound()
 	
 	#format_loc_src_microcone.printListenRanges()#debug
 	initRotateParam()

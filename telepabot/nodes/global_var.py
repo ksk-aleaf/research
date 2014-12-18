@@ -32,6 +32,8 @@ recogWordList = [] #have list from 0 to VERT_MAX_RESULT_NUM
 
 #分離音源視聴UI
 listenSeparateSoundCount = 0
+mainListenRange = None
+subListenRange = None
 #listenSeparateSoundFlag = False
 #sendSeparateAngleInfoTime = 0
 #sendSeparateAngleInfoDuration = 1.0
@@ -65,6 +67,10 @@ rightKeyPressFlag = False
 leftKeyPressFlag = False
 upKeyPressFlag = False
 downKeyPressFlag = False
+
+#マウスクリック
+rightClickFlag = False
+leftClickFlag = False
 
 #システムステータス(現状、harkの定位・分離が動いているか)
 systemStatusFlag = True
