@@ -157,23 +157,13 @@ def setListenAxis(startAzimuth,endAzimuth):
 #角度が音源視聴範囲内か判定する
 def ifThetaInRanges(theta):
 	def ifThetaInRange(listenRange):
-		#print "[ifThetaInRange]"
-		#listenRange.printRangeInfo()
 		if getUIAzimuth(theta) >= listenRange.startAzimuth - const.AZIMUTH_RANGE_BUF and getUIAzimuth(theta) <= listenRange.endAzimuth + const.AZIMUTH_RANGE_BUF:
 			return True
-	
-#	flag = False
 
 	if ifThetaInRange(global_var.mainListenRange) or ifThetaInRange(global_var.subListenRange):
 		return True
 	else:
 		return False
-# 	for index in range(global_var.listenSeparateSoundCount):
-# 		listenRange = global_var.listenRangeList[index]
-# 		if getUIAzimuth(theta) >= listenRange.startAzimuth - const.AZIMUTH_RANGE_BUF and getUIAzimuth(theta) <= listenRange.endAzimuth + const.AZIMUTH_RANGE_BUF:
-# 			flag = True
-
-#	return flag
 
 
 #分離音声視聴範囲数を減らす
@@ -187,17 +177,14 @@ def decListenSeparateSoundCount():
 
 #視聴範囲の角度を引数の角度だけずらす
 def shiftListenRange(azimuth):
-	for listenRange in global_var.listenRangeList:
+	def shiftAngle(listenRange):
 		listenRange.startAzimuth += azimuth
 		listenRange.endAzimuth += azimuth
 		listenRange.startX = thetaimg.getXAxisFromAzimuth(listenRange.startAzimuth)
 		listenRange.endX = thetaimg.getXAxisFromAzimuth(listenRange.endAzimuth)
-
-#メインとサブの視聴範囲を入れ替える
-def switchListenRange():
-	if len(global_var.listenRangeList) == const.LISTEN_SEPARATE_SOUND_MAX_NUM:
-		global_var.listenRangeList[const.MAIN_LISTEN_AREA],	global_var.listenRangeList[const.SUB_LISTEN_AREA] = global_var.listenRangeList[const.SUB_LISTEN_AREA],	global_var.listenRangeList[const.MAIN_LISTEN_AREA]
-
+		
+	shiftAngle(global_var.mainListenRange)
+	shiftAngle(global_var.subListenRange)
 
 #分離視聴角度(1番目)を取得
 def getSeparateListenAngle():
@@ -206,17 +193,8 @@ def getSeparateListenAngle():
 		azimuth = (global_var.listenRangeList[0].startAzimuth + global_var.listenRangeList[0].endAzimuth) /2
 	return azimuth
 
-#分離音声聴取範囲に角度をセット
-# def setListenRangeAzimuth(listenRange):
-# 	listenRange.startX,listenRange.endX = telepabot.sortNums(listenRange.startX,listenRange.endX)
-# 	listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
-# 	listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
-	#listenRange.printRangeInfo()
-
-#分離音声視聴に関するパラメータを初期化
-def initSeparateListenParam():
-	global_var.listenSeparateSoundCount = 0
-	#global_var.listenSeparateSoundFlag = False
+def switchListenRange():
+	global_var.mainListenRange,global_var.subListenRange = global_var.subListenRange,global_var.mainListenRange
 
 #debug用
 def printListenRanges():

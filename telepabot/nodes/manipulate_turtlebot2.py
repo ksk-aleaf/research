@@ -51,9 +51,8 @@ def getDirection(joyInput):
 def autoRotateStarter():
 	print "autoRotateStarter"
 	
-	#回転角度と回転方向を指定
-	if global_var.listenSeparateSoundCount > 0:
-		azimuth = (global_var.listenRangeList[const.MAIN_LISTEN_AREA].startAzimuth + global_var.listenRangeList[const.MAIN_LISTEN_AREA].endAzimuth) /2
+	azimuth = (global_var.mainListenRange.startAzimuth + global_var.mainListenRange.endAzimuth) / 2
+
 	if azimuth > 0:
 		global_var.robotMoveDirection = const.RIGHT
 		global_var.robotPrevMoveDirection = const.RIGHT
@@ -78,9 +77,10 @@ def autoRotateFinisher():
 	sendCommand(const.STOP_ROT_CMD)
 
 	#回転分を調節
-	if global_var.listenSeparateSoundCount > 0:
-		format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometryOrienZ))
-		#format_loc_src_microcone.listenSeparateSound()
+	format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometryOrienZ))
+	for listenRange in [global_var.mainListenRange,global_var.subListenRange]:
+		if listenRange.selectFlag is True:
+			listenRange.initButtonPosition()
 	
 	#format_loc_src_microcone.printListenRanges()#debug
 	initRotateParam()
@@ -94,6 +94,9 @@ def manualRotateFinisher():
 	print "manual rotate finisher"
 	global_var.isManualRotating = False
 	format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometryOrienZ))
+	for listenRange in [global_var.mainListenRange,global_var.subListenRange]:
+		if listenRange.selectFlag is True:
+			listenRange.initButtonPosition()
 	initRotateParam()
 
 def rotateFinisher():

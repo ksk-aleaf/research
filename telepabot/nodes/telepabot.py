@@ -50,8 +50,6 @@ def ifNumBetween(start,end,point):
 
 #turtlebotへコマンドを送信
 def sendCommand(command):
-	#os.system(const.SET_TO_STR + str(timeout))
-	#pub = rospy.Publisher('/cmd_vel', Twist)
 	pub = rospy.Publisher(const.KOBUKI_VEL_NODE_STR, Twist)
 	pub.publish(command)
 	rospy.loginfo(command)
@@ -104,23 +102,47 @@ class ListenRange(DrawRange):
 		if self.selectFlag is True:
 			if self.deleteButton is not None:
 				self.deleteButton.hide()
+			if self.deleteButton is not None:
+				self.mainRangeButton.hide()
 			self.resetRange()
 			self.selectFlag = False
 			format_loc_src_microcone.checkListenSoundMode()
 	
+	def setMainRange(self):
+		if self is not global_var.mainListenRange:
+			global_var.mainListenRange,global_var.subListenRange = self,global_var.mainListenRange
+			global_var.mainListenRange.drawColor,global_var.subListenRange.drawColor = global_var.subListenRange.drawColor,global_var.mainListenRange.drawColor
+		self.robotAutoRotate()
+	
 	def initDeleteButton(self,parent):
 		self.deleteButton = QtGui.QPushButton(QString(const.DELETE_RANGE_BUTTON_STR.decode(const.UTF_CODE_STR)),parent)
-		print "self.endX:" + str(self.endX)
 		self.deleteButton.setGeometry (self.endX - const.DELETE_RANGE_BUTTON_WIDTH - 1,const.DELETE_RANGE_BUTTON_Y,const.DELETE_RANGE_BUTTON_WIDTH,const.DELETE_RANGE_BUTTON_HEIGHT)
 		self.deleteButton.clicked.connect(self.delete)
 		self.deleteButton.show()
+	
+	def initMainRangeButton(self,parent):
+		self.mainRangeButton = QtGui.QPushButton(QString(const.MAIN_RANGE_BUTTON_STR.decode(const.UTF_CODE_STR)),parent)
+		self.mainRangeButton.setGeometry ((self.startX + self.endX)/2 - const.MAIN_RANGE_BUTTON_WIDTH / 2,const.MAIN_RANGE_BUTTON_Y,const.MAIN_RANGE_BUTTON_WIDTH,const.MAIN_RANGE_BUTTON_HEIGHT)
+		self.mainRangeButton.clicked.connect(self.setMainRange)
+		self.mainRangeButton.show()
+	
+	def initButtonPosition(self):
+		self.deleteButton.setGeometry (self.endX - const.DELETE_RANGE_BUTTON_WIDTH - 1,const.DELETE_RANGE_BUTTON_Y,const.DELETE_RANGE_BUTTON_WIDTH,const.DELETE_RANGE_BUTTON_HEIGHT)
+		self.mainRangeButton.setGeometry ((self.startX + self.endX)/2 - const.MAIN_RANGE_BUTTON_WIDTH / 2,const.MAIN_RANGE_BUTTON_Y,const.MAIN_RANGE_BUTTON_WIDTH,const.MAIN_RANGE_BUTTON_HEIGHT)
 	
 	def select(self,parent):
 		#self.drawRange = crossWideRange
 		self.fixRange()
 		self.initDeleteButton(parent)
+		self.initMainRangeButton(parent)
 		self.selectFlag = True
 		format_loc_src_microcone.checkListenSoundMode()
+	
+	def robotAutoRotate(self):
+		if const.GUI_MANIPULATE_MODE == const.GUI_MANIPULATE_AUTO:
+			if self.selectFlag is True:
+				manipulate_turtlebot2.autoRotateStarter()
+
 
 def getSettingListenRange():
 	if global_var.leftClickFlag is True:
@@ -136,10 +158,6 @@ def initListenRange():
 	global_var.mainListenRange.drawColor = const.MAIN_RANGE_DRAW_COLOR_STR
 	global_var.subListenRange = ListenRange(DrawRange())
 	global_var.subListenRange.drawColor = const.SUB_RANGE_DRAW_COLOR_STR
-# 	global_var.listenRangeList = []
-# 	for index in range(const.LISTEN_SEPARATE_SOUND_MAX_NUM):
-# 		global_var.listenRangeList.append(DrawRange())
-
 
 #ウィンドウ定義クラス
 class CentralWidget(QtGui.QWidget):
@@ -227,34 +245,22 @@ class CentralWidget(QtGui.QWidget):
 		
 
 	#選択聴取範囲(単体)を描画
-	def paintListenRange(self,event,listenRange):
-		#drawRange = listenRange.drawRange
-		
-		if listenRange.startX != listenRange.endX:
-			
+	def paintListenRange(self,event,listenRange):		
+		if listenRange.startX != listenRange.endX:			
 			#startXの方が小さくなるようソート
 			startX,endX = sortNums(listenRange.startX, listenRange.endX)
-			
-			#メイン視聴範囲、サブ視聴範囲で色を分ける
-	# 		if listenRangeIndex == const.MAIN_RANGE_INDEX:
-	# 			rangeDrawColor = const.MAIN_RANGE_DRAW_COLOR_STR
-	# 		else:
-	# 			rangeDrawColor = const.SUB_RANGE_DRAW_COLOR_STR
-			rangeDrawColor = listenRange.drawColor
 
 			#正面、それ以外で明るさを分ける
 			leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(DrawRange(startX,endX))
-			self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
-			self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
-			self.paintRect(event,self.getColor(rangeDrawColor,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
+			self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
+			self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
+			self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
 
 
 	#選択聴取範囲(複数)を描画
 	def paintListenRanges(self,event):
-		self.paintListenRange(event, global_var.mainListenRange)
-		self.paintListenRange(event, global_var.subListenRange)
-# 		for index in range(global_var.listenSeparateSoundCount):
-# 			self.paintListenRange(event,copy.deepcopy(global_var.listenRangeList[index]),index)
+		for listenRange in [global_var.mainListenRange,global_var.subListenRange]:
+			self.paintListenRange(event, listenRange)
 
 	#暗くするフィルタを描画するか判断(最低1つの選択範囲が選択完了されている時のみ)
 	def ifPaintDarkFilter(self):
@@ -266,12 +272,13 @@ class CentralWidget(QtGui.QWidget):
 	#選択聴取範囲外を暗くする
 	def paintDarkFilter(self,event):
 
-		if self.ifPaintDarkFilter() is True:#listenSeparateSoundCount > 0 を保証
+		if format_loc_src_microcone.isSeparateListening() is True:#listenSeparateSoundCount > 0 を保証
 			rangeList = []
 			
 			#視聴範囲を取得
-			for index in range(global_var.listenSeparateSoundCount):
-				rangeList.append(copy.deepcopy(global_var.listenRangeList[index]))
+			for listenRange in [global_var.mainListenRange,global_var.subListenRange]:
+				if listenRange.startX != listenRange.endX:
+					rangeList.append(copy.deepcopy(listenRange))
 			
 			#正面範囲を加える
 			#rangeList.append(DrawRange(const.LEFT_FRONT_AREA_X,const.RIGHT_FRONT_AREA_X))
@@ -331,7 +338,6 @@ class CentralWidget(QtGui.QWidget):
 		for locSrc in tmpLocSrcList:
 			painter = QtGui.QPainter()
 			painter.begin(self)
-			#painter.setPen(QPen(QColor(255,0,0,255)))
 			painter.setPen(QPen(self.getColor(const.LOC_STR_COLOR,const.LOC_STR_ALPHA)))
 			painter.setFont(QFont(const.LOC_STR_FONT,const.LOC_STR_FONT_SIZE))
 			painter.drawText(locSrc.drawBottomLeft,QString(const.LOC_STR.decode(const.UTF_CODE_STR)))
@@ -383,52 +389,23 @@ class CentralWidget(QtGui.QWidget):
 			elif event.button() == Qt.RightButton:
 				global_var.rightClickFlag = True
 				global_var.subListenRange.delete()
-			print "event.button:" + str(event.button())
 		
 		self.ifDragging = True
 		if manipulate_turtlebot2.isRotating() is not True:
-			print "single click"
-
 			setPressFlag()
 
 			listenRange = getSettingListenRange()
 			listenRange.startX = event.x()
 			listenRange.endX = listenRange.startX
-			print "listenRangeStartX:" + str(listenRange.startX)
-				#サブ範囲上で右クリックされたらサブとメインを入れ替える
-# 				if len(global_var.listenRangeList) == const.LISTEN_SEPARATE_SOUND_MAX_NUM:
-# 					startX = global_var.listenRangeList[const.SUB_LISTEN_AREA].startX
-# 					endX = global_var.listenRangeList[const.SUB_LISTEN_AREA].endX
-# 					if ifNumBetween(startX,endX,event.x()):
-# 						format_loc_src_microcone.switchListenRange()
-				
-				#メインの視聴範囲があればその方向を向く
-# 				if const.GUI_MANIPULATE_MODE == const.GUI_MANIPULATE_AUTO:
-# 					if len(global_var.listenRangeList) > 0:
-# 						manipulate_turtlebot2.autoRotateStarter()
 
-	#ダブルクリック
-# 	def mouseDoubleClickEvent(self,event):
-# 		if manipulate_turtlebot2.isRotating() is not True:
-# 			print "double click"
-# 			format_loc_src_microcone.listenWholeSound()
-# 			global_var.listenSeparateSoundCount = 0
-# 			initListenRange()
-# 			self.ifDoubleClicked = True
 
 
 	#カーソル移動
 	def mouseMoveEvent(self,event):
 		if manipulate_turtlebot2.isRotating() is not True:
 			listenRange = getSettingListenRange()
-			listenRange.endX = event.x()
-			#format_loc_src_microcone.printListenRanges()
-# 			print "mainListenRange:" + str(global_var.mainListenRange.printRangeInfo())
-# 			print "listenRange:"
-# 			listenRange.printRangeInfo()
-			#global_var.listenRangeList[global_var.listenSeparateSoundCount - 1].endX = event.x()
-		
-			
+			listenRange.endX = event.x()		
+
 	#クリック離し
 	def mouseReleaseEvent(self, event):
 		def resetPressFlag():
@@ -442,15 +419,6 @@ class CentralWidget(QtGui.QWidget):
 		if manipulate_turtlebot2.isRotating() is False:
 			if self.ifDoubleClicked is False:
 				
-				#listenRange = global_var.listenRangeList[global_var.listenSeparateSoundCount - 1]
-				
-				#座標を角度に変換してグローバル変数にセット
-# 				if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
-# 					
-# 					listenRange.startX,listenRange.endX = sortNums(listenRange.startX,listenRange.endX)
-# 		
-# 					listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
-# 					listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
 				listenRange = getSettingListenRange()
 
 				if math.fabs(listenRange.endX - listenRange.startX) > const.IGNOR_PIX_THR:
