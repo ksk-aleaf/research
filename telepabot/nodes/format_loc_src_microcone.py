@@ -58,7 +58,7 @@ def localization_callback(data):
 		src = LocSrc(data.src[index].id,azimuth,data.src[index].power,QPoint(x,y),0)
 		global_var.locSrcList.append(src)
 
-	if global_var.listenSeparateSoundCount > 0:
+	if isSeparateListening() is True:
 		sendSrcForSoundSeparation()
 
 #±180度の範囲で反対側の角度を取得
@@ -114,10 +114,16 @@ def sendSrcForSoundSeparation():
 
 #HARKの分離音声視聴フラグの切り替え
 def checkListenSoundMode():
-	if global_var.mainListenRange.selectFlag is True or global_var.subListenRange.selectFlag is True:
+	if isSeparateListening():
 		const.SEP_LIS_TRIG_PUB.publish(True)
 	else:
 		const.SEP_LIS_TRIG_PUB.publish(False)
+
+def isSeparateListening():
+	if global_var.mainListenRange is not None and global_var.subListenRange is not None:
+		if global_var.mainListenRange.selectFlag is True or global_var.subListenRange.selectFlag is True:
+			return True
+	return False
 
 #視聴範囲内のharkSourceを返す
 #引数：全定位情報
@@ -151,8 +157,10 @@ def setListenAxis(startAzimuth,endAzimuth):
 #角度が音源視聴範囲内か判定する
 def ifThetaInRanges(theta):
 	def ifThetaInRange(listenRange):
+		#print "[ifThetaInRange]"
+		#listenRange.printRangeInfo()
 		if getUIAzimuth(theta) >= listenRange.startAzimuth - const.AZIMUTH_RANGE_BUF and getUIAzimuth(theta) <= listenRange.endAzimuth + const.AZIMUTH_RANGE_BUF:
-			flag = True
+			return True
 	
 #	flag = False
 
@@ -199,10 +207,11 @@ def getSeparateListenAngle():
 	return azimuth
 
 #分離音声聴取範囲に角度をセット
-def setListenRangeAzimuth(listenRange):
-	listenRange.startX,listenRange.endX = telepabot.sortNums(listenRange.startX,listenRange.endX)
-	listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
-	listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
+# def setListenRangeAzimuth(listenRange):
+# 	listenRange.startX,listenRange.endX = telepabot.sortNums(listenRange.startX,listenRange.endX)
+# 	listenRange.startAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.startX)
+# 	listenRange.endAzimuth = thetaimg.getAzimuthFromXAxis(listenRange.endX)
+	#listenRange.printRangeInfo()
 
 #分離音声視聴に関するパラメータを初期化
 def initSeparateListenParam():
