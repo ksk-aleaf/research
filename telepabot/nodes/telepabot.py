@@ -33,6 +33,7 @@ import manipulate_turtlebot2
 import time
 from geometry_msgs.msg import Twist
 from std_msgs.msg import Bool
+from std_msgs.msg import UInt8
 
 #第一引数より第二引数が大きければ入れ替える
 def sortNums(var1,var2):
@@ -139,7 +140,7 @@ class ListenRange(DrawRange):
 		format_loc_src_microcone.checkListenSoundMode()
 	
 	def robotAutoRotate(self):
-		if const.GUI_MANIPULATE_MODE == const.GUI_MANIPULATE_AUTO:
+		if global_var.robotManipulateMode == const.ROBOT_MANIPULATE_AUTO:
 			if self.selectFlag is True:
 				manipulate_turtlebot2.autoRotateStarter()
 
@@ -374,7 +375,7 @@ class CentralWidget(QtGui.QWidget):
 		self.paintListenRanges(event)
 		self.paintSystemError(event)
 		
-		if const.EFFECT_MODE == const.EFFECT_ON:
+		if global_var.effectMode == const.EFFECT_ON:
 			self.paintDarkFilter(event)		
 		
 		#tmpLocSrcList = global_var.locSrcList[:]
@@ -475,7 +476,7 @@ class MainWindow(QtGui.QMainWindow):
 	
 	def keyPressEvent(self,event):
 		#print "isAutoRepeat:" + str(event.isAutoRepeat())
-		if event.isAutoRepeat() is False:
+		if event.isAutoRepeat() is False and global_var.robotManipulateMode == const.ROBOT_MANIPULATE_MANUAL:
 			print "keyPressed"
 			key = event.key()
 			command = None
@@ -551,10 +552,13 @@ def initialize():
 	return app,window
 
 def systemStatusCallback(systemStatusFlag):
-# 	print "systemStatusCallback"
-# 	print "systemStatusFlag_boolstr:"+str(bool(systemStatusFlag))
-# 	print "systemStatusFlag_str:"+str(systemStatusFlag)
 	global_var.systemStatusFlag = systemStatusFlag.data
+	
+def robotManipulateModeCallback(robotManipulateMode):
+	global_var.robotManipulateMode = robotManipulateMode.data
+
+def effectModeCallback(effectMode):
+	global_var.effectMode = effectMode.data
 
 #トピック購読処理
 def subscriber():
@@ -565,6 +569,8 @@ def subscriber():
 	recogword.subscriber()
 	cameraimage.subscriber()
 	manipulate_turtlebot2.initializer()
+	rospy.Subscriber(const.ROBOT_MANIPULATE_MODE_TOPIC_NAME, UInt8, robotManipulateModeCallback, buff_size = 1)
+	rospy.Subscriber(const.EFFECT_MODE_TOPIC_NAME, UInt8, effectModeCallback, buff_size = 1)
 	#rospy.spin()
 
 #メイン関数

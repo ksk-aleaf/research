@@ -142,7 +142,7 @@ def joy_callback(joydata):
 	joyInput = JoyInput(joydata.axes[const.JOY_FRONT_BACK_INDEX],joydata.axes[const.JOY_LEFT_RIGHT_INDEX],triggerButtonPushFlag)
 	
 	#joy stick 入力受付
-	if global_var.isAutoRotating is False:
+	if global_var.isAutoRotating is False and global_var.robotManipulateMode == const.ROBOT_MANIPULATE_MANUAL:
 		global_var.robotMoveDirection = getDirection(joyInput)
 		checkInput()
 # 		if joyInput.triggerButtonPushFlag is True:
