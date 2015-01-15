@@ -9,8 +9,8 @@ from hark_msgs.msg import HarkSource  # @UnresolvedImport
 from hark_msgs.msg import HarkSourceVal  # @UnusedImport @UnresolvedImport
 
 #GUI動作モード
-robotManipulateMode = const.ROBOT_MANIPULATE_AUTO
-effectMode = const.EFFECT_ON
+robotManipulateMode = const.ROBOT_MANIPULATE_FULLAUTO
+effectMode = const.EFFECT_OFF
 
 #d_theta = []
 locSrcList = [] #harkから得た定位音源情報を整形して入れる配列

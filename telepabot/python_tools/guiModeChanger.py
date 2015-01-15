@@ -34,8 +34,9 @@ GUI_MODE3_LABEL = "GUI MODE 3"
 
 
 #GUIモード
-ROBOT_MANIPULATE_AUTO = 0
-ROBOT_MANIPULATE_MANUAL = 1
+ROBOT_MANIPULATE_FULLAUTO = 0
+ROBOT_MANIPULATE_SEMIAUTO = 1
+ROBOT_MANIPULATE_MANUAL = 2
 EFFECT_ON = 1
 EFFECT_OFF = 0
 ROBOT_MANIPULATE_INDEX = 0
@@ -48,8 +49,8 @@ EFFECT_NODE_NAME = "EffectMode"
 
 #グローバル変数
 #guiMode = [ROBOT_MANIPULATE_AUTO,EFFECT_ON]
-robotManipulateMode = ROBOT_MANIPULATE_AUTO
-effectMode = EFFECT_ON
+robotManipulateMode = ROBOT_MANIPULATE_FULLAUTO
+effectMode = EFFECT_OFF
 robot_publisher = rospy.Publisher(ROBOT_MANIPULATE_NODE_NAME, UInt8, queue_size=10)
 effect_publisher = rospy.Publisher(EFFECT_NODE_NAME, UInt8, queue_size=10)
 
@@ -62,9 +63,9 @@ class MainWindow(QtGui.QWidget):
 		#rospy.init_node(EFFECT_NODE_NAME, anonymous=True)
 	
 	def initBtn(self):
-		ChangeGuiModeButton(self,ROBOT_MANIPULATE_AUTO,EFFECT_ON,CHANGE_GUI_MODE1_BTN_X,CHANGE_GUI_MODE_BTN_Y,GUI_MODE1_LABEL)
-		ChangeGuiModeButton(self,ROBOT_MANIPULATE_AUTO,EFFECT_OFF,CHANGE_GUI_MODE2_BTN_X,CHANGE_GUI_MODE_BTN_Y,GUI_MODE2_LABEL)
-		ChangeGuiModeButton(self,ROBOT_MANIPULATE_MANUAL,EFFECT_ON,CHANGE_GUI_MODE3_BTN_X,CHANGE_GUI_MODE_BTN_Y,GUI_MODE3_LABEL)
+		ChangeGuiModeButton(self,ROBOT_MANIPULATE_FULLAUTO,EFFECT_OFF,CHANGE_GUI_MODE1_BTN_X,CHANGE_GUI_MODE_BTN_Y,GUI_MODE1_LABEL)
+		ChangeGuiModeButton(self,ROBOT_MANIPULATE_SEMIAUTO,EFFECT_OFF,CHANGE_GUI_MODE2_BTN_X,CHANGE_GUI_MODE_BTN_Y,GUI_MODE2_LABEL)
+		ChangeGuiModeButton(self,ROBOT_MANIPULATE_MANUAL,EFFECT_OFF,CHANGE_GUI_MODE3_BTN_X,CHANGE_GUI_MODE_BTN_Y,GUI_MODE3_LABEL)
 
 class ChangeGuiModeButton(QtGui.QPushButton):
 	def __init__(self,parent,robotManipulateMode,effectMode,xPos,yPos,btnText):
@@ -81,30 +82,7 @@ class ChangeGuiModeButton(QtGui.QPushButton):
 	
 	def changeMode(self):
 		global robotManipulateMode,effectMode,publisher
-		#guiMode = self.guiMode
-		
-# 		dim0 = MultiArrayDimension()
-# 		dim1 = MultiArrayDimension()
-# 		dim0.label = "height"
-# 		dim0.size = 1*2
-# 		dim0.stride = 2
-# 		dim1.label = "width"
-# 		dim1.size = 2
-# 		dim1.stride = 2
-# 		
-# 		dim = [dim0,dim1]
-# 		
-# 		layout = MultiArrayLayout()
-# 		layout.dim = dim
-# 		layout.data_offset = 0
-# 		
-# 		msg = UInt8MultiArray()
-# 		msg.data = guiMode
-# 		msg.layout = layout
-# 		
-# 		print msg
-# 		guiMode[ROBOT_MANIPULATE_INDEX] = self.robotManipulateMode
-# 		guiMode[EFFECT_INDEX] = self.effectMode
+
 		robotManipulateMode = self.robotManipulateMode
 		effectMode = self.effectMode
 		robot_publisher.publish(robotManipulateMode)

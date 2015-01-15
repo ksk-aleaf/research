@@ -48,10 +48,10 @@ def getDirection(joyInput):
 	else:
 		return const.STAY
 
-def autoRotateStarter():
+def autoRotateStarter(azimuth):
 	print "autoRotateStarter"
 	
-	azimuth = (global_var.mainListenRange.startAzimuth + global_var.mainListenRange.endAzimuth) / 2
+	#azimuth = (global_var.mainListenRange.startAzimuth + global_var.mainListenRange.endAzimuth) / 2
 
 	if azimuth > 0:
 		global_var.robotMoveDirection = const.RIGHT
@@ -80,8 +80,10 @@ def autoRotateFinisher():
 	format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometryOrienZ))
 	for listenRange in [global_var.mainListenRange,global_var.subListenRange]:
 		if listenRange.selectFlag is True:
-			listenRange.initButtonPosition()
-	
+			#listenRange.initButtonPosition()
+			print "before reload button"
+			listenRange.reloadButtons()
+			print "after reload button"
 	#format_loc_src_microcone.printListenRanges()#debug
 	initRotateParam()
 
@@ -96,7 +98,8 @@ def manualRotateFinisher():
 	format_loc_src_microcone.shiftListenRange(-getRotateAzimuth(global_var.odometryOrienZ))
 	for listenRange in [global_var.mainListenRange,global_var.subListenRange]:
 		if listenRange.selectFlag is True:
-			listenRange.initButtonPosition()
+			#listenRange.initButtonPosition()
+			listenRange.reloadButtons()
 	initRotateParam()
 
 def rotateFinisher():
