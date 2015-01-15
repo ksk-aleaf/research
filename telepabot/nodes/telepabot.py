@@ -68,14 +68,9 @@ class DrawRange():
 class ListenRange(DrawRange):
 	def __init__(self,drawRange,parent,ifMainRange):
 		DrawRange.__init__(self, drawRange.startX, drawRange.endX, drawRange.startAzimuth, drawRange.endAzimuth)
-		#self.drawRange = drawRange
 		self.selectFlag = False
 		self.drawColor = None
 		self.ifMainRange = ifMainRange
-# 		self.initDeleteButton(parent)
-# 		self.initMainRangeButton(parent)
-# 		self.deleteButton = None
-# 		self.mainRangeButton = None
 
 	def getRange(self):
 		return DrawRange(self.startX,self.endX,self.startAzimuth,self.endAzimuth)
@@ -120,36 +115,14 @@ class ListenRange(DrawRange):
 			format_loc_src_microcone.checkListenSoundMode()
 	
 	def setMainRange(self):
-# 		def switchRanges():
-# 			#メインとサブの座標を入れ替え
-# 			mainDrawRange = global_var.mainListenRange.getRange()
-# 			subDrawRange = global_var.subListenRange.getRange()
-# 			global_var.mainListenRange.setRange(subDrawRange)
-# 			global_var.subListenRange.setRange(mainDrawRange)
-# 			#選択フラグ入れ替え
-# 			global_var.mainListenRange.selectFlag,global_var.subListenRange.selectFlag = global_var.subListenRange.selectFlag,global_var.mainListenRange.selectFlag 
-# 		
-# 		def showButtonStatus():
-# 			if global_var.mainListenRange is not None and global_var.mainListenRange.mainRangeButton is not None and global_var.mainListenRange.mainRangeButton.isVisible():
-# 				print "main button:"
-# 			if global_var.subListenRange is not None and global_var.subListenRange.mainRangeButton is not None and global_var.subListenRange.mainRangeButton.isVisible():
-# 				print "sub button:"
-
 		#メイン会話相手の方を向く
 		if self.ifMainRange is not True or global_var.robotManipulateMode != const.ROBOT_MANIPULATE_FULLAUTO:
 			self.robotAutoRotate()
 
 		if self.ifMainRange is not True:
-			#switchRanges()
-
 			global_var.mainListenRange,global_var.subListenRange = global_var.subListenRange,global_var.mainListenRange
 			global_var.mainListenRange.drawColor,global_var.subListenRange.drawColor = global_var.subListenRange.drawColor,global_var.mainListenRange.drawColor
 			global_var.mainListenRange.ifMainRange,global_var.subListenRange.ifMainRange = global_var.subListenRange.ifMainRange,global_var.mainListenRange.ifMainRange			
-			#元々描画されていなかった視聴範囲はdeleteを実行しておく
-# 			for listenRange in [global_var.mainListenRange,global_var.subListenRange]:
-# 				if listenRange.getWidth() < const.IGNOR_PIX_THR:
-# 					listenRange.delete()
-
 			
 	def initDeleteButton(self,parent):
 		self.deleteButton = QtGui.QPushButton(QString(const.DELETE_RANGE_BUTTON_STR.decode(const.UTF_CODE_STR)),parent)
@@ -157,39 +130,20 @@ class ListenRange(DrawRange):
 		self.deleteButton.show()
 
 	def reloadDeleteButton(self):
-		#print "before reload delete"
 		self.deleteButton.setGeometry (self.endX - const.DELETE_RANGE_BUTTON_WIDTH - 1,const.DELETE_RANGE_BUTTON_Y,const.DELETE_RANGE_BUTTON_WIDTH,const.DELETE_RANGE_BUTTON_HEIGHT)
-# 		if self.deleteButton.isHidden():
-		#self.deleteButton.show()
-		#print "after reload delete"
-
 	
 	def initMainRangeButton(self,parent):
-		#if self is not global_var.mainListenRange or global_var.robotManipulateMode != const.ROBOT_MANIPULATE_FULLAUTO:
 		self.mainRangeButton = QtGui.QPushButton(QString(const.MAIN_RANGE_BUTTON_STR.decode(const.UTF_CODE_STR)),parent)
 		self.mainRangeButton.clicked.connect(self.setMainRange)
 		self.mainRangeButton.show()
 	
 	def reloadMainRangeButton(self):
-# 		self.mainRangeButton = QtGui.QPushButton(QString(const.MAIN_RANGE_BUTTON_STR.decode(const.UTF_CODE_STR)),parent)
-# 		self.mainRangeButton.clicked.connect(self.setMainRange)
-# 		
-# 		if self.ifMainRange is False or global_var.robotManipulateMode != const.ROBOT_MANIPULATE_FULLAUTO:
 		self.mainRangeButton.setGeometry ((self.startX + self.endX)/2 - const.MAIN_RANGE_BUTTON_WIDTH / 2,const.MAIN_RANGE_BUTTON_Y,const.MAIN_RANGE_BUTTON_WIDTH,const.MAIN_RANGE_BUTTON_HEIGHT)
-# 			self.mainRangeButton.show()
-# 		else:
-# 			if self.mainRangeButton is not None:
-# 				self.mainRangeButton.hide()
-		print "after reload main"
 
 	def reloadButtons(self):
 		self.reloadDeleteButton()
 		self.reloadMainRangeButton()
-	
-# 	def initButtonPosition(self):
-# 		self.deleteButton.setGeometry (self.endX - const.DELETE_RANGE_BUTTON_WIDTH - 1,const.DELETE_RANGE_BUTTON_Y,const.DELETE_RANGE_BUTTON_WIDTH,const.DELETE_RANGE_BUTTON_HEIGHT)
-# 		self.mainRangeButton.setGeometry ((self.startX + self.endX)/2 - const.MAIN_RANGE_BUTTON_WIDTH / 2,const.MAIN_RANGE_BUTTON_Y,const.MAIN_RANGE_BUTTON_WIDTH,const.MAIN_RANGE_BUTTON_HEIGHT)
-	
+		
 	def select(self,parent):
 		self.fixRange()
 		self.initDeleteButton(parent)
@@ -199,8 +153,6 @@ class ListenRange(DrawRange):
 		format_loc_src_microcone.checkListenSoundMode()
 	
 	def robotAutoRotate(self):
-		print "man mode:"+str(global_var.robotManipulateMode)
-		print "select flag:"+str(self.selectFlag)
 		if global_var.robotManipulateMode == const.ROBOT_MANIPULATE_FULLAUTO or global_var.robotManipulateMode == const.ROBOT_MANIPULATE_SEMIAUTO:
 			if self.selectFlag is True:
 				manipulate_turtlebot2.autoRotateStarter((self.startAzimuth + self.endAzimuth) / 2)
