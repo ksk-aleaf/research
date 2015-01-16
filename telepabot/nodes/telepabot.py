@@ -264,12 +264,15 @@ class CentralWidget(QtGui.QWidget):
 		if listenRange.startX != listenRange.endX:			
 			#startXの方が小さくなるようソート
 			startX,endX = sortNums(listenRange.startX, listenRange.endX)
-
-			#正面、それ以外で明るさを分ける
-			leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(DrawRange(startX,endX))
-			self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
-			self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
-			self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
+			
+			if global_var.effectMode == const.EFFECT_ON:
+				#正面、それ以外で明るさを分ける
+				leftSideListenRange,frontListenRange,rightSideListenRange = self.getDrawRanges(DrawRange(startX,endX))
+				self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_FRONT_ALPHA),frontListenRange)
+				self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_SIDE_ALPHA),leftSideListenRange)
+				self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_SIDE_ALPHA),rightSideListenRange)
+			else:
+				self.paintRect(event,self.getColor(listenRange.drawColor,const.RANGE_DRAW_FRONT_ALPHA),listenRange)				
 
 
 	#選択聴取範囲(複数)を描画
@@ -330,11 +333,12 @@ class CentralWidget(QtGui.QWidget):
 	#矩形を描画
 	#引数：color 矩形の色(QColor)
 	#      startX,endX 矩形の始点、終点
-	def paintRect(self,event,color,listenRange):
+	def paintRect(self,event,color,listenRange,frameColor = const.CLEAR_COLOR):
 		if listenRange is not None:
 			painter = QtGui.QPainter()
 			painter.begin(self)
 			painter.setBrush(color)
+			painter.setPen(frameColor)
 			painter.drawRect(self.getPaintRect(listenRange.startX,listenRange.endX))
 
 	#音声認識結果を描画
@@ -380,6 +384,13 @@ class CentralWidget(QtGui.QWidget):
 			painter.setFont(QFont(const.SYSTEM_ERROR_FONT,const.SYSTEM_ERROR_FONT_SIZE))
 			painter.drawText(QPoint(const.SYSTEM_ERROR_DRAW_X,const.SYSTEM_ERROR_DRAW_Y),QString(const.SYSTEM_ERROR_STR.decode(const.UTF_CODE_STR)))
 
+	def paintFrontFrame(self,event):
+		startAzimuth = - const.FRONT_AREA_ANGLE_WIDTH / 2
+		endAzimuth = const.FRONT_AREA_ANGLE_WIDTH / 2
+		startX = thetaimg.getXAxisFromAzimuth(startAzimuth)
+		endX = thetaimg.getXAxisFromAzimuth(endAzimuth)
+		range = DrawRange(startX,endX,startAzimuth,endAzimuth)
+		self.paintRect(event, const.CLEAR_COLOR, range,self.getColor(const.FRONT_AREA_FRAME_COLOR, const.FRONT_AREA_FRAME_ALPHA))
 
 	#描画処理全般（カメラ画像、情報提示）
 	def paintEvent(self, event):
@@ -388,6 +399,7 @@ class CentralWidget(QtGui.QWidget):
 		self.paintCamImg(event)
 		self.paintListenRanges(event)
 		self.paintSystemError(event)
+		self.paintFrontFrame(event)
 		
 		if global_var.effectMode == const.EFFECT_ON:
 			self.paintDarkFilter(event)		
@@ -487,10 +499,15 @@ class MainWindow(QtGui.QMainWindow):
 
 	
 	def keyPressEvent(self,event):
-		#print "isAutoRepeat:" + str(event.isAutoRepeat())
+		key = event.key()
+		
+		if key == Qt.Key_Space:
+			print "SPACE"
+			manipulate_turtlebot2.rotateFinisher()
+# 			format_loc_src_microcone.listenWholeSound()
+# 			format_loc_src_microcone.initSeparateListenParam()
+
 		if event.isAutoRepeat() is False and global_var.robotManipulateMode == const.ROBOT_MANIPULATE_MANUAL:
-			print "keyPressed"
-			key = event.key()
 			command = None
 			if key == Qt.Key_Right:
 				if global_var.rightKeyPressFlag is False:
@@ -518,12 +535,6 @@ class MainWindow(QtGui.QMainWindow):
 					global_var.robotMoveDirection = const.DOWN
 					manipulate_turtlebot2.checkManualRotatingFlag()
 					global_var.downKeyPressFlag = True
-
-			elif key == Qt.Key_Space:
-				print "SPACE"
-				manipulate_turtlebot2.rotateFinisher()
-				format_loc_src_microcone.listenWholeSound()
-				format_loc_src_microcone.initSeparateListenParam()
 
 	
 	def keyReleaseEvent(self,event):
